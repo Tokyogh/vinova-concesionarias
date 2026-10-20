@@ -1,0 +1,95 @@
+{# ES: Renderiza la interfaz templates/help_center/home; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/help_center/home interface; permissions and data are resolved server-side. #}
+{% extends "base/base.html" %}
+{% block title %}Centro de ayuda · Vinova Pro{% endblock %}
+{% block page_title %}Centro de ayuda y capacitación{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Manuales por rol, ayuda contextual y checklists operativos para trabajar con seguridad.</p>{% endblock %}
+
+{% block topbar_actions %}
+{% if request.user.can_manage_help %}<a class="btn btn-primary" href="{% url 'help_center:manage_articles' %}">Gestionar artículos</a>{% endif %}
+{# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+{# EN: The following form renders server errors; browser checks do not replace server validation. #}
+<form method="post" action="{% url 'help_center:training_mode' %}" class="training-toggle-form">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <input type="hidden" name="enabled" value="{% if help_training_mode %}0{% else %}1{% endif %}">
+  <button class="btn {% if help_training_mode %}btn-secondary{% else %}btn-light{% endif %}" type="submit">
+    {% if help_training_mode %}Desactivar capacitación{% else %}Activar capacitación{% endif %}
+  </button>
+</form>
+{% endblock %}
+
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="panel-card help-search-hero">
+  <div>
+    <span class="eyebrow">Búsqueda guiada</span>
+    <h2>¿Qué necesitas hacer?</h2>
+    <p>Busca una tarea, un módulo o una palabra clave. Solo verás contenido autorizado para tu rol.</p>
+  </div>
+  <form action="{% url 'help_center:search' %}" method="get" class="search-form help-search-form">
+    {{ search_form.q }}
+    <button class="btn btn-primary" type="submit">Buscar ayuda</button>
+  </form>
+</section>
+
+{% if featured_articles %}
+<section class="help-section">
+  <div class="section-heading">
+    <div><span class="eyebrow">Recomendados</span><h2>Manuales principales</h2></div>
+  </div>
+  <div class="help-card-grid">
+    {% for article in featured_articles %}
+      <a class="panel-card help-card" href="{% url 'help_center:article' article.slug %}">
+        <span class="help-type">{{ article.get_article_type_display }}</span>
+        <h3>{{ article.title }}</h3>
+        <p>{{ article.summary }}</p>
+        <small>{{ article.estimated_minutes }} min · {{ article.category.name }}</small>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if checklist_cards %}
+<section class="help-section">
+  <div class="section-heading">
+    <div><span class="eyebrow">Aprendizaje práctico</span><h2>Checklists operativos</h2></div>
+  </div>
+  <div class="help-checklist-grid">
+    {% for card in checklist_cards %}
+      <a class="panel-card checklist-card" href="{% url 'help_center:checklist' card.checklist.slug %}">
+        <div class="checklist-card-head"><h3>{{ card.checklist.title }}</h3><strong>{{ card.percent }}%</strong></div>
+        <p>{{ card.checklist.summary }}</p>
+        <div class="progress-track" aria-label="{{ card.percent }} por ciento completado"><span style="width:{{ card.percent }}%"></span></div>
+        <small>{{ card.completed }} de {{ card.total }} pasos completados</small>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="help-section">
+  <div class="section-heading">
+    <div><span class="eyebrow">Biblioteca</span><h2>Contenido disponible para tu rol</h2></div>
+  </div>
+  <div class="help-category-stack">
+    {% for category, articles in article_categories %}
+      <article class="panel-card help-category-card">
+        <header><span class="category-index">{{ category.icon }}</span><div><h3>{{ category.name }}</h3><p>{{ category.description }}</p></div></header>
+        <div class="help-link-list">
+          {% for article in articles %}
+            <a href="{% url 'help_center:article' article.slug %}">
+              <span><strong>{{ article.title }}</strong><small>{{ article.summary }}</small></span>
+              <span aria-hidden="true">→</span>
+            </a>
+          {% endfor %}
+        </div>
+      </article>
+    {% empty %}
+      <div class="panel-card"><p>No existen artículos disponibles para tu perfil.</p></div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

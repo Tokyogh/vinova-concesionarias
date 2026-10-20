@@ -1,0 +1,12 @@
+{# ES: Renderiza la interfaz templates/dashboard/snippets/asset_rows; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/snippets/asset_rows interface; permissions and data are resolved server-side. #}
+<div class="compact-row-list">
+  {% for asset in assets %}
+    <a class="compact-row" href="{% url 'documents_internal:asset_detail' asset.pk %}">
+      <strong>{{ asset.title }}</strong>
+      <span>{{ asset.get_asset_type_display }} · {{ asset.get_visibility_display }}</span>
+    </a>
+  {% empty %}
+    <p class="muted">{{ empty_text }}</p>
+  {% endfor %}
+</div>

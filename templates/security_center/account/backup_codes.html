@@ -1,0 +1,5 @@
+{# ES: Renderiza la interfaz templates/security_center/account/backup_codes; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/security_center/account/backup_codes interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}Códigos de recuperación | Vinova Pro{% endblock %}
+{% block content %}<section class="security-account-card panel-card"><span class="eyebrow">Guardar una sola vez</span><h1>Códigos de recuperación</h1><p>Guárdalos fuera del sistema. Cada código funciona una sola vez y no volverá a mostrarse.</p><div class="backup-code-grid">{% for code in backup_codes %}<code>{{ code }}</code>{% endfor %}</div><a class="btn btn-primary" href="{% url 'accounts:profile' %}">Ya los guardé</a></section>{% endblock %}

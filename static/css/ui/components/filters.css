@@ -1,0 +1,120 @@
+/* ES: Define estilos de static/css/ui/components/filters, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/components/filters styles, including states and responsive behavior. */
+/*
+   Barras de filtro compactas del área interna.
+   Un solo patrón: .filter-form / .internal-filter-form.dense-filter-form.
+   Depende de core/tokens.css. */
+
+/* --- Formulario de filtros --- */
+.filter-form, .internal-filter-form, .inventory-filter-form, .reports-filter-form,
+.analytics-filter-form, .imports-filter-form, .customers-filter-form, .sales-filter-form,
+.documents-filter-form, .notifications-filter-form, .invoices-filter-form {
+  display: flex; flex-wrap: wrap; gap: var(--space-10);
+  align-items: flex-end; width: 100%;
+}
+.filter-form select, .filter-form input,
+.internal-filter-form select, .internal-filter-form input,
+.inventory-filter-form select, .reports-filter-form select, .reports-filter-form input,
+.analytics-filter-form select, .analytics-filter-form input,
+.imports-filter-form select, .imports-filter-form input,
+.sales-filter-form select, .documents-filter-form select,
+.notifications-filter-form select, .invoices-filter-form select {
+  min-width: 170px;
+}
+
+/* Rejilla densa: los filtros se alinean en una fila y ocupan todo el ancho. */
+.internal-filter-form.dense-filter-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-12); align-items: end; width: 100%;
+}
+.dense-filter-form .filter-field {
+  display: grid; gap: var(--space-4); min-width: 0;
+}
+.dense-filter-form .filter-field > span {
+  color: var(--text-muted); font-size: var(--fs-11);
+  font-weight: var(--fw-semibold); letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+.dense-filter-form .filter-field input,
+.dense-filter-form .filter-field select,
+.dense-filter-form .searchable-select-wrap {
+  width: 100%; min-width: 0; max-width: 100%;
+}
+/* Altura única para todos los controles compactos (evita selects 4px más altos). */
+.dense-filter-form .filter-field input:not([type="checkbox"]):not([type="radio"]),
+.dense-filter-form .filter-field select,
+.dense-filter-form .searchable-select-input { height: var(--control-h); }
+.dense-filter-form .filter-field.checkbox-field {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center; gap: var(--space-8);
+}
+.dense-filter-form .filter-field.checkbox-field > span {
+  text-transform: none; letter-spacing: 0; font-size: var(--fs-13);
+  font-weight: var(--fw-medium); color: var(--text-2);
+}
+.dense-filter-form .filter-field.checkbox-field input {
+  width: 16px; height: 16px; min-width: 0; margin: 0;
+}
+
+/* Acciones del filtro alineadas al extremo derecho de la rejilla. */
+/* ES: Las reglas de «.filter-actions» definen estado visual y adaptación sin alterar semántica. */
+/* EN: The «.filter-actions» rules define visual state and adaptation without changing semantics. */
+.filter-actions {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: var(--space-8); min-width: max-content;
+}
+.dense-filter-form .filter-actions { grid-column: auto; width: max-content; max-width: 100%; }
+
+/* Buscador simple (una sola entrada) en la barra compacta. */
+.toolbar .search-form:not(.dense-filter-form) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-8); width: 100%; }
+.toolbar .search-form:not(.dense-filter-form) input[type="search"],
+.toolbar .search-form:not(.dense-filter-form) input[type="text"] {
+  flex: 1 1 240px; min-width: 0; width: auto;
+}
+
+/* Filtros 2.0: superficie compartida, filtros progresivos y vistas locales. */
+.filter-panel {
+  display: grid; gap: var(--space-12); width: 100%; padding: var(--space-16);
+  border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface);
+}
+.filter-panel-form { display: grid; gap: var(--space-12); }
+.filter-panel-common, .filter-panel-advanced {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-12); align-items: end;
+}
+.filter-panel-common > .filter-field:first-child { grid-column: span 2; }
+.filter-panel-advanced {
+  padding-top: var(--space-12); border-top: 1px solid var(--border);
+}
+.filter-panel-advanced[hidden] { display: none; }
+.filter-panel-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-12);
+  padding-top: var(--space-12); border-top: 1px solid var(--border);
+}
+.filter-chips, .saved-views { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-8); }
+.filter-chip {
+  display: inline-flex; align-items: center; gap: var(--space-8); min-height: 30px; padding: 4px 10px;
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border)); border-radius: 999px;
+  color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  font-size: var(--fs-12); font-weight: var(--fw-semibold); text-decoration: none;
+}
+.filter-chip:hover { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 13%, var(--surface)); }
+.filter-clear { color: var(--text-2); font-size: var(--fs-12); font-weight: var(--fw-semibold); }
+.filter-empty { color: var(--text-muted); font-size: var(--fs-12); }
+.saved-views select { width: auto; min-width: 150px; }
+
+@media (max-width: 767px) {
+  .filter-panel { padding: var(--space-12); }
+  .filter-panel-common, .filter-panel-advanced { grid-template-columns: minmax(0, 1fr); }
+  .filter-panel-common > .filter-field:first-child { grid-column: auto; }
+  .filter-panel-common .filter-actions, .filter-panel-footer { width: 100%; }
+  .filter-panel-footer { align-items: stretch; flex-direction: column; }
+  .saved-views { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; }
+  .saved-views select { width: 100%; min-width: 0; }
+}
+
+@media (max-width: 430px) {
+  .saved-views { grid-template-columns: 1fr 1fr; }
+  .saved-views select { grid-column: 1 / -1; }
+}

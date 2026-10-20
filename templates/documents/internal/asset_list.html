@@ -1,0 +1,52 @@
+{# ES: Renderiza la interfaz templates/documents/internal/asset_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/documents/internal/asset_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Recursos reutilizables | Vinova Pro{% endblock %}
+{% block page_title %}Recursos reutilizables{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Librería de imágenes, manuales, modelos 3D y recursos compartidos para evitar archivos duplicados.</p>{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-light" href="{% url 'documents_internal:list' %}">Documentos privados</a>
+  {% if request.user.can_manage_documents %}<a class="btn btn-primary" href="{% url 'documents_internal:asset_create' %}">Cargar recurso</a>{% endif %}
+{% endblock %}
+{% block content %}
+<section class="metric-grid documents-status-grid">
+  <article class="metric-card"><span>Recursos públicos</span><strong>{{ metrics.public_assets }}</strong></article>
+  <article class="metric-card"><span>Documentos privados</span><strong>{{ metrics.private_documents }}</strong></article>
+  <article class="metric-card"><span>Confidenciales</span><strong>{{ metrics.confidential_documents }}</strong></article>
+  <article class="metric-card"><span>Almacenamiento</span><strong>{{ metrics.storage_bytes|filesizeformat }}</strong></article>
+</section>
+<section class="toolbar panel-card compact">
+  <form method="get" class="search-form internal-filter-form documents-filter-form">
+    {{ search_form.q }} {{ search_form.asset_type }} {{ search_form.visibility }}
+    <button class="btn btn-primary">Filtrar</button><a class="btn btn-light" href="{% url 'documents_internal:assets' %}">Limpiar</a>
+  </form>
+</section>
+<section class="asset-grid">
+  {% for asset in assets %}
+    <article class="panel-card asset-card">
+      <div class="asset-preview">
+        {% if asset.asset_type == 'image' or asset.asset_type == 'vehicle_image' or asset.asset_type == 'brand_logo' %}
+          <img src="{{ asset.file.url }}" alt="{{ asset.alt_text|default:asset.title }}">
+        {% else %}
+          <span>{{ asset.extension|default:'file' }}</span>
+        {% endif %}
+      </div>
+      <span class="eyebrow">{{ asset.get_asset_type_display }} · {{ asset.get_visibility_display }}</span>
+      <h2>{{ asset.title }}</h2>
+      <p>{{ asset.description|truncatechars:100|default:'Sin descripción.' }}</p>
+      {% if asset.vehicle_model %}<p class="muted">{{ asset.vehicle_model }} · {{ asset.vehicle_year|default:'Todos los años' }}</p>{% endif %}
+      <div class="asset-meta"><span>{{ asset.size_bytes|filesizeformat }}</span><span>{{ asset.created_at|date:'d/m/Y' }}</span></div>
+      <a class="btn btn-secondary" href="{% url 'documents_internal:asset_detail' asset.pk %}">Gestionar</a>
+    </article>
+  {% empty %}
+    <article class="panel-card"><p>No hay recursos con estos filtros.</p></article>
+  {% endfor %}
+</section>
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="?page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

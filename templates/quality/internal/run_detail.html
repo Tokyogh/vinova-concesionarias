@@ -1,0 +1,129 @@
+{# ES: Renderiza la interfaz templates/quality/internal/run_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/quality/internal/run_detail interface; permissions and data are resolved server-side. #}
+{% extends "base/base.html" %}
+{% block title %}Ejecución QA | Vinova Pro{% endblock %}
+{% block page_title %}Validación {{ run.get_profile_display }}{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">{{ run.public_id }} · {{ run.get_status_display }} · {{ run.environment_name|default:"Entorno no informado" }}</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'quality:run_list' %}">Volver</a>{% if run.report_json_path %}<a class="btn btn-light" href="{% url 'quality:report_download' run.public_id 'json' %}">JSON</a>{% endif %}
+  {% if run.report_html_path %}<a class="btn btn-secondary" href="{% url 'quality:report_download' run.public_id 'html' %}">HTML</a>{% endif %}
+  {% if run.summary.e2e_artifact_path %}<a class="btn btn-secondary" href="{% url 'quality:report_download' run.public_id 'e2e' %}">Evidencia E2E</a>{% endif %}
+{% endblock %}
+{% block content %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="metric-grid">
+    <article class="metric-card">
+      <span>Estado</span><strong>{{ run.get_status_display }}</strong><small>{% if run.release_ready %}Apto para release{% else %}No declarado apto{% endif %}</small>
+    </article>
+    <article class="metric-card">
+      <span>Controles</span><strong>{{ run.passed_count }} aprobados</strong><small>{{ run.warning_count }} advertencias · {{ run.failed_count }} fallos</small>
+    </article>
+    <article class="metric-card">
+      <span>Duración</span><strong>{{ run.duration_seconds|default:"—" }} s</strong><small>{{ run.started_at|date:"d/m/Y H:i:s"|default:"Pendiente" }}</small>
+    </article>
+    <article class="metric-card">
+      <span>Fuente</span><strong>{{ run.source_version|default:"—" }}</strong><small>{{ run.source_commit|truncatechars:16|default:"Sin commit" }}</small>
+    </article>
+  </section>
+  {% if run.error_message %}
+    <div class="alert alert-danger">
+      <strong>Error operativo</strong>
+      <p>{{ run.error_message }}</p>
+    </div>
+  {% endif %}
+  {% if run.status == 'queued' or run.status == 'running' %}
+    <div class="alert alert-info">La ejecución sigue en proceso. Recarga esta página para consultar el resultado actualizado.</div>
+  {% endif %}
+  {% if run.summary.functional_e2e.module_matrix %}
+    <section class="panel-card table-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Matriz funcional por módulo</h2>
+          <p>Navegadores: {{ run.summary.functional_e2e.browsers|join:", " }}. La evidencia incluye capturas y trazas Playwright.</p>
+        </div>
+      </div>
+      <div class="table-scroll">
+        {# ES: La tabla siguiente presenta datos previamente filtrados por permisos y alcance. #}
+        {# EN: The following table renders data already filtered by permissions and scope. #}
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Módulo</th>
+              <th>Aprobadas</th>
+              <th>Fallidas</th>
+              <th>Omitidas</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for module, row in run.summary.functional_e2e.module_matrix.items %}
+              <tr>
+                <td>
+                  <strong>{{ module }}</strong>
+                </td>
+                <td>{{ row.passed }}</td>
+                <td>{{ row.failed|add:row.error }}</td>
+                <td>{{ row.skipped }}</td>
+                <td>{{ row.total }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+  <section class="panel-card table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Evidencia por control</h2>
+        <p>La salida se sanea antes de almacenarse y los reportes permanecen en almacenamiento privado.</p>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Categoría</th>
+            <th scope="col">Control</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Duración</th>
+            <th scope="col">Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for check in run.checks.all %}
+            <tr>
+              <td>{{ check.sequence }}</td>
+              <td>{{ check.category }}</td>
+              <td>
+                <strong>{{ check.title }}</strong><br><code>{{ check.code }}</code>
+              </td>
+              <td>{{ check.get_status_display }}</td>
+              <td>{{ check.duration_seconds }} s</td>
+              <td>
+                <details>
+                  <summary>{{ check.message|default:"Ver evidencia" }}</summary>
+                  {% if check.command %}
+                    <p>
+                      <code>{{ check.command|join:" " }}</code>
+                    </p>
+                  {% endif %}
+                  {% if check.output_excerpt %}
+                    <pre>{{ check.output_excerpt }}</pre>
+                  {% endif %}
+                </details>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">Los controles aparecerán cuando el QA Bot procese la ejecución.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

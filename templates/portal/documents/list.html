@@ -1,0 +1,49 @@
+{# ES: Renderiza la interfaz templates/portal/documents/list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/documents/list interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}Documentos{% endblock %}
+{% block portal_heading %}Documentos y manuales{% endblock %}
+{% block portal_lead %}Consulta archivos de tu expediente y manuales publicados para tus vehículos actuales.{% endblock %}
+{% block portal_content %}
+<form method="get" class="portal-filter-form" role="search" aria-label="Filtrar documentos">
+  {% for field in filter_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}</label>{% endfor %}
+  <div class="filter-actions"><button class="btn btn-secondary" type="submit">Filtrar</button>{% if request.GET.q or request.GET.document_type %}<a class="btn btn-light" href="{% url 'portal:document_list' %}">Limpiar</a>{% endif %}</div>
+</form>
+<section class="panel-card">
+  <div class="panel-header"><div><h2>Mi biblioteca privada</h2><p>Contratos, garantías y documentos vinculados a tu expediente.</p></div></div>
+  <div class="portal-document-grid">
+    {% for document in documents %}
+      <article class="portal-document-card">
+        <span class="eyebrow">{{ document.get_document_type_display }}</span>
+        <h3>{{ document.title }}</h3>
+        <p>{% if document.vehicle %}{{ document.vehicle }}{% elif document.sale %}Venta {{ document.sale.number }}{% else %}Expediente personal{% endif %}</p>
+        <small>{{ document.created_at|date:'d/m/Y' }} · {{ document.size_bytes|filesizeformat }}</small>
+        <a class="btn btn-secondary" href="{% url 'portal:document_detail' document.pk %}">Ver detalle</a>
+      </article>
+    {% empty %}<div class="empty-state"><h3>Sin documentos disponibles</h3><p>Los archivos publicados para tu expediente aparecerán aquí.</p></div>{% endfor %}
+  </div>
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar" aria-label="Paginación de documentos">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="?q={{ request.GET.q|urlencode }}&amp;document_type={{ request.GET.document_type|urlencode }}&amp;page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="?q={{ request.GET.q|urlencode }}&amp;document_type={{ request.GET.document_type|urlencode }}&amp;page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+
+<section class="panel-card">
+  <div class="panel-header"><div><h2>Manuales de mis vehículos</h2><p>Solo se muestran publicaciones para la marca, modelo y año que tienes vinculados.</p></div></div>
+  <div class="portal-document-grid">
+    {% for manual in manuals %}
+      <article class="portal-document-card">
+        <span class="eyebrow">Manual publicado</span>
+        <h3>{{ manual.title }}</h3>
+        <p>{{ manual.vehicle_model }} · {{ manual.vehicle_year|default:'Todos los años' }}</p>
+        <small>{{ manual.description|truncatechars:120|default:'Documento del fabricante o concesionario.' }}</small>
+        <a class="btn btn-secondary" href="{% url 'portal:manual_download' manual.pk %}">Descargar manual</a>
+      </article>
+    {% empty %}<div class="empty-state"><h3>Sin manuales publicados</h3><p>Cuando exista un manual para tu modelo, aparecerá en esta sección.</p></div>{% endfor %}
+  </div>
+</section>
+{% endblock %}

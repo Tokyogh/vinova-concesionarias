@@ -1,0 +1,49 @@
+{# ES: Renderiza la interfaz templates/portal/vehicles/list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/vehicles/list interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}Mis vehículos{% endblock %}
+{% block portal_heading %}Mis vehículos{% endblock %}
+{% block portal_lead %}Unidades vinculadas actualmente a tu expediente de cliente.{% endblock %}
+{% block portal_content %}
+<section class="portal-toolbar">
+  <form method="get" class="filter-form" role="search">
+    <label class="form-field"><span class="sr-only">{{ search_form.q.label }}</span>{{ search_form.q }}</label>
+    <button class="btn btn-secondary">Buscar</button>
+    {% if request.GET.q %}<a class="btn btn-light" href="{% url 'portal:vehicle_list' %}">Limpiar</a>{% endif %}
+  </form>
+  <a class="btn btn-primary" href="{% url 'portal:vehicle_redeem' %}">Agregar vehículo</a>
+</section>
+
+<section class="portal-garage-grid" aria-label="Vehículos vinculados">
+  {% for link in vehicle_links %}
+    <article class="portal-garage-card">
+      <div class="portal-garage-image">
+        {% with hero=link.vehicle.hero_media %}
+          {% if hero and hero.resource.file %}<img src="{{ hero.resource.file.url }}" alt="{{ hero.alt_text|default:link.vehicle }}" loading="lazy" decoding="async">{% else %}<div class="vehicle-image-placeholder" role="img" aria-label="Vehículo sin fotografía"></div>{% endif %}
+        {% endwith %}
+      </div>
+      <div class="portal-garage-body">
+        <span class="eyebrow">{{ link.vehicle.brand.name }}</span>
+        <h2>{{ link.vehicle.model.name }}{% if link.vehicle.version %} {{ link.vehicle.version }}{% endif %}</h2>
+        <p>{{ link.vehicle.year }}{% if link.vehicle.color %} · {{ link.vehicle.color }}{% endif %}{% if link.vehicle.plate %} · {{ link.vehicle.plate }}{% endif %}</p>
+        <small>Vinculado el {{ link.linked_at|date:'d/m/Y' }} · {{ link.get_role_type_display }}</small>
+        <a class="btn btn-light full" href="{% url 'portal:vehicle_detail' link.pk %}" data-portal-modal>Ver detalle privado</a>
+      </div>
+    </article>
+  {% empty %}
+    <article class="empty-state portal-garage-empty">
+      <h2>{% if request.GET.q %}No encontramos coincidencias{% else %}Tu garaje está vacío{% endif %}</h2>
+      <p>{% if request.GET.q %}Prueba otra marca, modelo, versión o placa.{% else %}Agrega una unidad usando el código VNV privado entregado por la concesionaria.{% endif %}</p>
+      <a class="btn btn-primary" href="{% url 'portal:vehicle_redeem' %}">Ingresar código VNV</a>
+    </article>
+  {% endfor %}
+</section>
+
+{% if is_paginated %}
+<nav class="pagination" aria-label="Páginas del garaje">
+  {% if page_obj.has_previous %}<a href="?q={{ request.GET.q|urlencode }}&amp;page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a href="?q={{ request.GET.q|urlencode }}&amp;page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

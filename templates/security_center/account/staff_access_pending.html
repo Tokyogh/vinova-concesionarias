@@ -1,0 +1,28 @@
+{# ES: Estado seguro de acceso Staff excepcional. EN: Secure exceptional Staff access status. #}
+
+{% extends 'base/base.html' %}
+{% block title %}Acceso Staff | Vinova Pro{% endblock %}
+{% block page_title %}Verificación de acceso Staff{% endblock %}
+{% block page_subtitle %}<p class="page-lead">La sesión está autenticada, pero las funciones internas permanecen bloqueadas hasta completar la política de seguridad.</p>{% endblock %}
+{% block content %}
+<section class="panel-card auth-card">
+  {% if access_request %}
+    <h2>Solicitud {{ access_request.get_status_display|lower }}</h2>
+    {% if access_request.status == 'pending' %}
+      <p>Un aprobador autorizado debe revisar esta solicitud. No cierres sesión si deseas conservar el mismo contexto de acceso.</p>
+      <p><strong>Vigencia de la solicitud:</strong> {{ access_request.request_expires_at|date:'d/m/Y H:i' }}</p>
+      <form method="post" action="{% url 'security_center:staff_access_cancel' %}">{% csrf_token %}<button class="btn btn-light" type="submit">Cancelar solicitud</button></form>
+    {% elif access_request.status == 'approved' and access_request.is_active_approval %}
+      <p>El acceso temporal fue aprobado hasta {{ access_request.access_expires_at|date:'d/m/Y H:i' }}.</p>
+      <a class="btn btn-primary" href="{% url 'dashboard:staff_home' %}">Continuar al panel</a>
+    {% else %}
+      <p>La solicitud ya no permite acceso. Regresa a tu perfil o solicita una nueva evaluación desde una función interna.</p>
+      <a class="btn btn-light" href="{% url 'accounts:profile' %}">Volver al perfil</a>
+    {% endif %}
+  {% else %}
+    <h2>Sin solicitud activa</h2>
+    <p>No existe una solicitud asociada a esta sesión.</p>
+    <a class="btn btn-light" href="{% url 'accounts:profile' %}">Volver al perfil</a>
+  {% endif %}
+</section>
+{% endblock %}

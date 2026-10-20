@@ -1,0 +1,77 @@
+{# ES: Renderiza la interfaz templates/dashboard/snippets/executive_summary; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/snippets/executive_summary interface; permissions and data are resolved server-side. #}
+{% comment %}
+F11 - Resumen ejecutivo del dashboard staff.
+KPI del periodo con variación real, evolución mensual en CSS y actividad reciente.
+{% endcomment %}
+<section class="executive-summary" aria-labelledby="executive-summary-title">
+  <header class="executive-summary-head">
+    <div>
+      <span class="eyebrow">Panel de control</span>
+      <h2 id="executive-summary-title">Resumen ejecutivo</h2>
+    </div>
+    <p class="executive-summary-note">Cifras de los últimos 30 días comparadas contra el periodo anterior, según tu sucursal y permisos.</p>
+  </header>
+
+  <div class="executive-kpi-grid">
+    {% for kpi in executive_kpis %}
+      <article class="executive-kpi executive-kpi--{{ kpi.tone }}">
+        <span class="executive-kpi-label">{{ kpi.label }}</span>
+        <strong class="executive-kpi-value">
+          {% if kpi.is_currency %}${{ kpi.value|floatformat:0 }}{% elif kpi.is_percent %}{{ kpi.value }}%{% else %}{{ kpi.value }}{% endif %}
+        </strong>
+        <span class="executive-kpi-delta {% if kpi.delta >= 0 %}is-up{% else %}is-down{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            {% if kpi.delta >= 0 %}<path d="m5 15 7-7 7 7"/><path d="M12 8v9"/>{% else %}<path d="m5 9 7 7 7-7"/><path d="M12 16V7"/>{% endif %}
+          </svg>
+          {{ kpi.delta }}%
+        </span>
+        <small class="executive-kpi-hint">{{ kpi.hint }}</small>
+      </article>
+    {% endfor %}
+  </div>
+
+  <div class="executive-panels">
+    <article class="executive-panel executive-chart">
+      <header>
+        <h3>Evolución de ventas</h3>
+        <span class="executive-panel-tag">Últimos 6 meses</span>
+      </header>
+      {% if executive_has_sales %}
+        <div class="executive-bars" role="img" aria-label="Ventas por mes">
+          {% for month in executive_evolution %}
+            <div class="executive-bar{% if month.is_current %} is-current{% endif %}">
+              <span class="executive-bar-value">{{ month.count }}</span>
+              <span class="executive-bar-track"><i style="height: {{ month.height }}%"></i></span>
+              <span class="executive-bar-label">{{ month.label }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="executive-empty">Tu perfil no tiene acceso a ventas.</p>
+      {% endif %}
+    </article>
+
+    <article class="executive-panel executive-activity">
+      <header>
+        <h3>Actividad reciente</h3>
+        <span class="executive-panel-tag">{% if executive_activity %}{{ executive_activity|length }} eventos{% else %}Sin eventos{% endif %}</span>
+      </header>
+      {% if executive_activity %}
+        <ul class="executive-activity-list">
+          {% for item in executive_activity %}
+            <li class="executive-activity-item executive-activity-item--{{ item.kind|lower }}">
+              <span class="executive-activity-kind">{{ item.kind }}</span>
+              <span class="executive-activity-text">
+                <strong>{{ item.title }}</strong>
+                <small>{{ item.detail }}{% if item.meta %} · {{ item.meta }}{% endif %}</small>
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="executive-empty">Todavía no hay movimientos registrados.</p>
+      {% endif %}
+    </article>
+  </div>
+</section>

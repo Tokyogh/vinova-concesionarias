@@ -1,0 +1,24 @@
+{# ES: Renderiza la interfaz templates/dashboard/role_worker; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/role_worker interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Panel operativo | Vinova Pro{% endblock %}
+{% block page_title %}Panel operativo{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Dashboard mínimo generado según tus permisos actuales. Cada módulo aparece solo si existe para tu rol.</p>{% endblock %}
+{% block content %}
+<section class="role-dashboard-hero worker-hero"><div><span>Panel ajustado a permisos</span><h2>Accesos disponibles</h2><p>Este panel evita mostrar áreas que no aplican al usuario.</p></div></section>
+<section class="metric-grid role-metric-grid">
+  <article class="metric-card"><span>Vehículos disponibles</span><strong>{{ metrics.available_vehicles }}</strong></article>
+  <article class="metric-card"><span>Reservados</span><strong>{{ metrics.reserved_vehicles }}</strong></article>
+  <article class="metric-card"><span>Clientes</span><strong>{{ metrics.customers_total }}</strong></article>
+  <article class="metric-card"><span>Sucursales</span><strong>{{ metrics.active_branches }}</strong></article>
+</section>
+<section class="panel-card">
+  <h2>Módulos habilitados</h2>
+  <p class="muted">Los accesos se calculan por permisos. Si un módulo no aparece aquí, para este usuario no existe visualmente.</p>
+  <div class="dashboard-module-grid">
+    {% for module in available_modules %}
+      {% if module.visible %}<a class="dashboard-module-card" href="{% url module.url %}"><strong>{{ module.label }}</strong><span>Abrir módulo</span></a>{% endif %}
+    {% empty %}<p class="muted">No tienes módulos internos asignados.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

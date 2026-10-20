@@ -1,0 +1,345 @@
+/* ES: Define estilos de static/css/ui/core/tokens, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/core/tokens styles, including states and responsive behavior. */
+/*
+   ÚNICA fuente de verdad de tokens. Paleta canónica (AGENTS.md §5) y escalas
+   de spacing / radius / shadow / typography / layout / motion / z-index.
+   Cargar antes que reset, base, typography y cualquier componente. */
+
+/* =========================================
+   1. PALETA — tema claro (por defecto)
+   ========================================= */
+:root {
+  /* --- Marca --- */
+  --primary: #006bc7;
+  --primary-hover: #0057a8;
+  --primary-2: #0057a8;
+  --primary-3: #004c96;
+  --primary-soft: #e8f2fb;
+  --primary-soft-2: #d3e6f7;
+  --primary-contrast: #ffffff;
+  --on-primary: #ffffff;
+
+  --accent: #7657e8;
+  --accent-soft: #efecfd;
+
+  /* Paleta de marca sujeta a configuración de empresa (aplicada por plantilla) */
+  --brand-primary: var(--primary);
+  --brand-secondary: var(--primary-2);
+
+  --navy: #0b1f3a;
+  --navy-2: #07172b;
+  --dashboard-banner-start: var(--navy-2);
+  --dashboard-banner-mid: var(--navy);
+  --dashboard-banner-end: #123b63;
+  --dashboard-banner-text: #f5f8fc;
+  --dashboard-banner-accent: #9dcef5;
+
+  /* --- Texto --- */
+  --text: #0b1f3a;
+  --text-2: #52647a;
+  --text-muted: #718096;
+  --muted: #718096;
+  --text-inverse: #ffffff;
+
+  /* --- Superficies --- */
+  --bg: #f7f9fc;
+  --bg-blue: #eef6fd;
+  --surface: #ffffff;
+  --surface-2: #f4f8fc;
+  --surface-3: #eaf1f9;
+  --surface-soft: #f4f8fc;
+  --surface-raised: #ffffff;
+  --surface-inverse: #0b1f3a;
+  --asset-position: center;
+  --asset-ratio: 4 / 3;
+  --media-slot-from: #e9eef5;
+  --media-slot-to: #d6dfe9;
+
+  /* --- Bordes --- */
+  --border: #dce6f0;
+  --border-soft: #e8eef6;
+  --border-strong: #c3d4e6;
+  --border-inverse: #2a3b50;
+
+  /* --- Semánticos --- */
+  --success: #18b67a;
+  --success-bg: #e4f7ef;
+  --info: #18a7d8;
+  --info-bg: #e4f5fb;
+  --info-cyan: #18a7d8;
+  --violet: #7657e8;
+  --warning: #f2a93b;
+  --warning-bg: #fdf3e3;
+  --danger: #d94b5b;
+  --danger-bg: #fdecee;
+  --neutral-bg: #eef2f7;
+
+  /* --- Acentos suaves --- */
+  --blue-soft: #e8f2fb;
+  --cyan-soft: #e4f5fb;
+  --green-soft: #e4f7ef;
+  --violet-soft: #efecfd;
+
+  /* --- Overlays --- */
+  --overlay: rgba(11, 31, 58, .55);
+  --overlay-soft: rgba(11, 31, 58, .35);
+
+  /* =========================================
+     2. SPACING — escala canónica 4/8/12/16/20/24/32/40/48/64/80
+     ========================================= */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-28: 28px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --space-64: 64px;
+  --space-80: 80px;
+
+  /* Alias semánticos heredados */
+  --sp-xs: var(--space-4);
+  --sp-sm: var(--space-8);
+  --sp-md: var(--space-12);
+  --sp-lg: var(--space-16);
+  --sp-xl: var(--space-20);
+  --sp-2xl: var(--space-24);
+  --sp-3xl: var(--space-32);
+  --sp-4xl: var(--space-40);
+  --sp-5xl: var(--space-48);
+  --sp-6xl: var(--space-64);
+  --sp-7xl: var(--space-80);
+
+  /* =========================================
+     3. RADIOS
+     ========================================= */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  /* =========================================
+     4. SOMBRAS — sutiles y neutrales
+     ========================================= */
+  --shadow-xs: 0 1px 2px rgba(11, 31, 58, .06);
+  --shadow-sm: 0 1px 3px rgba(11, 31, 58, .07), 0 1px 2px rgba(11, 31, 58, .04);
+  --shadow-md: 0 4px 12px rgba(11, 31, 58, .08);
+  --shadow-lg: 0 12px 28px rgba(11, 31, 58, .10);
+  --shadow: var(--shadow-md);
+  --shadow-focus: 0 0 0 3px rgba(0, 107, 199, .18);
+
+  /* =========================================
+     5. TIPOGRAFÍA
+     ========================================= */
+  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --fs-11: 11px;
+--fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-15: 15px;
+  --fs-16: 16px;
+  --fs-18: 18px;
+  --fs-20: 20px;
+  --fs-24: 24px;
+  --fs-30: 30px;
+  --fs-36: 36px;
+  --fs-28: 28px;
+  --fs-32: 32px;
+  --fs-42: 42px;
+  --fs-48: 48px;
+  --fs-56: 56px;
+  --fs-64: 64px;
+
+  /* Escala de display (titulos publicos) */
+  --fs-hero: clamp(2.75rem, 4.4vw, 3.75rem);
+  --fs-display: clamp(2.25rem, 3.4vw, 2.875rem);
+  --fs-h2: clamp(1.75rem, 2.6vw, 2.25rem);
+  --fs-h3: clamp(1.25rem, 1.6vw, 1.5rem);
+
+  --lh-tight: 1.12;
+  --lh-snug: 1.25;
+  --lh-normal: 1.55;
+  --lh-relaxed: 1.7;
+
+  --tracking-tight: -.02em;
+  --tracking-normal: -.01em;
+  --tracking-wide: .02em;
+  --tracking-caps: .08em;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* =========================================
+     6. LAYOUT — contenedores y shells
+     ========================================= */
+  --container: 1200px;
+  --container-wide: 1320px;
+  --container-narrow: 960px;
+  --container-gutter: 24px;
+  --header-h: 64px;
+  --sidebar-w: 240px;
+  --topbar-h: 68px;
+  --control-h: 42px;
+  --control-h-sm: 36px;
+
+  /* =========================================
+     7. BREAKPOINTS (referencia; usar en media queries)
+     xs 360 · sm 480 · md 768 · lg 1024 · xl 1280 · 2xl 1440
+     ========================================= */
+
+  /* =========================================
+     8. MOTION
+     ========================================= */
+  --t-fast: .12s ease;
+  --t: .2s ease;
+  --t-slow: .32s ease;
+  --ease-out: cubic-bezier(.22, .61, .36, 1);
+
+  /* =========================================
+     9. Z-INDEX
+     ========================================= */
+  --z-base: 1;
+  --z-sticky: 100;
+  --z-header: 200;
+  --z-drawer: 300;
+  --z-overlay: 350;
+  --z-modal: 400;
+  --z-toast: 500;
+
+  /* =========================================
+     10. TOKENS COMPUESTOS (composición pública)
+     ========================================= */
+  --public-hero-1: var(--bg);
+  --public-hero-2: var(--bg-blue);
+  --public-ink: var(--navy);
+  --public-ink-soft: rgba(11, 31, 58, .72);
+  --public-accent: var(--primary);
+  --media-ratio: 16 / 10;
+  --media-position: 50% 50%;
+
+  /* =========================================
+     11. TOKENS DE ESTADO DE CONTROLES
+     (compartidos por forms.css y buttons.css)
+     ========================================= */
+  --control-bg: var(--surface);
+  --control-bg-hover: var(--surface-2);
+  --control-bg-disabled: var(--surface-3);
+  --control-bg-readonly: var(--surface-2);
+  --control-border: var(--border);
+  --control-border-hover: var(--border-strong);
+  --control-accent: var(--primary);
+  --control-focus-ring: var(--shadow-focus);
+  --control-error-border: var(--danger);
+  --control-error-bg: var(--danger-bg);
+  --control-error-ring: 0 0 0 3px rgba(217, 75, 91, .18);
+  --control-success-border: var(--success);
+  --control-success-bg: var(--success-bg);
+  --control-success-ring: 0 0 0 3px rgba(24, 182, 122, .18);
+  --control-track: var(--border-strong);
+  --control-track-checked: var(--primary);
+  --control-knob: #ffffff;
+}
+
+/* =========================================
+   10. TOKENS — tema oscuro (estructura, no geometría)
+   ========================================= */
+/* ES: Las reglas de «[data-theme="dark"]» definen estado visual y adaptación sin alterar semántica. */
+/* EN: The «[data-theme="dark"]» rules define visual state and adaptation without changing semantics. */
+[data-theme="dark"] {
+  --primary: #3d95e0;
+  --primary-hover: #63aaea;
+  --primary-2: #2f83ce;
+  --primary-3: #6fb2ec;
+  --primary-soft: #16304c;
+  --primary-soft-2: #1d3d60;
+  --primary-contrast: #06121f;
+  --on-primary: #06121f;
+
+  --accent: #9a86f2;
+  --accent-soft: #241f43;
+
+  --navy: #0d1a2b;
+  --navy-2: #081321;
+
+  --text: #f5f8fc;
+  --text-2: #b9c6d6;
+  --text-muted: #aab8c8;
+  --muted: #aab8c8;
+  --text-inverse: #0b1f3a;
+
+  --bg: #0b1624;
+  --bg-blue: #101f33;
+  --surface: #101d2e;
+  --surface-2: #16263a;
+  --surface-3: #1d3047;
+  --surface-soft: #16263a;
+  --surface-raised: #16263a;
+  --surface-inverse: #f5f8fc;
+  --media-slot-from: #1c2d43;
+  --media-slot-to: #142235;
+
+  --border: #2a3b50;
+  --border-soft: #223146;
+  --border-strong: #3a4e66;
+  --border-inverse: #dce6f0;
+
+  --success: #35c68c;
+  --success-bg: #11332a;
+  --info: #46bde8;
+  --info-cyan: #46bde8;
+  --violet: #9a86f2;
+  --warning: #f3b95e;
+  --warning-bg: #352c19;
+  --danger: #e8707e;
+  --danger-bg: #3a1e24;
+  --neutral-bg: #1a2a3d;
+
+  --blue-soft: #16304c;
+  --cyan-soft: #10333f;
+  --green-soft: #11332a;
+  --violet-soft: #241f43;
+
+  --overlay: rgba(4, 10, 18, .7);
+  --overlay-soft: rgba(4, 10, 18, .5);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .45);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, .5);
+  --shadow-lg: 0 14px 32px rgba(0, 0, 0, .55);
+  --shadow-focus: 0 0 0 3px rgba(61, 149, 224, .3);
+
+  --public-hero-1: var(--bg);
+  --public-hero-2: var(--bg-blue);
+  --public-ink: var(--text);
+  --public-ink-soft: rgba(245, 248, 252, .74);
+  --public-accent: var(--primary);
+
+  --control-bg: var(--surface);
+  --control-bg-hover: var(--surface-3);
+  --control-bg-disabled: var(--surface-2);
+  --control-bg-readonly: var(--surface-2);
+  --control-border: var(--border);
+  --control-border-hover: var(--border-strong);
+  --control-accent: var(--primary);
+  --control-focus-ring: 0 0 0 3px rgba(61, 149, 224, .28);
+  --control-error-border: var(--danger);
+  --control-error-bg: var(--danger-bg);
+  --control-error-ring: 0 0 0 3px rgba(232, 112, 126, .25);
+  --control-success-border: var(--success);
+  --control-success-bg: var(--success-bg);
+  --control-success-ring: 0 0 0 3px rgba(53, 198, 140, .22);
+  --control-track: var(--border-strong);
+  --control-track-checked: var(--primary);
+  --control-knob: #ffffff;
+}

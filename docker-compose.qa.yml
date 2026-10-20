@@ -1,0 +1,136 @@
+# ES: Perfil QA aislado con PostgreSQL/Redis efímeros y ejecutores restringidos.
+# EN: Isolated QA profile with ephemeral PostgreSQL/Redis and restricted runners.
+services:
+  web:
+    volumes:
+      - qa_reports:/app/private/qa_reports
+    environment:
+      VINOVA_QA_EXECUTION_ENABLED: "True"
+      VINOVA_QA_REPORT_ROOT: /app/private/qa_reports
+
+  celery_worker:
+    environment:
+# ES: La sección siguiente declara servicios, dependencias y límites de la topología operativa.
+# EN: The following section declares services, dependencies, and operational topology limits.
+      VINOVA_QA_EXECUTION_ENABLED: "True"
+
+  celery_beat:
+    environment:
+      VINOVA_QA_EXECUTION_ENABLED: "True"
+
+  qa_db:
+    image: postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+    profiles: ["qa"]
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: vinova_qa
+      POSTGRES_PASSWORD: vinova_qa
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vinova_qa -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: "no"
+    networks:
+      - qa_internal
+
+  qa_redis:
+    image: redis:7-alpine@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+    profiles: ["qa"]
+    command: redis-server --save "" --appendonly no
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: "no"
+    networks:
+      - qa_internal
+
+  qa_runner:
+    build:
+      context: .
+      dockerfile: docker/qa/Dockerfile
+    profiles: ["qa"]
+    init: true
+    environment:
+      VINOVA_QA_EXECUTION_ENABLED: "True"
+      VINOVA_QA_DATABASE_ADMIN_URL: postgresql://vinova_qa:vinova_qa@qa_db:5432/postgres
+      VINOVA_QA_ALLOWED_DB_HOSTS: qa_db
+      VINOVA_QA_REDIS_URL: redis://qa_redis:6379/0
+      VINOVA_QA_REPORT_ROOT: /app/private/qa_reports
+      VINOVA_QA_ENVIRONMENT: docker-isolated
+      VINOVA_QA_IGNORE_PROJECT_ENV: "True"
+      VINOVA_QA_RUNTIME_ROOT: /tmp/vinova-qa-runtime
+      VINOVA_QA_PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      RUFF_CACHE_DIR: /tmp/vinova-qa-cache/ruff
+      XDG_CACHE_HOME: /tmp/vinova-qa-cache
+      PYTEST_ADDOPTS: "-o cache_dir=/tmp/vinova-qa-cache/pytest"
+    command: python scripts/vinova_qa.py --profile ${VINOVA_QA_PROFILE:-quick}
+    volumes:
+      - qa_reports:/app/private/qa_reports
+    depends_on:
+      qa_db:
+        condition: service_healthy
+      qa_redis:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - qa_internal
+
+  qa_worker:
+    build:
+      context: .
+      dockerfile: docker/qa/Dockerfile
+    profiles: ["qa"]
+    init: true
+    env_file:
+      - .env
+    environment:
+      VINOVA_QA_EXECUTION_ENABLED: "True"
+      VINOVA_QA_DATABASE_ADMIN_URL: postgresql://vinova_qa:vinova_qa@qa_db:5432/postgres
+      VINOVA_QA_ALLOWED_DB_HOSTS: qa_db
+      VINOVA_QA_REDIS_URL: redis://qa_redis:6379/0
+      VINOVA_QA_REPORT_ROOT: /app/private/qa_reports
+      VINOVA_QA_ENVIRONMENT: docker-enterprise
+      VINOVA_QA_RUNTIME_ROOT: /tmp/vinova-qa-runtime
+      VINOVA_QA_PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      RUFF_CACHE_DIR: /tmp/vinova-qa-cache/ruff
+      XDG_CACHE_HOME: /tmp/vinova-qa-cache
+      PYTEST_ADDOPTS: "-o cache_dir=/tmp/vinova-qa-cache/pytest"
+    command: celery -A config worker -l info -Q qa --hostname=qa@%h --concurrency=1
+    volumes:
+      - qa_reports:/app/private/qa_reports
+    depends_on:
+      qa_db:
+        condition: service_healthy
+      qa_redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping -d qa@$${HOSTNAME} --timeout=10 | grep -q pong"]
+      interval: 30s
+      timeout: 15s
+      start_period: 45s
+      retries: 5
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - default
+      - qa_internal
+
+volumes:
+  qa_reports:
+
+networks:
+  qa_internal:
+    internal: true

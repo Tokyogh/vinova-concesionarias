@@ -1,0 +1,21 @@
+/* ES: Define estilos de static/css/ui/responsive/breakpoints, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/responsive/breakpoints styles, including states and responsive behavior. */
+/*
+   Escala de breakpoints y utilidades responsive globales. */
+
+.breakpoint-note { display: none; }
+
+.u-hide-desktop { display: none; }
+.u-hide-mobile { display: inline-flex; }
+.u-full { width: 100%; }
+.u-center-text { text-align: center; }
+.u-stack-8 { display: grid; gap: var(--space-8); }
+.u-stack-16 { display: grid; gap: var(--space-16); }
+.u-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (min-width: 761px) {
+  .u-hide-mobile { display: none; }
+}
+@media (max-width: 760px) {
+  .u-hide-desktop { display: none !important; }
+}

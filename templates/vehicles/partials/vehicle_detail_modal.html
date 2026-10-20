@@ -1,0 +1,147 @@
+{# ES: Renderiza la interfaz templates/vehicles/partials/vehicle_detail_modal; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/vehicles/partials/vehicle_detail_modal interface; permissions and data are resolved server-side. #}
+{% with hero=vehicle.hero_media model3d=vehicle.active_model_3d %}
+<div class="modal-backdrop">
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section
+    class="vehicle-modal"
+    data-vinova-modal
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="vehicle-modal-title-{{ vehicle.pk }}"
+  >
+    <button class="modal-close" type="button" data-modal-close aria-label="Cerrar ficha del vehículo">×</button>
+
+    <div class="vehicle-modal-split">
+      <div class="vehicle-modal-main">
+        <div class="modal-tabs" role="tablist" aria-label="Secciones de la ficha">
+          <button
+            type="button"
+            role="tab"
+            id="vehicle-tab-gallery-{{ vehicle.pk }}"
+            data-modal-tab="gallery"
+            aria-controls="vehicle-panel-gallery-{{ vehicle.pk }}"
+            aria-selected="true"
+            tabindex="0"
+          >Galería</button>
+          <button
+            type="button"
+            role="tab"
+            id="vehicle-tab-experience-{{ vehicle.pk }}"
+            data-modal-tab="experience"
+            aria-controls="vehicle-panel-experience-{{ vehicle.pk }}"
+            aria-selected="false"
+            tabindex="-1"
+          >Vista 3D / Slide</button>
+          <button
+            type="button"
+            role="tab"
+            id="vehicle-tab-specs-{{ vehicle.pk }}"
+            data-modal-tab="specs"
+            aria-controls="vehicle-panel-specs-{{ vehicle.pk }}"
+            aria-selected="false"
+            tabindex="-1"
+          >Partes y especificaciones</button>
+        </div>
+
+        <div
+          id="vehicle-panel-gallery-{{ vehicle.pk }}"
+          data-modal-panel="gallery"
+          role="tabpanel"
+          aria-labelledby="vehicle-tab-gallery-{{ vehicle.pk }}"
+          class="gallery-layout"
+        >
+          <div class="gallery-main">
+            {% for media in vehicle.media.all %}
+              {% if media.media_type == 'hero' or media.media_type == 'image' %}
+                <img class="asset-slot-image" data-gallery-image src="{{ media.resource.file.url }}" alt="{{ media.alt_text|default:media.title|default:vehicle }}" loading="lazy" decoding="async">
+              {% endif %}
+            {% endfor %}
+            {% if not hero %}<div class="vehicle-image-placeholder large asset-slot" data-asset-slot="vehicle-gallery">Sin fotos cargadas</div>{% endif %}
+          </div>
+          {% if hero %}
+            <div class="gallery-thumbs" aria-label="Miniaturas de la galería">
+              {% for media in vehicle.media.all %}
+                {% if media.media_type == 'hero' or media.media_type == 'image' %}
+                  <button type="button" data-gallery-thumb aria-label="Mostrar {{ media.title|default:'imagen del vehículo' }}">
+                    <img src="{{ media.resource.file.url }}" alt="" loading="lazy" decoding="async">
+                  </button>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div
+          id="vehicle-panel-experience-{{ vehicle.pk }}"
+          data-modal-panel="experience"
+          role="tabpanel"
+          aria-labelledby="vehicle-tab-experience-{{ vehicle.pk }}"
+          class="experience-panel"
+          hidden
+        >
+          {% if model3d and model3d.resource.file %}
+            <model-viewer
+              src="{{ model3d.resource.file.url }}"
+              alt="Modelo tridimensional de {{ vehicle }}"
+              camera-controls
+              auto-rotate
+              shadow-intensity="1"
+              class="model-viewer-box"
+            ></model-viewer>
+          {% elif hero and hero.resource.file %}
+            <img class="slide-fallback asset-slot-image" src="{{ hero.resource.file.url }}" alt="{{ hero.alt_text|default:vehicle }}" loading="lazy" decoding="async">
+            <p class="muted">Este vehículo aún no tiene modelo 3D; se muestra la imagen comercial principal.</p>
+          {% else %}
+            <div class="vehicle-image-placeholder large">Sin modelo 3D ni imagen alternativa.</div>
+          {% endif %}
+        </div>
+
+        <div
+          id="vehicle-panel-specs-{{ vehicle.pk }}"
+          data-modal-panel="specs"
+          role="tabpanel"
+          aria-labelledby="vehicle-tab-specs-{{ vehicle.pk }}"
+          class="parts-grid"
+          hidden
+        >
+          {% for part in vehicle.part_specs.all %}
+            <article class="part-card">
+              {% if part.image and part.image.file %}<img class="asset-slot-image" src="{{ part.image.file.url }}" alt="{{ part.title }}" loading="lazy" decoding="async">{% endif %}
+              <div>
+                <span class="eyebrow">{{ part.get_part_code_display }}</span>
+                <h3>{{ part.title }}</h3>
+                <p>{{ part.summary }}</p>
+                {% if part.specs %}
+                  <dl class="spec-list">
+                    {% for key,value in part.specs.items %}<div><dt>{{ key }}</dt><dd>{{ value }}</dd></div>{% endfor %}
+                  </dl>
+                {% endif %}
+              </div>
+            </article>
+          {% empty %}
+            <article class="panel-card compact">Aún no hay especificaciones por partes.</article>
+          {% endfor %}
+        </div>
+      </div>
+
+      <aside class="vehicle-modal-aside">
+        <span class="eyebrow">{{ vehicle.brand.name }}</span>
+        <h2 id="vehicle-modal-title-{{ vehicle.pk }}">{{ vehicle.year }} {{ vehicle.model.name }} {{ vehicle.version }}</h2>
+        <div class="modal-badges">
+          <span class="status-badge status-{{ vehicle.status }}">Disponible</span>
+          {% if vehicle.branch %}<span class="modal-branch-chip">{{ vehicle.branch.name }}</span>{% endif %}
+        </div>
+        <p class="modal-description">{{ vehicle.description|default:vehicle.short_description }}</p>
+        <div class="modal-price">
+          {% if vehicle.price %}<span>Precio referencial</span><strong>${{ vehicle.price }}</strong>{% endif %}
+        </div>
+        <div class="modal-commercial-actions">
+          <a class="btn btn-primary" href="{% url 'leads:public_vehicle_request' vehicle.pk %}">Solicitar información o cotización</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+</div>
+{% endwith %}

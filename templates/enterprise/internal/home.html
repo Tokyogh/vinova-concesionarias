@@ -1,0 +1,51 @@
+{# ES: Renderiza la interfaz templates/enterprise/internal/home; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/enterprise/internal/home interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Centro empresarial | Vinova Pro{% endblock %}
+{% block page_title %}Centro de configuración empresarial{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Panel visual para administrar la empresa única de esta instalación, su web pública, SRI base y políticas de aprobación.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'dashboard:admin_home' %}">Dashboard admin</a>{% endblock %}
+{% block content %}
+{% include 'enterprise/internal/_nav.html' %}
+<section class="role-dashboard-hero admin-hero enterprise-hero">
+  <div>
+    <span>Instalación independiente</span>
+    <h2>{{ company.commercial_name }}</h2>
+    <p>Vinova Pro se mantiene como plataforma propia por empresa: dominio, base, archivos, facturación, SRI y configuración separados.</p>
+  </div>
+  <div class="role-dashboard-actions">
+    <a class="btn btn-primary" href="{% url 'enterprise:profile' %}">Editar empresa</a>
+    <a class="btn btn-secondary" href="{% url 'enterprise:public_site' %}">Editar portada</a>
+  </div>
+</section>
+<section class="metric-grid enterprise-status-grid">
+  <article class="metric-card"><span>SRI</span><strong>{{ sri_configuration.get_status_display|default:'No configurado' }}</strong><small>{{ sri_configuration.get_environment_display|default:'Pruebas' }}</small></article>
+  <article class="metric-card"><span>Políticas</span><strong>{{ approval_policies.count }}</strong><small>Aprobaciones configurables</small></article>
+  <article class="metric-card"><span>Web pública</span><strong>{% if public_settings.show_public_branches %}Activa{% else %}Limitada{% endif %}</strong><small>Contenido editable</small></article>
+  <article class="metric-card"><span>Protección</span><strong>Visual</strong><small>Sin editar archivos internos</small></article>
+</section>
+<section class="dashboard-module-grid enterprise-module-grid">
+  <a class="dashboard-module-card" href="{% url 'enterprise:profile' %}"><strong>Perfil empresarial</strong><span>Nombre, RUC, logo y colores corporativos.</span></a>
+  <a class="dashboard-module-card" href="{% url 'enterprise:public_site' %}"><strong>Portada pública</strong><span>Hero, catálogo, footer y textos visibles.</span></a>
+  <a class="dashboard-module-card" href="{% url 'enterprise:contact' %}"><strong>Contacto</strong><span>WhatsApp, redes, horarios y dirección pública.</span></a>
+  <a class="dashboard-module-card" href="{% url 'enterprise:legal' %}"><strong>Legal y datos</strong><span>Privacidad, términos y tratamiento de datos.</span></a>
+  <a class="dashboard-module-card" href="{% url 'sri_integration:configuration' %}"><strong>SRI base</strong><span>Preparación para facturación electrónica con datos reales.</span></a>
+  <a class="dashboard-module-card" href="{% url 'enterprise:approval_policies' %}"><strong>Aprobaciones</strong><span>Automático o con autorización según caso crítico.</span></a>
+</section>
+<section class="detail-grid two-columns">
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Configuración SRI</h2><p>Base preparada; la activación real depende de certificado y datos de la empresa.</p></div></div>
+    <div class="compact-row-list">
+      <div class="compact-row"><strong>RUC</strong><span>{{ sri_configuration.ruc }}</span></div>
+      <div class="compact-row"><strong>Ambiente</strong><span>{{ sri_configuration.get_environment_display }}</span></div>
+      <div class="compact-row"><strong>Certificado</strong><span>{% if sri_configuration.certificate_file %}Cargado en storage privado{% else %}Pendiente{% endif %}</span></div>
+    </div>
+  </article>
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Políticas de aprobación</h2><p>El objetivo es filtrar acciones críticas sin frenar ventas normales.</p></div></div>
+    <div class="compact-row-list">
+      {% for policy in approval_policies|slice:':5' %}<a class="compact-row" href="{% url 'enterprise:approval_policy_update' policy.pk %}"><strong>{{ policy.get_action_display }}</strong><span>{{ policy.get_mode_display }}</span></a>{% empty %}<p class="empty-inline">No hay políticas creadas.</p>{% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}

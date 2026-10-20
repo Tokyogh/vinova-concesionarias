@@ -1,0 +1,63 @@
+{# ES: Renderiza la interfaz templates/privacy/internal/request_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/privacy/internal/request_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Solicitudes de titulares | Vinova Pro{% endblock %}
+{% block page_title %}Solicitudes de titulares{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'privacy:dashboard' %}">Volver</a>{% if request.user.can_manage_privacy %}<a class="btn btn-primary" href="{% url 'privacy:request_create' %}">Nueva solicitud</a>{% endif %}
+{% endblock %}
+{% block content %}
+  <section class="panel-card">
+    <form method="get" class="form-grid">
+      <label class="form-field"><span>Buscar</span><input class="form-control" name="q" value="{{ request.GET.q }}" placeholder="Nombre, correo, teléfono o cliente"></label><label class="form-field"><span>Estado</span>
+        <select class="form-control" name="status">
+          <option value="">Todos</option>{% for value,label in statuses %}<option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </label><label class="form-field"><span>Tipo</span>
+        <select class="form-control" name="type">
+          <option value="">Todos</option>{% for value,label in types %}<option value="{{ value }}" {% if request.GET.type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <div class="form-actions">
+        <button class="btn btn-primary">Filtrar</button>
+      </div>
+    </form>
+  </section>
+  <section class="panel-card table-panel">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Recibida</th>
+            <th>Solicitante</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Plazo</th>
+            <th>Cliente</th>
+            <th>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in requests_list %}
+            <tr>
+              <td>{{ item.received_at|date:'d/m/Y H:i' }}</td>
+              <td>{{ item.requester_name }}<span class="table-subtext">{{ item.requester_email|default:item.requester_phone }}</span>
+              </td>
+              <td>{{ item.get_request_type_display }}</td>
+              <td>{{ item.get_status_display }}</td>
+              <td>{{ item.due_at|date:'d/m/Y H:i'|default:'Sin definir' }}</td>
+              <td>{{ item.customer|default:'Sin relacionar' }}</td>
+              <td>
+                <a class="btn btn-light btn-small" href="{% url 'privacy:request_detail' item.public_id %}">Detalle</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7">Sin resultados.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

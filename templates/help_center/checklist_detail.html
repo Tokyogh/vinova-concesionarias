@@ -1,0 +1,26 @@
+{# ES: Renderiza la interfaz templates/help_center/checklist_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/help_center/checklist_detail interface; permissions and data are resolved server-side. #}
+{% extends "base/base.html" %}
+{% block title %}{{ checklist.title }} · Capacitación{% endblock %}
+{% block page_title %}{{ checklist.title }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">{{ checklist.summary }}</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'help_center:home' %}">Centro de ayuda</a>{% endblock %}
+{% block content %}
+<section class="panel-card checklist-progress-summary">
+  <div><span class="eyebrow">Tu progreso</span><h2>{{ completed }} de {{ total }} pasos</h2></div>
+  <div class="progress-value">{{ percent }}%</div>
+  <div class="progress-track"><span style="width:{{ percent }}%"></span></div>
+</section>
+<section class="checklist-step-list">
+  {% for item in items %}
+    <article class="panel-card checklist-step {% if item.id in completed_ids %}completed{% endif %}">
+      <form method="post" action="{% url 'help_center:toggle_item' item.id %}">
+        {% csrf_token %}
+        <button class="check-button" type="submit" aria-label="Cambiar estado del paso">{% if item.id in completed_ids %}✓{% else %}{{ forloop.counter }}{% endif %}</button>
+      </form>
+      <div><h3>{{ item.title }}</h3><p>{{ item.instructions }}</p></div>
+      {% if item.route_name %}<a class="btn btn-light" href="{% url item.route_name %}">Abrir módulo</a>{% endif %}
+    </article>
+  {% endfor %}
+</section>
+{% endblock %}

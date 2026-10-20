@@ -1,0 +1,21 @@
+{# ES: Renderiza la interfaz templates/notifications/internal/campaign_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/notifications/internal/campaign_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ campaign.name }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ campaign.name }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">{{ campaign.branch.name }} · {{ campaign.get_segment_type_display }} · {{ campaign.get_status_display }}</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'notifications_internal:campaign_list' %}">Campañas</a>{% endblock %}
+{% block content %}
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Flujo controlado</h2><dl class="data-list"><div><dt>Estado</dt><dd>{{ campaign.get_status_display }}</dd></div><div><dt>Destinatarios</dt><dd>{{ campaign.recipient_count }}</dd></div><div><dt>Canal</dt><dd>{{ campaign.get_channel_display }}</dd></div><div><dt>Calculada</dt><dd>{{ campaign.calculated_at|date:'d/m/Y H:i'|default:'Pendiente' }}</dd></div><div><dt>Confirmada</dt><dd>{{ campaign.confirmed_at|date:'d/m/Y H:i'|default:'Pendiente' }}</dd></div></dl>
+    <div class="action-row wrap">
+    {% if can_manage and campaign.status == 'draft' %}<form method="post" action="{% url 'notifications_internal:campaign_calculate' campaign.pk %}">{% csrf_token %}<button class="btn btn-primary">Calcular destinatarios</button></form>{% endif %}
+    {% if can_manage and campaign.status == 'review' %}<a class="btn btn-primary" href="{% url 'notifications_internal:campaign_message' campaign.pk %}">Preparar mensaje</a>{% endif %}
+    {% if can_send and campaign.status == 'ready' %}<form method="post" action="{% url 'notifications_internal:campaign_confirm' campaign.pk %}">{% csrf_token %}<button class="btn btn-danger">Confirmar campaña</button></form>{% endif %}
+    {% if campaign.notification %}<a class="btn btn-secondary" href="{% url 'notifications_internal:detail' campaign.notification.pk %}">Ver registro enviado</a>{% endif %}
+    </div>
+  </article>
+  <article class="panel-card"><h2>Vista previa</h2>{% if preview_subject %}<h3>{{ preview_subject }}</h3><p>{{ preview_body|linebreaksbr }}</p><small>Ejemplo renderizado con el primer destinatario.</small>{% else %}<p>Disponible después de preparar el mensaje.</p>{% endif %}</article>
+</section>
+<section class="panel-card table-panel"><div class="panel-header"><div><h2>Destinatarios congelados</h2><p>Se muestran hasta 100 registros del cálculo.</p></div></div><div class="responsive-table"><table class="data-table"><thead><tr><th>Cliente</th><th>Correo</th><th>Teléfono</th></tr></thead><tbody>{% for recipient in snapshots %}<tr><td>{{ recipient.display_name_snapshot }}</td><td>{{ recipient.email_snapshot|default:'N/D' }}</td><td>{{ recipient.phone_snapshot|default:'N/D' }}</td></tr>{% empty %}<tr><td colspan="3">Aún no se calcularon destinatarios.</td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

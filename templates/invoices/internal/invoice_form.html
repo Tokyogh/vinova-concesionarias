@@ -1,0 +1,32 @@
+{# ES: Renderiza la interfaz templates/invoices/internal/invoice_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/invoices/internal/invoice_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Crear comprobante | Vinova Pro{% endblock %}
+{% block page_title %}Crear comprobante desde venta{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Selecciona una operación comercial y genera un borrador revisable antes de emitir.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'invoices_internal:list' %}">Volver</a>{% endblock %}
+{% block content %}
+<section class="detail-grid two-columns invoices-form-layout">
+  <article class="panel-card">
+    <h2>Datos del comprobante</h2>
+    <p class="muted">La numeración se genera automáticamente por sucursal. Los datos del cliente se copian desde la venta para conservar trazabilidad.</p>
+    <form method="post" class="stacked-form invoices-form-grid">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="message message-error">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+        <label class="form-field{% if field.name == 'notes' or field.name == 'internal_notes' %} span-2{% endif %}"><span>{{ field.label }}</span>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>
+      {% endfor %}
+      <button class="btn btn-primary">Crear borrador</button>
+    </form>
+  </article>
+  <article class="panel-card">
+    <h2>Ventas disponibles</h2>
+    <p class="muted">Estas operaciones pueden usarse como origen de un comprobante.</p>
+    <div class="compact-row-list">
+      {% for sale in ready_sales %}
+        <a class="compact-row" href="?sale={{ sale.pk }}"><strong>{{ sale.number }} · {{ sale.customer.display_name }}</strong><span>{{ sale.branch.name }} · ${{ sale.total }}</span></a>
+      {% empty %}<p class="muted">No hay operaciones listas para facturar.</p>{% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,79 @@
+/* ES: Define estilos de static/css/ui/core/reset, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/core/reset styles, including states and responsive behavior. */
+/*
+   Reset moderno y mínimo. Sin valores de marca. */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+* { margin: 0; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img,
+video {
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+button { background: none; border: 0; padding: 0; cursor: pointer; }
+
+p, h1, h2, h3, h4, h5, h6, figure, blockquote, dl, dd { margin: 0; }
+
+ul[class], ol[class] { list-style: none; padding: 0; }
+
+a { color: inherit; text-decoration: none; }
+
+table { border-collapse: collapse; border-spacing: 0; }
+
+fieldset { border: 0; padding: 0; }
+
+:where(h1, h2, h3, h4, h5, h6) { text-wrap: balance; }
+
+:where(p) { text-wrap: pretty; }
+
+::selection { background: var(--primary-soft-2); color: var(--text); }
+
+:where([hidden]) { display: none !important; }
+
+/* Scrollbars discretas */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+}

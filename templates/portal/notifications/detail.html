@@ -1,0 +1,22 @@
+{# ES: Renderiza la interfaz templates/portal/notifications/detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/notifications/detail interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}{{ recipient.notification.title }}{% endblock %}
+{% block portal_heading %}{{ recipient.notification.title }}{% endblock %}
+{% block portal_lead %}Notificación privada de tu expediente.{% endblock %}
+{% block portal_content %}
+<article class="panel-card portal-notification-detail">
+  <div class="portal-notification-meta">
+    <span class="state state-ok">Leída</span>
+    <time datetime="{{ recipient.notification.sent_at|date:'c' }}">{{ recipient.notification.sent_at|date:'d/m/Y H:i' }}</time>
+  </div>
+  <div class="portal-notification-body">{{ recipient.notification.body|linebreaks }}</div>
+  <div class="module-actions">
+    <a class="btn btn-secondary" href="{% url 'portal:notification_list' %}">Volver a notificaciones</a>
+    <form method="post" action="{% url 'portal:notification_archive' recipient.pk %}">
+      {% csrf_token %}
+      <button class="btn btn-light" type="submit">Archivar</button>
+    </form>
+  </div>
+</article>
+{% endblock %}

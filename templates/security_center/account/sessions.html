@@ -1,0 +1,33 @@
+{# ES: Renderiza la interfaz templates/security_center/account/sessions; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/security_center/account/sessions interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}Mis sesiones | Vinova Pro{% endblock %}
+{% block content %}
+  <section class="public-section">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Seguridad de cuenta</span>
+        <h1>Mis sesiones</h1>
+        <p>Revisa los dispositivos que han usado tu cuenta y revoca los que no reconozcas.</p>
+      </div>
+    </div>
+    <div class="session-card-list">
+      {% for item in sessions %}
+        <article class="panel-card session-card">
+          <div>
+            <strong>{% if item.session_key == current_session_key %}Esta sesión{% else %}Sesión registrada{% endif %}</strong>
+            <p>{{ item.user_agent|default:'Dispositivo no identificado' }}</p>
+            <small>Última actividad: {{ item.last_seen_at|date:'d/m/Y H:i' }}</small>
+          </div>
+          {% if item.revoked_at %}<span class="state state-danger">Revocada</span>{% elif item.session_key == current_session_key %}<span class="state state-ok">Actual</span>{% else %}
+            <form method="post" action="{% url 'security_center:revoke_session' item.pk %}">
+              {% csrf_token %}<button class="btn btn-danger">Revocar</button>
+            </form>
+          {% endif %}
+        </article>
+        {% empty %}
+        <p>No hay sesiones registradas.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

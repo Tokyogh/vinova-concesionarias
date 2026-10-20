@@ -1,0 +1,32 @@
+{# ES: Marco común para borradores legales públicos, con estado y versión visibles. #}
+{# EN: Shared shell for public legal drafts with visible status and version. #}
+
+{% extends 'base/public.html' %}
+{% block main_class %}legal-public-page{% endblock %}
+{% block content %}
+<section class="page-section narrow-section legal-document" aria-labelledby="legal-document-title">
+  <header class="section-heading">
+    <span>Documento legal</span>
+    <h1 id="legal-document-title">{% block legal_heading %}{% endblock %}</h1>
+    <p>{% block legal_summary %}{% endblock %}</p>
+  </header>
+  <aside class="message message-warning legal-draft-notice" role="note">
+    <strong>Borrador técnico pendiente de revisión profesional.</strong>
+    <span>No constituye asesoría legal ni una declaración definitiva de cumplimiento. Los campos pendientes deben completarse y aprobarse antes de producción.</span>
+  </aside>
+  <nav class="legal-document-nav" aria-label="Documentos legales">
+    <a href="{% url 'privacy_public:privacy_policy' %}">Privacidad</a>
+    <a href="{% url 'privacy_public:cookie_policy' %}">Cookies</a>
+    <a href="{% url 'privacy_public:terms' %}">Términos</a>
+    <a href="{% url 'privacy_public:legal_notice' %}">Aviso legal</a>
+  </nav>
+  <article class="panel-card legal-document-body">
+    <p class="legal-document-meta"><strong>Versión:</strong> {% block legal_version %}borrador{% endblock %} · <strong>Fecha técnica:</strong> 16 de octubre de 2026</p>
+    {% block legal_body %}{% endblock %}
+  </article>
+  <div class="legal-document-actions">
+    <a class="btn btn-primary" href="{% url 'privacy_public:request' %}">Ejercer un derecho sobre datos</a>
+    <a class="btn btn-light" href="{% url 'privacy_public:cookie_settings' %}">Cambiar preferencias de cookies</a>
+  </div>
+</section>
+{% endblock %}

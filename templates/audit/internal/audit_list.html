@@ -1,0 +1,67 @@
+{# ES: Renderiza la interfaz templates/audit/internal/audit_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/audit/internal/audit_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Auditoría avanzada | Vinova Pro{% endblock %}
+{% block page_title %}Auditoría avanzada{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Trazabilidad empresarial de accesos, cambios, documentos, importaciones y eventos críticos.</p>{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-light" href="{% url 'audit_internal:alerts' %}">Alertas de seguridad</a>
+  <a class="btn btn-light" href="{% url 'audit_internal:integrity' %}">Verificar integridad</a>
+  {% if request.user.can_export_audit %}<a class="btn btn-secondary" href="{% url 'audit_internal:export' %}?format=xlsx{% if filter_query %}&{{ filter_query }}{% endif %}">Exportar Excel</a>{% endif %}
+{% endblock %}
+{% block content %}
+<section class="metric-grid audit-metric-grid">
+  <article class="metric-card"><span>Eventos totales</span><strong>{{ metrics.total }}</strong></article>
+  <article class="metric-card"><span>Últimos 30 días</span><strong>{{ metrics.last_30_days }}</strong></article>
+  <article class="metric-card"><span>Riesgo alto/crítico</span><strong>{{ metrics.high_risk }}</strong></article>
+  <article class="metric-card"><span>Accesos denegados</span><strong>{{ metrics.denied }}</strong></article>
+  <article class="metric-card"><span>Alertas abiertas</span><strong>{{ metrics.open_alerts }}</strong></article>
+</section>
+
+<section class="panel-card">
+  <div class="panel-header"><div><h2>Filtros avanzados</h2><p>Combina usuario, fecha, sucursal, categoría, riesgo, IP y objeto afectado.</p></div></div>
+  <form method="get" class="form-grid audit-filter-grid">
+    {% for field in filter_form %}
+      <label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>
+    {% endfor %}
+    <div class="form-actions span-2"><button class="btn btn-primary">Aplicar filtros</button><a class="btn btn-light" href="{% url 'audit_internal:list' %}">Limpiar</a></div>
+  </form>
+</section>
+
+<section class="panel-card table-panel">
+  <div class="panel-header"><div><h2>Registro cronológico</h2><p>{{ page_obj.paginator.count }} evento(s) según el alcance y filtros actuales.</p></div></div>
+  <div class="table-scroll">
+    <table class="data-table audit-table">
+      <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Objeto</th><th>Sucursal</th><th>Origen</th><th>Riesgo</th><th>Resultado</th><th></th></tr></thead>
+      <tbody>
+      {% for log in logs %}
+        <tr>
+          <td><strong>{{ log.occurred_at|date:'d/m/Y H:i:s' }}</strong><span class="table-subtext">{{ log.event_id }}</span></td>
+          <td>{{ log.user_display_snapshot|default:log.username_snapshot|default:'Sistema/Anónimo' }}{% if log.role_snapshot %}<span class="table-subtext">{{ log.role_snapshot.0.role__name|default:log.role_snapshot.0.role__code }}</span>{% endif %}</td>
+          <td><code>{{ log.action }}</code><span class="table-subtext">{{ log.get_category_display }}</span></td>
+          <td>{{ log.object_repr|default:'Sin objeto' }}{% if log.content_type_label %}<span class="table-subtext">{{ log.content_type_label }} #{{ log.object_id }}</span>{% endif %}</td>
+          <td>{% if log.branch %}{{ log.branch.name }}{% else %}Global / N/D{% endif %}</td>
+          <td>{{ log.ip_address|default:'N/D' }}<span class="table-subtext">{{ log.http_method }} {{ log.request_path|truncatechars:42 }}</span></td>
+          <td><span class="audit-badge audit-severity-{{ log.severity }}">{{ log.get_severity_display }}</span></td>
+          <td><span class="audit-badge audit-result-{{ log.result }}">{{ log.get_result_display }}</span></td>
+          <td><a class="btn btn-light btn-small" href="{% url 'audit_internal:detail' log.event_id %}">Detalle</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="9">No existen eventos con estos filtros.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.paginator.num_pages > 1 %}
+  <nav class="pagination-bar">
+    {% if page_obj.has_previous %}<a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}{% if filter_query %}&{{ filter_query }}{% endif %}">Anterior</a>{% endif %}
+    <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a class="btn btn-light" href="?page={{ page_obj.next_page_number }}{% if filter_query %}&{{ filter_query }}{% endif %}">Siguiente</a>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+
+{% if metrics.top_actions %}
+<section class="panel-card"><h2>Acciones más frecuentes · 30 días</h2><div class="audit-action-grid">{% for item in metrics.top_actions %}<div><code>{{ item.action }}</code><strong>{{ item.total }}</strong></div>{% endfor %}</div></section>
+{% endif %}
+{% endblock %}

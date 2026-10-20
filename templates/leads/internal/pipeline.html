@@ -1,0 +1,36 @@
+{# ES: Renderiza la interfaz templates/leads/internal/pipeline; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/leads/internal/pipeline interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Pipeline comercial | Vinova Pro{% endblock %}
+{% block page_title %}Pipeline comercial{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">Vista rápida del embudo. Cada tarjeta respeta el alcance del usuario, sucursal y asesor.</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'leads_internal:list' %}">Vista de lista</a>{% if request.user.can_manage_leads %}<a class="btn btn-primary" href="{% url 'leads_internal:create' %}">Nuevo lead</a>{% endif %}
+{% endblock %}
+{% block content %}
+  <section class="crm-pipeline">
+    {% for column in columns %}
+      <article class="pipeline-column">
+        <header>
+          <div>
+            <span class="crm-badge crm-status-{{ column.code }}">{{ column.label }}</span><strong>{{ column.count }}</strong>
+          </div>
+        </header>
+        <div class="pipeline-stack">
+          {% for lead in column.leads %}<a class="pipeline-card" href="{% url 'leads_internal:detail' lead.pk %}">
+              <div>
+                <strong>{{ lead.full_name }}</strong><span>{{ lead.code }}</span>
+              </div>
+              <p>{{ lead.vehicle_interest_label|truncatechars:55 }}</p>
+              <div class="pipeline-meta">
+                <span>{{ lead.get_priority_display }}</span><span>{{ lead.score }}/100</span>
+              </div>
+              {% if lead.next_follow_up_at %}<small>Seguimiento: {{ lead.next_follow_up_at|date:'d/m H:i' }}</small>{% endif %}</a>{% empty %}
+            <p class="pipeline-empty">Sin leads en esta etapa.</p>
+          {% endfor %}
+        </div>
+      </article>
+    {% endfor %}
+  </section>
+{% endblock %}

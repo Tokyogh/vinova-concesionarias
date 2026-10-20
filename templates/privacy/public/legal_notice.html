@@ -1,0 +1,24 @@
+{# ES: Aviso de identificación y titularidad del sitio con campos no confirmados visibles. #}
+{# EN: Site ownership notice with visibly unconfirmed fields. #}
+
+{% extends 'privacy/public/legal_base.html' %}
+{% block title %}Aviso legal | Vinova Pro{% endblock %}
+{% block legal_heading %}Aviso legal{% endblock %}
+{% block legal_summary %}Identificación preliminar del operador y canales del sitio.{% endblock %}
+{% block legal_version %}borrador-2026-10-16{% endblock %}
+{% block legal_body %}
+  <h2>Operador del sitio</h2>
+  <dl class="legal-identity">
+    <div><dt>Razón social</dt><dd>{% if vinova_company %}{{ vinova_company.legal_name|default:'PENDIENTE DE COMPLETAR' }}{% else %}PENDIENTE DE COMPLETAR{% endif %}</dd></div>
+    <div><dt>RUC</dt><dd>{% if vinova_company %}{{ vinova_company.ruc|default:'PENDIENTE DE COMPLETAR' }}{% else %}PENDIENTE DE COMPLETAR{% endif %}</dd></div>
+    <div><dt>Domicilio</dt><dd>{% if vinova_company %}{{ vinova_company.address|default:'PENDIENTE DE COMPLETAR' }}{% else %}PENDIENTE DE COMPLETAR{% endif %}</dd></div>
+    <div><dt>Correo</dt><dd>{% if vinova_company %}{{ vinova_company.email|default:'PENDIENTE DE COMPLETAR' }}{% else %}PENDIENTE DE COMPLETAR{% endif %}</dd></div>
+    <div><dt>Representante</dt><dd>PENDIENTE DE COMPLETAR</dd></div>
+  </dl>
+
+  <h2>Titularidad y contacto</h2>
+  <p>La titularidad de marcas, fotografías, fichas y demás contenidos debe documentarse antes de producción. Para reportar contenido, seguridad o datos personales utiliza los canales oficiales publicados por el operador; el canal legal específico está PENDIENTE DE COMPLETAR.</p>
+
+  <h2>Proveedores y enlaces</h2>
+  <p>El sitio puede enlazar servicios de terceros o cargarlos tras la elección correspondiente. Sus condiciones no sustituyen las responsabilidades del operador. El registro contractual de proveedores y transferencias está PENDIENTE DE COMPLETAR.</p>
+{% endblock %}

@@ -1,0 +1,8 @@
+{# ES: Renderiza la interfaz templates/notifications/internal/campaign_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/notifications/internal/campaign_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Nueva campaña | Vinova Pro{% endblock %}
+{% block page_title %}Nueva campaña{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Define un segmento con datos existentes. El cálculo no envía mensajes.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'notifications_internal:campaign_list' %}">Volver</a>{% endblock %}
+{% block content %}<section class="panel-card form-panel-wide"><form method="post" class="form-grid">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}<div class="form-actions"><button class="btn btn-primary">Crear borrador</button></div></form></section>{% endblock %}

@@ -1,0 +1,25 @@
+{# ES: Renderiza la interfaz templates/vehicles/redeem; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/vehicles/redeem interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}Canjear código de vinculación | Vinova Pro{% endblock %}
+{% block content %}
+<section class="redeem-hero">
+  <div class="redeem-hero-inner">
+    <span class="eyebrow">Garaje digital</span>
+    <h1>Vincular un vehículo</h1>
+    <p>Ingresa el código VNV-XXXX-XXXX-XXXX-XXXX entregado por tu asesor. No se aceptan cédulas como prueba de propiedad.</p>
+  </div>
+</section>
+
+<section class="redeem-panel">
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Código de vinculación</h2><p>El código es personal, intransferible y caduca si lo indica la concesionaria.</p></div></div>
+    <form method="post" class="stacked-form">
+      {% csrf_token %}
+      <label class="form-field" for="id_code"><span>Código</span><input type="text" id="id_code" name="code" required autocomplete="off" autocapitalize="characters" maxlength="23" placeholder="VNV-XXXX-XXXX-XXXX-XXXX" data-vnv-code aria-describedby="code-help"></label>
+      <small id="code-help" class="muted">Puedes escribirlo con o sin guiones; se normaliza automáticamente.</small>
+      <button class="btn btn-primary">Canjear código</button>
+    </form>
+  </article>
+</section>
+{% endblock %}

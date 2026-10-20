@@ -1,0 +1,44 @@
+{# ES: Renderiza la interfaz templates/portal/settings; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/settings interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}Configuración{% endblock %}
+{% block portal_heading %}Configuración y seguridad{% endblock %}
+{% block portal_lead %}Administra la protección de tu cuenta y revisa tus sesiones activas.{% endblock %}
+{% block portal_content %}
+<section class="portal-grid">
+  <article class="panel-card">
+    <h2>Seguridad de acceso</h2>
+    <dl class="data-list">
+      <div><dt>Autenticación en dos pasos</dt><dd>{% if security_profile.two_factor_enabled %}Activa{% else %}No configurada{% endif %}</dd></div>
+      <div><dt>Último cambio de contraseña</dt><dd>{{ request.user.last_password_change_at|date:'d/m/Y H:i'|default:'No registrado' }}</dd></div>
+      <div><dt>Último acceso</dt><dd>{{ request.user.last_login|date:'d/m/Y H:i'|default:'No registrado' }}</dd></div>
+    </dl>
+    <div class="module-actions">
+      <a class="btn btn-primary" href="{% url 'security_center:password_change' %}">Cambiar contraseña</a>
+      {% if security_profile.two_factor_enabled %}<a class="btn btn-secondary" href="{% url 'security_center:two_factor_disable' %}">Administrar 2FA</a>{% else %}<a class="btn btn-secondary" href="{% url 'security_center:two_factor_setup' %}">Activar 2FA</a>{% endif %}
+      <a class="btn btn-light" href="{% url 'security_center:my_sessions' %}">Ver sesiones</a>
+    </div>
+  </article>
+  <article class="panel-card">
+    <h2>Privacidad y preferencias</h2>
+    <p>Tu información privada se muestra únicamente dentro de esta cuenta y conforme al expediente vinculado.</p>
+    <a class="btn btn-light" href="{% url 'privacy_public:request' %}">Solicitar acceso o corrección de datos</a>
+  </article>
+  <article class="panel-card">
+    <h2>Preferencias de notificación</h2>
+    <p>Elige qué avisos deseas recibir en tu bandeja privada.</p>
+    <form method="post" class="portal-preferences-form">
+      {% csrf_token %}
+      {% for field in form %}
+        <label class="portal-preference-option" for="{{ field.id_for_label }}">
+          {{ field }}
+          <span>{{ field.label }}</span>
+        </label>
+        {% if field.errors %}<div class="form-error">{{ field.errors|striptags }}</div>{% endif %}
+      {% endfor %}
+      <p class="form-help">La opción de correo registra tu consentimiento. Los avisos permanecen disponibles en el portal aunque no exista un proveedor de correo configurado.</p>
+      <button class="btn btn-primary" type="submit">Guardar preferencias</button>
+    </form>
+  </article>
+</section>
+{% endblock %}

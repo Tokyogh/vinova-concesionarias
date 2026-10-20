@@ -1,0 +1,85 @@
+{# ES: Renderiza la interfaz templates/inventory/internal/item_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/inventory/internal/item_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% load filter_ui %}
+{% block title %}Inventario interno | Vinova Pro{% endblock %}
+{% block page_title %}Inventario{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Control empresarial de artículos, SKU, stock por sucursal, movimientos, transferencias y alertas operativas.</p>{% endblock %}
+{% block topbar_actions %}
+  {% if request.user.can_view_inventory %}
+    <a class="btn btn-light" href="{% url 'inventory_internal:movement_list' %}">Movimientos</a>
+    <a class="btn btn-light" href="{% url 'inventory_internal:low_stock' %}">Stock bajo</a>
+  {% endif %}
+  {% if request.user.can_manage_inventory %}
+    <a class="btn btn-light" href="{% url 'inventory_internal:catalog_data' %}">Categorías</a>
+    <a class="btn btn-light" href="{% url 'inventory_internal:movement_create' %}">Movimiento</a>
+    <a class="btn btn-light" href="{% url 'inventory_internal:transfer_create' %}">Transferencia</a>
+    <a class="btn btn-primary" href="{% url 'inventory_internal:create' %}">Nuevo artículo</a>
+  {% endif %}
+{% endblock %}
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="metric-grid inventory-status-grid">
+  <article class="metric-card"><span>Artículos activos</span><strong>{{ metrics.active_items }}</strong></article>
+  <article class="metric-card"><span>Stock total</span><strong>{{ metrics.total_stock }}</strong></article>
+  <article class="metric-card"><span>Alertas stock bajo</span><strong>{{ metrics.low_stock }}</strong></article>
+  <article class="metric-card"><span>Sucursales con stock</span><strong>{{ metrics.branches_with_stock }}</strong></article>
+</section>
+
+{% url 'inventory_internal:list' as filter_clear_url %}
+{% vinova_filter_panel search_form filter_clear_url 'inventory' common='q,status,sort' advanced='item_type,category' %}
+
+<section class="panel-card table-panel">
+  <div class="panel-header">
+    <div>
+      <h2>Artículos y servicios</h2>
+      <p>{{ page_obj.paginator.count }} resultado(s). El stock se controla por sucursal y todo movimiento queda auditado.</p>
+    </div>
+  </div>
+  <div class="responsive-table">
+    {# ES: La tabla siguiente presenta datos previamente filtrados por permisos y alcance. #}
+    {# EN: The following table renders data already filtered by permissions and scope. #}
+    <table class="data-table mobile-card-table inventory-item-table">
+      <thead><tr><th>Artículo</th><th>Tipo / categoría</th><th>Precio</th><th>Stock total</th><th>Sucursales</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td data-label="Artículo"><strong>{{ item.name }}</strong><span class="table-subtext">SKU {{ item.sku }} · {{ item.unit }}</span></td>
+            <td data-label="Tipo / categoría">{{ item.get_item_type_display }}<span class="table-subtext">{{ item.category.name|default:'Sin categoría' }}</span></td>
+            <td data-label="Precio">${{ item.price }}</td>
+            <td data-label="Stock total">{% if item.track_stock %}<strong>{{ item.total_stock_amount|default:'0.00' }}</strong>{% if item.has_low_stock %}<span class="table-subtext state state-warning">Stock bajo</span>{% endif %}{% else %}<span class="table-subtext">No controla stock</span>{% endif %}</td>
+            <td data-label="Sucursales">{{ item.branch_count }}</td>
+            <td data-label="Estado"><span class="state state-inventory-{{ item.status }}">{{ item.get_status_display }}</span></td>
+            <td class="table-actions-cell" data-label="Acciones"><a class="btn btn-light btn-small" href="{% url 'inventory_internal:detail' item.pk %}">Gestionar</a></td>
+          </tr>
+        {% empty %}
+          <tr class="empty-table-row"><td colspan="7">No hay artículos registrados con estos filtros.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel-card recent-movements-panel">
+  <div class="panel-header"><div><h2>Movimientos recientes</h2><p>Entradas, salidas, ajustes y transferencias confirmadas.</p></div></div>
+  <div class="responsive-table">
+    <table class="data-table compact-table mobile-card-table inventory-movement-table">
+      <thead><tr><th>Fecha</th><th>Artículo</th><th>Movimiento</th><th>Sucursal</th><th>Cantidad</th><th>Referencia</th></tr></thead>
+      <tbody>
+        {% for movement in recent_movements %}
+          <tr><td data-label="Fecha">{{ movement.confirmed_at|date:'d/m/Y H:i' }}</td><td data-label="Artículo">{{ movement.item.sku }}<span class="table-subtext">{{ movement.item.name }}</span></td><td data-label="Movimiento">{{ movement.get_movement_type_display }}</td><td data-label="Sucursal">{{ movement.branch.name }}{% if movement.destination_branch %}<span class="table-subtext">→ {{ movement.destination_branch.name }}</span>{% endif %}</td><td data-label="Cantidad">{{ movement.quantity }}</td><td data-label="Referencia">{{ movement.reference|default:'N/D' }}</td></tr>
+        {% empty %}<tr class="empty-table-row"><td colspan="6">Aún no hay movimientos registrados.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.previous_page_number %}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.next_page_number %}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

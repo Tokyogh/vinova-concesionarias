@@ -1,0 +1,62 @@
+/* ES: Define estilos de static/css/ui/accessibility, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/accessibility styles, including states and responsive behavior. */
+/*
+   Foco visible, contraste en forced-colors, reduced-motion, tamaños mínimos de
+   target y reglas de impresión. Los !important aquí son parte del contrato
+   prefers-reduced-motion / print (no son parches de cascada). */
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.btn:focus-visible,
+.theme-toggle:focus-visible,
+.drawer-menu-button:focus-visible,
+.drawer-close-button:focus-visible,
+.side-nav a:focus-visible,
+.public-nav a:focus-visible {
+  box-shadow: var(--shadow-focus);
+}
+
+/* Targets táctiles mínimos */
+.side-nav a { min-height: var(--space-40); }
+.public-nav a { min-height: var(--space-40); }
+.theme-toggle,
+.drawer-menu-button,
+.drawer-close-button,
+.modal-close { min-width: var(--space-40); min-height: var(--space-40); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .btn { border: 1px solid ButtonText; }
+  .state, .status-badge, .crm-badge, .audit-badge, .role-badge { border: 1px solid; }
+  .panel-card, .vehicle-card, .metric-card { border: 1px solid; }
+}
+
+@media print {
+  .sidebar, .topbar, .public-header, .public-footer, .theme-toggle,
+  .topbar-actions, .skip-link, .modal-backdrop, .pagination-bar,
+  .pagination, .public-pagination, .public-nav { display: none !important; }
+  .app-shell { display: block !important; }
+  .main-content { padding: 0 !important; }
+  body { background: #fff !important; color: #000 !important; }
+  .panel-card, .vehicle-card, .metric-card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+  .btn-primary {
+    background: #000 !important;
+    color: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

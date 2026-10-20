@@ -1,0 +1,20 @@
+{# ES: Renderiza la interfaz templates/help_center/article_print; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/help_center/article_print interface; permissions and data are resolved server-side. #}
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ article.title }} · Vinova Pro</title>
+  <style nonce="{{ request.csp_nonce }}">
+    body{font-family:Arial,sans-serif;color:#1f2937;max-width:850px;margin:36px auto;padding:0 24px;line-height:1.55}header{border-bottom:2px solid #123b63;padding-bottom:18px;margin-bottom:26px}h1{color:#123b63;margin:6px 0}.meta{color:#64748b;font-size:14px}.content p{margin:0 0 14px}.print-actions{margin-bottom:20px}@media print{.print-actions{display:none}body{margin:0;max-width:none}}
+  </style>
+  <script defer src="{% static 'js/vinova.js' %}?v={{ vinova_product_version }}"></script>
+</head>
+<body>
+  <div class="print-actions"><button type="button" data-print-page>Imprimir o guardar como PDF</button></div>
+  <header><small>Vinova Pro · Centro de ayuda</small><h1>{{ article.title }}</h1><p>{{ article.summary }}</p><div class="meta">{{ article.category.name }} · {{ article.estimated_minutes }} min · Actualizado {{ article.updated_at|date:"d/m/Y" }}</div></header>
+  <main class="content">{{ article.content|linebreaks }}</main>
+</body>
+</html>

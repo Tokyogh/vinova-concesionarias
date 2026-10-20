@@ -1,0 +1,60 @@
+/* ES: Define estilos de static/css/ui/pages/errors, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/pages/errors styles, including states and responsive behavior. */
+/*
+   Pantallas de error de producto (403, 404, 500).
+   Documento autocontenido: carga theme.js y head_assets para mantener el
+   tema Light/Dark coherente y el lenguaje visual del producto. */
+.error-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  padding: var(--space-24);
+}
+
+.error-card {
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  padding: var(--space-32);
+  background: var(--surface-card, var(--surface));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: var(--shadow-card, none);
+  display: grid;
+  gap: var(--space-16);
+  justify-items: center;
+}
+
+.error-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-16, 64px);
+  height: var(--space-16, 64px);
+  border-radius: 14px;
+  background: var(--accent-strong, #0f2f4d);
+  color: var(--on-accent, #ffffff);
+  font-weight: 800;
+  font-size: 1.5rem;
+}
+
+.error-card h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+.error-card p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-12);
+  margin-top: var(--space-8);
+}

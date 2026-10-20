@@ -1,0 +1,8 @@
+{# ES: Renderiza la interfaz templates/notifications/internal/campaign_message_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/notifications/internal/campaign_message_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Preparar mensaje | Vinova Pro{% endblock %}
+{% block page_title %}Preparar mensaje{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Variables seguras: <code>{customer_name}</code>, <code>{branch_name}</code> y <code>{campaign_name}</code>.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'notifications_internal:campaign_detail' object.pk %}">Volver</a>{% endblock %}
+{% block content %}<section class="panel-card form-panel-wide"><form method="post" class="form-grid">{% csrf_token %}{% if form.non_field_errors %}<div class="message message-error span-2">{{ form.non_field_errors }}</div>{% endif %}{% for field in form %}<label class="form-field {% if field.name == 'body' %}span-2{% endif %}"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}<div class="form-actions"><button class="btn btn-primary">Guardar y generar vista previa</button></div></form></section>{% endblock %}

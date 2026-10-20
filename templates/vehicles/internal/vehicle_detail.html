@@ -1,0 +1,198 @@
+{# ES: Renderiza la interfaz templates/vehicles/internal/vehicle_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/vehicles/internal/vehicle_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ vehicle }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ vehicle.year }} {{ vehicle.brand.name }} {{ vehicle.model.name }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Ficha interna con estado comercial, sucursal, publicación y trazabilidad.</p>{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-light" href="{% url 'vehicles_internal:list' %}">Volver</a>
+  {% if request.user.can_manage_vehicles %}<a class="btn btn-primary" href="{% url 'vehicles_internal:update' vehicle.pk %}">Editar</a>{% endif %}
+{% endblock %}
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="detail-grid two-columns vehicle-internal-detail">
+  <article class="panel-card vehicle-summary-card">
+    <div class="vehicle-internal-visual">
+      {% with hero=vehicle.hero_media %}
+        {% if hero and hero.resource.file %}<img src="{{ hero.resource.file.url }}" alt="{{ hero.alt_text|default:vehicle }}">{% else %}<div class="vehicle-image-placeholder large">Sin imagen principal</div>{% endif %}
+      {% endwith %}
+    </div>
+    <span class="eyebrow">{{ vehicle.brand.name }}</span>
+    <h2>{{ vehicle.model.name }} {{ vehicle.version }}</h2>
+    <p>{{ vehicle.short_description|default:'Sin descripción comercial.' }}</p>
+    <div class="vehicle-detail-meta">
+      <span><strong>Año</strong>{{ vehicle.year }}</span>
+      <span><strong>Color</strong>{{ vehicle.color|default:'N/D' }}</span>
+      <span><strong>Kilometraje</strong>{% if vehicle.mileage is not None %}{{ vehicle.mileage }} km{% else %}No registrado{% endif %}</span>
+      <span><strong>Precio</strong>{% if vehicle.price %}${{ vehicle.price }}{% else %}N/D{% endif %}</span>
+    </div>
+  </article>
+
+  <article class="panel-card">
+    <div class="panel-header">
+      <div><h2>Control operativo</h2><p>Estado actual: <span class="state state-vehicle-{{ vehicle.status }}">{{ vehicle.get_status_display }}</span></p></div>
+    </div>
+    <dl class="data-list">
+      <div><dt>Código interno Vinova</dt><dd>{{ vehicle.internal_code }}</dd></div>
+      <div><dt>VIN real / chasis</dt><dd>{{ vehicle.vin|default:'No registrado' }}</dd></div>
+      <div><dt>Placa</dt><dd>{{ vehicle.plate|default:'No registrada' }}</dd></div>
+      <div><dt>Sucursal</dt><dd>{% if vehicle.branch %}{{ vehicle.branch.name }} · {{ vehicle.branch.city|default:vehicle.branch.company.commercial_name }}{% else %}Sin asignar{% endif %}</dd></div>
+      <div><dt>Slug público</dt><dd>{{ vehicle.public_slug }}</dd></div>
+      <div><dt>Publicado</dt><dd>{{ vehicle.published_at|date:'d/m/Y H:i'|default:'No publicado' }}</dd></div>
+      <div><dt>Destacado</dt><dd>{% if vehicle.is_featured %}Sí{% else %}No{% endif %}</dd></div>
+    </dl>
+    {% if request.user.can_publish_vehicles %}
+      <div class="action-row wrap">
+        {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+        {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+        <form method="post" action="{% url 'vehicles_internal:status_action' vehicle.pk 'publish' %}">{% csrf_token %}<button class="btn btn-secondary">Publicar</button></form>
+        <form method="post" action="{% url 'vehicles_internal:status_action' vehicle.pk 'hide' %}">{% csrf_token %}<button class="btn btn-light">Ocultar</button></form>
+        <form method="post" action="{% url 'vehicles_internal:status_action' vehicle.pk 'archive' %}">{% csrf_token %}<button class="btn btn-danger">Archivar</button></form>
+      </div>
+    {% endif %}
+  </article>
+</section>
+
+<section class="detail-grid two-columns">
+  <article class="panel-card">
+    <h2>Descripción interna/comercial</h2>
+    <p>{{ vehicle.description|linebreaksbr|default:'Sin descripción ampliada.' }}</p>
+  </article>
+  <article class="panel-card vehicle-media-upload-card">
+    <div class="panel-header no-pad"><div><h2>Cargar multimedia</h2><p>Fotos, imagen principal, fallback, manuales y modelo 3D del vehículo.</p></div></div>
+    {% if request.user.can_manage_vehicles %}
+      <form method="post" enctype="multipart/form-data" action="{% url 'vehicles_internal:media_upload' vehicle.pk %}" class="stacked-form">
+        {% csrf_token %}
+        {% for field in media_upload_form %}
+          <label class="form-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>
+        {% endfor %}
+        <button class="btn btn-primary">Subir archivo</button>
+      </form>
+    {% else %}
+      <p>No tienes permiso para cargar multimedia.</p>
+    {% endif %}
+  </article>
+</section>
+
+<section class="panel-card">
+  <div class="panel-header"><div><h2>Galería y archivos del vehículo</h2><p>Recursos asociados a esta unidad. Las imágenes públicas pueden mostrarse en el catálogo.</p></div></div>
+  <div class="vehicle-media-grid">
+    {% for media in vehicle.media.all %}
+      <article class="vehicle-media-card">
+        {% if media.media_type == 'hero' or media.media_type == 'image' or media.media_type == 'fallback' %}
+          <img src="{{ media.resource.file.url }}" alt="{{ media.alt_text|default:media.title|default:vehicle }}">
+        {% else %}
+          <div class="vehicle-media-file">{{ media.get_media_type_display }}</div>
+        {% endif %}
+        <strong>{{ media.title|default:media.resource.title }}</strong>
+        <span>{{ media.get_media_type_display }} · {% if media.is_public %}Público{% else %}Interno{% endif %}</span>
+        {% if request.user.can_manage_vehicles %}<div class="action-row wrap"><a class="btn btn-light btn-sm" href="{% url 'vehicles_internal:media_edit' vehicle.pk media.pk %}">Editar metadatos</a><form method="post" action="{% url 'vehicles_internal:media_delete' vehicle.pk media.pk %}" data-confirm="Desvincular este recurso del vehículo? El archivo reutilizable se conservará.">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">Desvincular</button></form></div>{% endif %}
+      </article>
+    {% empty %}
+      <p class="empty-inline">Este vehículo todavía no tiene multimedia cargada.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="detail-grid two-columns">
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Destacados comerciales</h2><p>Características breves visibles en las interfaces comerciales.</p></div>{% if request.user.can_manage_vehicles %}<a class="btn btn-primary btn-sm" href="{% url 'vehicles_internal:highlight_create' vehicle.pk %}">Añadir destacado</a>{% endif %}</div>
+    <div class="data-list">
+      {% for highlight in vehicle.highlights.all %}
+        <div><dt>{{ highlight.title }}</dt><dd>{{ highlight.value|default:'—' }}{% if request.user.can_manage_vehicles %}<span class="action-row wrap"><a class="btn btn-light btn-sm" href="{% url 'vehicles_internal:highlight_edit' vehicle.pk highlight.pk %}">Editar</a><form method="post" action="{% url 'vehicles_internal:highlight_delete' vehicle.pk highlight.pk %}" data-confirm="Eliminar este destacado?">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">Eliminar</button></form></span>{% endif %}</dd></div>
+      {% empty %}<p class="empty-inline">No hay destacados comerciales configurados.</p>{% endfor %}
+    </div>
+  </article>
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Especificaciones técnicas</h2><p>Datos estructurados por motor, seguridad, tecnología y otras áreas existentes.</p></div>{% if request.user.can_manage_vehicles %}<a class="btn btn-primary btn-sm" href="{% url 'vehicles_internal:specification_create' vehicle.pk %}">Añadir especificación</a>{% endif %}</div>
+    <div class="data-list">
+      {% for specification in vehicle.part_specs.all %}
+        <div><dt>{{ specification.get_part_code_display }} · {{ specification.title }}</dt><dd>{{ specification.summary|default:specification.description|default:'Sin detalle' }}{% if request.user.can_manage_vehicles %}<span class="action-row wrap"><a class="btn btn-light btn-sm" href="{% url 'vehicles_internal:specification_edit' vehicle.pk specification.pk %}">Editar</a><form method="post" action="{% url 'vehicles_internal:specification_delete' vehicle.pk specification.pk %}" data-confirm="Eliminar esta especificación?">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">Eliminar</button></form></span>{% endif %}</dd></div>
+      {% empty %}<p class="empty-inline">No hay especificaciones técnicas configuradas.</p>{% endfor %}
+    </div>
+  </article>
+</section>
+
+<section class="detail-grid two-columns">
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Códigos de vinculación</h2><p>Códigos privados VNV-… para agregar este vehículo al garaje del cliente. Solo se muestra el sufijo del código.</p></div></div>
+    {% if can_manage_link_codes %}
+      <form method="post" action="{% url 'vehicles_internal:link_code_generate' vehicle.pk %}" class="stacked-form">
+        {% csrf_token %}
+        <label class="form-field"><span>Vigencia</span><select name="expires_days"><option value="">Sin vencimiento</option><option value="30">30 días</option><option value="90">90 días</option></select></label>
+        <button class="btn btn-primary">Generar nuevo código</button>
+      </form>
+      <div class="responsive-table">
+        <table class="data-table">
+          <thead><tr><th>Estado</th><th>Código</th><th>Generado</th><th>Vence</th><th>Acciones</th></tr></thead>
+          <tbody>
+            {% for code_obj in link_codes %}
+              <tr>
+                <td><span class="state state-vehicle-{{ code_obj.status }}">{{ code_obj.get_status_display }}</span></td>
+                <td><code>{{ code_obj.code }}</code></td>
+                <td>{{ code_obj.created_at|date:'d/m/Y H:i' }}</td>
+                <td>{% if code_obj.expires_at %}{{ code_obj.expires_at|date:'d/m/Y H:i' }}{% else %}—{% endif %}</td>
+                <td>
+                  {% if code_obj.status == 'active' and not code_obj.is_expired %}
+                    <form method="post" action="{% url 'vehicles_internal:link_code_revoke' vehicle.pk code_obj.pk %}" data-confirm="Revocar este código? El cliente no podrá canjearlo.">
+                      {% csrf_token %}
+                      <input type="hidden" name="reason" value="Revocado manualmente">
+                      <button type="submit" class="btn btn-light btn-sm">Revocar</button>
+                    </form>
+                  {% else %}—{% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" class="empty-inline">Sin códigos generados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No tienes permiso para gestionar códigos de vinculación.</p>
+    {% endif %}
+  </article>
+
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Garage y titularidad</h2><p>Propietarios actuales e históricos. Cambiar de titular conserva el historial técnico y nunca traslada documentos privados.</p></div></div>
+    <div class="responsive-table">
+      <table class="data-table">
+        <thead><tr><th>Cliente</th><th>Identificación</th><th>Rol</th><th>Vinculado</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          {% for link in customer_links %}
+            <tr>
+              <td>{{ link.customer.display_name }}</td>
+              <td>{{ link.snapshot_identification|default:link.customer.identification_number|default:'—' }}</td>
+              <td>{{ link.get_role_type_display }}</td>
+              <td>{{ link.linked_at|date:'d/m/Y H:i' }}</td>
+              <td>{% if link.is_active %}<span class="state state-vehicle-active">Activo</span>{% else %}<span class="state state-vehicle-archived">{% if link.unlinked_reason %}{{ link.unlinked_reason|truncatechars:40 }}{% else %}Archivado{% endif %}</span>{% endif %}</td>
+              <td>
+                {% if link.is_active %}
+                  <div class="action-row wrap">
+                    {% if can_manage_link_codes %}
+                      <form method="post" action="{% url 'vehicles_internal:garage_transfer' vehicle.pk link.pk %}" class="stacked-form">
+                        {% csrf_token %}
+                        <label class="form-field"><span>Nuevo titular</span><select name="customer" required><option value="">Seleccionar…</option>{% for c in garage_customer_choices %}<option value="{{ c.pk }}">{{ c.display_name }}{% if c.assigned_branch %} · {{ c.assigned_branch.name }}{% endif %}</option>{% endfor %}</select></label>
+                        <label class="form-field"><span>Motivo</span><input type="text" name="reason" maxlength="220" placeholder="Motivo de la transferencia"></label>
+                        <button class="btn btn-secondary btn-sm">Transferir titularidad</button>
+                      </form>
+                      <form method="post" action="{% url 'vehicles_internal:garage_unlink' vehicle.pk link.pk %}" data-confirm="Desvincular a {{ link.customer.display_name }}? El historial se conserva.">
+                        {% csrf_token %}
+                        <input type="hidden" name="reason" value="Desvinculación autorizada">
+                        <button type="submit" class="btn btn-light btn-sm">Desvincular</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="empty-inline">Este vehículo aún no está vinculado a ningún cliente.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+{% endblock %}

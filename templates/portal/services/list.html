@@ -1,0 +1,33 @@
+{# ES: Renderiza la interfaz templates/portal/services/list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/services/list interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}{% if service_view == 'upcoming' %}Próximos servicios{% else %}Historial{% endif %}{% endblock %}
+{% block portal_heading %}{% if service_view == 'upcoming' %}Próximos servicios{% else %}Historial de servicios{% endif %}{% endblock %}
+{% block portal_lead %}{% if service_view == 'upcoming' %}Consulta citas y trabajos en curso para tus vehículos.{% else %}Revisa los mantenimientos y atenciones registrados para tus vehículos actuales.{% endif %}{% endblock %}
+{% block portal_content %}
+<form method="get" class="portal-filter-form" role="search" aria-label="Filtrar servicios">
+  {% if service_view %}<input type="hidden" name="view" value="{{ service_view }}">{% endif %}
+  {% for field in filter_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}</label>{% endfor %}
+  <div class="filter-actions"><button class="btn btn-secondary" type="submit">Filtrar</button>{% if request.GET.q or request.GET.status %}<a class="btn btn-light" href="{% url 'portal:service_list' %}">Limpiar</a>{% endif %}</div>
+</form>
+<section class="panel-card">
+  <div class="panel-header"><div><h2>{% if service_view == 'upcoming' %}Atenciones programadas{% else %}Mis atenciones{% endif %}</h2><p>{% if service_view == 'upcoming' %}Próximas citas y servicios actualmente en proceso.{% else %}Servicios finalizados o cancelados de tu expediente.{% endif %}</p></div></div>
+  <div class="portal-service-list">
+    {% for order in orders %}
+      <a class="portal-service-row" href="{% url 'portal:service_detail' order.pk %}">
+        <div><strong>{{ order.number }} · {{ order.vehicle }}</strong><span>{{ order.description|truncatechars:120 }}</span></div>
+        <div><span class="state state-{{ order.status }}">{{ order.get_status_display }}</span><small>{% if order.scheduled_at %}{{ order.scheduled_at|date:'d/m/Y H:i' }}{% elif order.completed_at %}{{ order.completed_at|date:'d/m/Y' }}{% elif order.cancelled_at %}{{ order.cancelled_at|date:'d/m/Y' }}{% else %}Fecha por confirmar{% endif %}</small></div>
+      </a>
+    {% empty %}
+      <div class="empty-state"><h3>Sin servicios disponibles</h3><p>{% if request.GET.q or request.GET.status %}No existen resultados para los filtros seleccionados.{% else %}Las atenciones de tus vehículos vinculados aparecerán aquí.{% endif %}</p></div>
+    {% endfor %}
+  </div>
+</section>
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar" aria-label="Paginación de servicios">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="?q={{ request.GET.q|urlencode }}&amp;status={{ request.GET.status|urlencode }}&amp;page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="?q={{ request.GET.q|urlencode }}&amp;status={{ request.GET.status|urlencode }}&amp;page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

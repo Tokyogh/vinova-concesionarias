@@ -1,0 +1,46 @@
+{# ES: Renderiza la interfaz templates/continuity/internal/restore_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/continuity/internal/restore_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Simulacro de restauración | Vinova Pro{% endblock %}
+{% block page_title %}Simulacro de restauración{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">{{ drill.public_id }} · {{ drill.environment }}</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'continuity:dashboard' %}">Volver</a>{% endblock %}
+{% block content %}
+  <section class="detail-grid two-columns">
+    <article class="panel-card">
+      <h2>Checklist</h2>
+      <div class="detail-list">
+        {% for item in drill.checklist %}
+          <div>
+            <span>{{ forloop.counter }}</span><strong>{% if item.done %}✓{% else %}○{% endif %}{{ item.step }}</strong>
+          </div>
+        {% endfor %}
+      </div>
+      <p>
+        <strong>Backup:</strong>
+        <a href="{% url 'continuity:backup_detail' drill.backup.public_id %}">{{ drill.backup.filename }}</a>
+      </p>
+      <p>
+        <strong>Estado:</strong>{{ drill.get_status_display }}</p>
+      <p>
+        <strong>Evidencia:</strong>
+        <code>{{ drill.evidence_hash|default:'Pendiente' }}</code>
+      </p>
+    </article>
+    <article class="panel-card">
+      <h2>Registrar resultado</h2>
+      {% if request.user.can_restore_continuity %}
+        <form method="post" action="{% url 'continuity:restore_complete' drill.public_id %}" class="stacked-form">
+          {% csrf_token %}
+          {% for field in result_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}</label>{% endfor %}<button class="btn btn-primary">Guardar resultado</button>
+        </form>
+      {% endif %}
+      <div class="privacy-note">
+        <strong>Resultado actual</strong>
+        <p>{{ drill.result_summary|default:'Sin resultado.' }}</p>
+      </div>
+    </article>
+  </section>
+{% endblock %}

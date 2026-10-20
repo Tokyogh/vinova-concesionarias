@@ -1,0 +1,54 @@
+{# ES: Renderiza la interfaz templates/continuity/internal/update_center; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/continuity/internal/update_center interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Actualizaciones | Vinova Pro{% endblock %}
+{% block page_title %}Actualizaciones{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Estado real de versión, compatibilidad y preparación del servidor.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'continuity:dashboard' %}">Backups y recuperación</a>{% endblock %}
+{% block content %}
+<section class="metric-grid" aria-label="Estado de actualización">
+  <article class="metric-card"><span>Versión instalada</span><strong>{{ lifecycle.product_version }}</strong></article>
+  <article class="metric-card"><span>Migraciones</span><strong>{% if lifecycle.database_migration_state.is_current %}Al día{% else %}Pendientes{% endif %}</strong><small>{{ lifecycle.database_migration_state.applied_count }} aplicadas</small></article>
+  <article class="metric-card"><span>Backup verificado</span><strong>{% if latest_verified_backup %}Disponible{% else %}Pendiente{% endif %}</strong>{% if latest_verified_backup %}<small>{{ latest_verified_backup.verified_at|date:'d/m/Y H:i' }}</small>{% endif %}</article>
+  <article class="metric-card"><span>Salud</span><strong>{% if all_healthy %}Operativa{% else %}Requiere atención{% endif %}</strong></article>
+</section>
+
+<section class="detail-grid two-columns">
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Release y preflight</h2><p>La verificación es read-only; Django no despliega ni controla Docker.</p></div></div>
+    {% if release_status.configured %}
+      <p><span class="state {% if release_status.ready %}state-verified{% else %}state-failed{% endif %}">{{ release_status.message }}</span></p>
+      <dl class="data-list">
+        {% if release_status.target_version %}<div><dt>Versión objetivo</dt><dd>{{ release_status.target_version }}</dd></div>{% endif %}
+        {% if release_status.channel %}<div><dt>Canal</dt><dd>{{ release_status.channel }}</dd></div>{% endif %}
+        {% if release_status.published_at %}<div><dt>Publicado</dt><dd>{{ release_status.published_at }}</dd></div>{% endif %}
+      </dl>
+      {% if release_status.checks %}<ul class="checklist">{% for check in release_status.checks %}<li><strong>{{ check.name }}</strong><span>{{ check.passed|yesno:'Correcto,Bloqueado' }} · {{ check.detail }}</span></li>{% endfor %}</ul>{% endif %}
+    {% else %}
+      <div class="privacy-note"><strong>No disponible</strong><p>{{ release_status.message }}</p></div>
+    {% endif %}
+  </article>
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Update Agent</h2><p>Componente externo al proceso web y único autorizado para coordinar el deployment layer.</p></div></div>
+    <dl class="data-list">
+      <div><dt>Conexión</dt><dd>{{ agent_status.connected|yesno:'Conectado,No configurado' }}</dd></div>
+      <div><dt>Estado</dt><dd>{{ agent_status.state_label|default:agent_status.state }}</dd></div>
+      {% if agent_status.target_version %}<div><dt>Objetivo</dt><dd>{{ agent_status.target_version }}</dd></div>{% endif %}
+      {% if agent_status.updated_at %}<div><dt>Actualizado</dt><dd>{{ agent_status.updated_at }}</dd></div>{% endif %}
+    </dl>
+    <p>{{ agent_status.message }}</p>
+  </article>
+</section>
+
+<section class="panel-card">
+  <div class="panel-header"><div><h2>Salud de la instalación</h2><p>Checks operativos saneados; no incluyen credenciales ni detalles sensibles.</p></div></div>
+  <div class="table-scroll"><table class="data-table"><thead><tr><th>Componente</th><th>Estado</th><th>Detalle</th></tr></thead><tbody>
+    {% for check in health_checks %}<tr><td>{{ check.name }}</td><td><span class="state {% if check.ok %}state-verified{% else %}state-failed{% endif %}">{{ check.ok|yesno:'Disponible,No disponible' }}</span></td><td>{{ check.detail }}</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+
+<section class="panel-card">
+  <h2>Política segura</h2>
+  <p>Canal, changelog e historial se mostrarán únicamente cuando el Release Service y el Update Agent publiquen datos verificables. No existe una acción web de actualización: ante un preflight inválido el proceso permanece detenido.</p>
+</section>
+{% endblock %}

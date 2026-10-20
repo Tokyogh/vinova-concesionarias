@@ -1,0 +1,65 @@
+{# ES: Renderiza la interfaz templates/portal/vehicles/detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/vehicles/detail interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}{{ vehicle_link.vehicle.model.name }}{% endblock %}
+{% block portal_heading %}{{ vehicle_link.vehicle.brand.name }} {{ vehicle_link.vehicle.model.name }}{% endblock %}
+{% block portal_lead %}Ficha privada de la unidad vinculada a tu expediente.{% endblock %}
+{% block portal_content %}
+<div class="portal-vehicle-tabs" data-portal-tabs role="tablist" aria-label="Detalle del vehículo">
+  <button id="vehicle-tab-summary" type="button" role="tab" aria-selected="true" aria-controls="vehicle-panel-summary">Resumen</button>
+  {% if portal_modules.post_sales %}<button id="vehicle-tab-history" type="button" role="tab" aria-selected="false" aria-controls="vehicle-panel-history" tabindex="-1">Historial</button>
+  <button id="vehicle-tab-maintenance" type="button" role="tab" aria-selected="false" aria-controls="vehicle-panel-maintenance" tabindex="-1">Mantenimiento</button>{% endif %}
+  <button id="vehicle-tab-documents" type="button" role="tab" aria-selected="false" aria-controls="vehicle-panel-documents" tabindex="-1">Documentación</button>
+</div>
+
+<section id="vehicle-panel-summary" role="tabpanel" aria-labelledby="vehicle-tab-summary">
+  <div class="portal-vehicle-detail">
+    <div class="portal-private-gallery">
+      {% for media in gallery %}
+        <figure{% if not forloop.first %} class="portal-gallery-secondary"{% endif %}><img src="{{ media.resource.file.url }}" alt="{{ media.alt_text|default:vehicle_link.vehicle }}"{% if not forloop.first %} loading="lazy"{% endif %} decoding="async">{% if media.title %}<figcaption>{{ media.title }}</figcaption>{% endif %}</figure>
+      {% empty %}<div class="vehicle-image-placeholder large" role="img" aria-label="Vehículo sin fotografía pública"></div>{% endfor %}
+    </div>
+    <article class="panel-card">
+      <span class="state state-ok">Vínculo activo</span>
+      <h2>{{ vehicle_link.vehicle.year }} {{ vehicle_link.vehicle.model.name }}{% if vehicle_link.vehicle.version %} {{ vehicle_link.vehicle.version }}{% endif %}</h2>
+      <dl class="data-list">
+        <div><dt>Placa</dt><dd>{{ vehicle_link.vehicle.plate|default:'No registrada' }}</dd></div>
+        <div><dt>VIN protegido</dt><dd>{{ masked_vin }}</dd></div>
+        <div><dt>Color</dt><dd>{{ vehicle_link.vehicle.color|default:'No registrado' }}</dd></div>
+        <div><dt>Kilometraje registrado</dt><dd>{% if vehicle_link.vehicle.mileage is not None %}{{ vehicle_link.vehicle.mileage }} km{% else %}No registrado{% endif %}</dd></div>
+        <div><dt>Sucursal</dt><dd>{{ vehicle_link.vehicle.branch.name|default:'No asignada' }}</dd></div>
+        <div><dt>Vinculación</dt><dd>{{ vehicle_link.linked_at|date:'d/m/Y H:i' }}</dd></div>
+      </dl>
+    </article>
+  </div>
+  <section class="panel-card portal-vehicle-specs">
+    <div class="panel-header"><div><h2>Ficha técnica</h2><p>Información registrada por la concesionaria.</p></div></div>
+    <div class="portal-spec-grid">
+      {% for part in vehicle_link.vehicle.part_specs.all %}<article><span class="eyebrow">{{ part.get_part_code_display }}</span><h3>{{ part.title }}</h3><p>{{ part.summary|default:part.description }}</p></article>
+      {% empty %}<div class="empty-state"><h3>Ficha en preparación</h3><p>La concesionaria todavía no ha publicado especificaciones adicionales.</p></div>{% endfor %}
+    </div>
+  </section>
+</section>
+
+{% if portal_modules.post_sales %}<section id="vehicle-panel-history" role="tabpanel" aria-labelledby="vehicle-tab-history" hidden>
+  <article class="panel-card"><div class="panel-header"><div><h2>Historial de servicios</h2><p>Atenciones finalizadas o canceladas para esta unidad.</p></div></div>
+    <div class="portal-service-list">{% for order in vehicle_service_history %}<a class="portal-service-row" href="{% url 'portal:service_detail' order.pk %}"><div><strong>{{ order.number }} · {{ order.description|truncatechars:70 }}</strong><span>{% if order.completed_at %}{{ order.completed_at|date:'d/m/Y' }}{% elif order.cancelled_at %}{{ order.cancelled_at|date:'d/m/Y' }}{% endif %}</span></div><span class="state state-{{ order.status }}">{{ order.get_status_display }}</span></a>{% empty %}<div class="empty-state"><h3>Sin historial</h3><p>No hay servicios registrados para este vehículo.</p></div>{% endfor %}</div>
+  </article>
+</section>
+
+<section id="vehicle-panel-maintenance" role="tabpanel" aria-labelledby="vehicle-tab-maintenance" hidden>
+  <article class="panel-card"><div class="panel-header"><div><h2>Próximo mantenimiento</h2><p>Fechas y kilometraje definidos por el equipo de postventa.</p></div></div>
+    <div class="portal-service-list">{% for order in vehicle_upcoming_services %}<a class="portal-service-row" href="{% url 'portal:service_detail' order.pk %}"><div><strong>{{ order.description|truncatechars:70 }}</strong><span>{% if order.scheduled_at %}{{ order.scheduled_at|date:'d/m/Y H:i' }}{% else %}Fecha por confirmar{% endif %}{% if order.next_service_mileage %} · {{ order.next_service_mileage }} km{% endif %}</span></div><span class="state state-{{ order.status }}">{{ order.get_status_display }}</span></a>{% empty %}<div class="empty-state"><h3>Sin mantenimiento pendiente</h3><p>La unidad no tiene atenciones próximas registradas.</p></div>{% endfor %}</div>
+  </article>
+</section>
+{% endif %}
+
+<section id="vehicle-panel-documents" role="tabpanel" aria-labelledby="vehicle-tab-documents" hidden>
+  <div class="portal-document-grid">
+    {% for document in vehicle_documents %}<article class="portal-document-card"><span class="eyebrow">{{ document.get_document_type_display }}</span><h3>{{ document.title }}</h3><a class="btn btn-secondary" href="{% url 'portal:document_detail' document.pk %}">Ver documento</a></article>{% endfor %}
+    {% for manual in vehicle_manuals %}<article class="portal-document-card"><span class="eyebrow">Manual</span><h3>{{ manual.title }}</h3><a class="btn btn-secondary" href="{% url 'portal:manual_download' manual.pk %}">Descargar</a></article>{% endfor %}
+    {% for invoice in vehicle_invoices %}<article class="portal-document-card"><span class="eyebrow">Factura</span><h3>{{ invoice.number }}</h3><a class="btn btn-secondary" href="{% url 'portal:invoice_detail' invoice.pk %}">Ver factura</a></article>{% endfor %}
+    {% if not vehicle_documents and not vehicle_manuals and not vehicle_invoices %}<div class="empty-state"><h3>Sin documentación</h3><p>No hay archivos publicados para esta unidad.</p></div>{% endif %}
+  </div>
+</section>
+{% endblock %}

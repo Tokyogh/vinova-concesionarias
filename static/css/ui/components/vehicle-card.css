@@ -1,0 +1,159 @@
+/* ES: Define estilos de static/css/ui/components/vehicle-card, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/components/vehicle-card styles, including states and responsive behavior. */
+/*
+   Card de vehiculo compartida por catalogo publico y resultados de busqueda. */
+
+.vehicle-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-16); }
+.public-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(282px, 1fr)); gap: var(--space-16); }
+
+.vehicle-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), transform var(--t-fast);
+}
+
+.vehicle-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.vehicle-image-wrap {
+  position: relative;
+  height: clamp(196px, 21vw, 232px);
+  overflow: hidden;
+  background: var(--media-slot-to);
+}
+
+.vehicle-image-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.vehicle-image-wrap .status-badge { position: absolute; top: var(--space-12); left: var(--space-12); z-index: 2; }
+
+/* Favorito: control de interfaz local (sin persistencia en servidor) */
+.vehicle-favorite {
+  position: absolute;
+  top: var(--space-12);
+  right: var(--space-12);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: var(--space-40);
+  height: var(--space-40);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, .92);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+}
+
+.vehicle-favorite svg { width: 20px; height: 20px; }
+.vehicle-favorite:hover { color: var(--danger); border-color: var(--danger); }
+.vehicle-favorite[aria-pressed="true"] { color: var(--danger); background: var(--surface); border-color: var(--danger); }
+.vehicle-favorite[aria-pressed="true"] svg { fill: currentColor; }
+
+[data-theme="dark"] .vehicle-favorite { background: rgba(16, 29, 46, .88); }
+
+.vehicle-image-placeholder {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-12);
+  width: 100%;
+  height: 100%;
+  padding: var(--space-16);
+  color: var(--text-muted);
+  text-align: center;
+  font-size: var(--fs-13);
+  background:
+    radial-gradient(120% 70% at 50% 120%, rgba(0, 107, 199, .12) 0%, rgba(14, 26, 42, 0) 62%),
+    linear-gradient(165deg, var(--media-slot-from) 0%, var(--media-slot-to) 100%);
+}
+
+/* ES: Las reglas de «.vehicle-image-placeholder::before» definen estado visual y adaptación sin alterar semántica. */
+/* EN: The «.vehicle-image-placeholder::before» rules define visual state and adaptation without changing semantics. */
+.vehicle-image-placeholder::before {
+  content: "";
+  display: block;
+  width: 84px;
+  height: 40px;
+  opacity: .72;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 30' fill='none' stroke='%237d91a8' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='32' cy='25.6' rx='25' ry='2' fill='%23000000' fill-opacity='.12' stroke='none'/%3E%3Cpath d='M6 22h3.6l4.6-6.4c1.8-2.4 4-3.1 6.6-3.1h4.1l2.3-6a3 3 0 0 1 2.9-2h6.1a3 3 0 0 1 2.9 2l2.3 6h4.1c2.6 0 4.8.7 6.6 3.1L54.4 22H58'/%3E%3Ccircle cx='17.5' cy='22.5' r='3'/%3E%3Ccircle cx='46.5' cy='22.5' r='3'/%3E%3Ccircle cx='17.5' cy='22.5' r='1.1' fill='%237d91a8' stroke='none'/%3E%3Ccircle cx='46.5' cy='22.5' r='1.1' fill='%237d91a8' stroke='none'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.vehicle-image-placeholder.large { min-height: 320px; border-radius: var(--radius); }
+
+.vehicle-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: var(--space-12);
+  padding: var(--space-16);
+}
+
+.vehicle-brand-label {
+  color: var(--text-muted);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.vehicle-name {
+  color: var(--text);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+}
+
+.vehicle-card-body > p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-14);
+  line-height: var(--lh-normal);
+}
+
+.vehicle-meta { display: flex; flex-wrap: wrap; gap: var(--space-8); margin: 0; }
+
+.vehicle-meta span {
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+}
+
+.vehicle-card-bottom { display: grid; gap: var(--space-12); margin-top: auto; }
+.vehicle-price-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); }
+
+.vehicle-price {
+  color: var(--text);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-normal);
+}
+
+.vehicle-price small {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.vehicle-details-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  color: var(--primary);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+}
+
+.vehicle-details-link:hover { color: var(--primary-hover); }

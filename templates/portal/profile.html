@@ -1,0 +1,41 @@
+{# ES: Renderiza la interfaz templates/portal/profile; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/profile interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}Perfil{% endblock %}
+{% block portal_heading %}Mi perfil{% endblock %}
+{% block portal_lead %}Actualiza tus canales de contacto. La identidad del expediente solo puede cambiarla personal autorizado.{% endblock %}
+{% block portal_content %}
+<section class="portal-grid">
+  <article class="panel-card">
+    <h2>Identidad verificada</h2>
+    <dl class="data-list">
+      <div><dt>Nombre</dt><dd>{{ portal_customer.display_name }}</dd></div>
+      <div><dt>Identificación</dt><dd>{{ portal_customer.identification_number|default:'No registrada' }}</dd></div>
+      <div><dt>Correo de acceso</dt><dd>{{ request.user.email }}</dd></div>
+      <div><dt>Estado</dt><dd>{{ portal_customer.get_status_display }}</dd></div>
+    </dl>
+    <p class="muted">Para corregir nombre, identificación o correo de acceso, contacta a la concesionaria.</p>
+  </article>
+  <article class="panel-card">
+    <h2>Fotografía</h2>
+    {% include 'components/avatar.html' with avatar_user=request.user avatar_size='avatar-profile' avatar_alt='Fotografía de perfil' %}
+    <form method="post" action="{% url 'accounts:avatar_update' %}" enctype="multipart/form-data" class="form-stack">
+      {% csrf_token %}
+      <label class="form-field"><span>{{ avatar_form.avatar.label }}</span>{{ avatar_form.avatar }}<small>{{ avatar_form.avatar.help_text }}</small></label>
+      <div class="module-actions">
+        <button class="btn btn-primary">Guardar fotografía</button>
+        {% if request.user.avatar %}<button class="btn btn-light" formaction="{% url 'accounts:avatar_delete' %}" formnovalidate>Eliminar</button>{% endif %}
+      </div>
+    </form>
+  </article>
+</section>
+<section class="panel-card portal-profile-form">
+  <div class="panel-header"><div><h2>Datos de contacto</h2><p>Estos datos ayudan a coordinar atención comercial y postventa. Solo el dato correspondiente al canal preferido es obligatorio.</p></div></div>
+  <form method="post" class="form-grid" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}<label class="form-field"><span>{{ field.label }}{% if field.field.required %} <b aria-hidden="true">*</b><span class="sr-only"> (obligatorio)</span>{% endif %}</span>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}
+    <div class="form-actions"><button class="btn btn-primary">Guardar cambios</button></div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,51 @@
+{# ES: Renderiza la interfaz templates/portal/services/detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/services/detail interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}{{ service_order.number }}{% endblock %}
+{% block portal_heading %}Orden {{ service_order.number }}{% endblock %}
+{% block portal_lead %}{{ service_order.vehicle }} · {{ service_order.get_status_display }}{% endblock %}
+{% block portal_content %}
+<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="{% url 'portal:service_list' %}">Servicios</a><span aria-hidden="true">/</span><span aria-current="page">{{ service_order.number }}</span></nav>
+<section class="portal-grid">
+  <article class="panel-card">
+    <h2>Atención registrada</h2>
+    <p>{{ service_order.description }}</p>
+    <dl class="data-list">
+      <div><dt>Estado</dt><dd>{{ service_order.get_status_display }}</dd></div>
+      <div><dt>Fecha programada</dt><dd>{{ service_order.scheduled_at|date:'d/m/Y H:i'|default:'Por confirmar' }}</dd></div>
+      <div><dt>Inicio</dt><dd>{{ service_order.started_at|date:'d/m/Y H:i'|default:'No iniciado' }}</dd></div>
+      <div><dt>Finalización</dt><dd>{{ service_order.completed_at|date:'d/m/Y H:i'|default:'No finalizado' }}</dd></div>
+      <div><dt>Kilometraje de recepción</dt><dd>{% if service_order.reception_mileage is not None %}{{ service_order.reception_mileage }} km{% else %}No registrado{% endif %}</dd></div>
+      <div><dt>Kilometraje de entrega</dt><dd>{% if service_order.delivery_mileage is not None %}{{ service_order.delivery_mileage }} km{% else %}No registrado{% endif %}</dd></div>
+      {% if service_order.cancellation_reason %}<div><dt>Motivo de cancelación</dt><dd>{{ service_order.cancellation_reason }}</dd></div>{% endif %}
+    </dl>
+  </article>
+  <article class="panel-card">
+    <h2>Diagnóstico y recomendación</h2>
+    <p>{{ service_order.diagnosis|default:'El diagnóstico todavía no ha sido publicado.'|linebreaksbr }}</p>
+    <dl class="data-list">
+      <div><dt>Próxima fecha sugerida</dt><dd>{{ service_order.next_service_date|date:'d/m/Y'|default:'Sin recomendación' }}</dd></div>
+      <div><dt>Próximo kilometraje sugerido</dt><dd>{% if service_order.next_service_mileage %}{{ service_order.next_service_mileage }} km{% else %}Sin recomendación{% endif %}</dd></div>
+    </dl>
+    <p class="muted">Las recomendaciones son registradas manualmente por el taller; no generan recordatorios automáticos.</p>
+  </article>
+</section>
+
+<section class="panel-card">
+  <h2>Trabajos y repuestos</h2>
+  <div class="table-responsive">
+    <table class="data-table"><thead><tr><th>Tipo</th><th>Descripción</th><th>Cantidad</th></tr></thead><tbody>
+      {% for line in service_order.lines.all %}<tr><td>{{ line.get_line_type_display }}</td><td>{{ line.description }}</td><td>{{ line.quantity }}</td></tr>
+      {% empty %}<tr><td colspan="3">No hay líneas publicadas para esta orden.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</section>
+
+<section class="panel-card">
+  <h2>Progreso</h2>
+  <ol class="portal-service-timeline">
+    {% for event in service_order.history.all %}<li><strong>{{ event.get_new_status_display }}</strong><span>{{ event.created_at|date:'d/m/Y H:i' }}</span>{% if event.note %}<p>{{ event.note }}</p>{% endif %}</li>
+    {% empty %}<li>Sin eventos adicionales.</li>{% endfor %}
+  </ol>
+</section>
+{% endblock %}

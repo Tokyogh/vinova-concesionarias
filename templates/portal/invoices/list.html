@@ -1,0 +1,30 @@
+{# ES: Renderiza la interfaz templates/portal/invoices/list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/invoices/list interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}Facturas{% endblock %}
+{% block portal_heading %}Mis facturas{% endblock %}
+{% block portal_lead %}Consulta los comprobantes emitidos para tu expediente. Esta sección no realiza trámites con el SRI.{% endblock %}
+{% block portal_content %}
+<form method="get" class="portal-filter-form" role="search" aria-label="Filtrar facturas">
+  {% for field in filter_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}</label>{% endfor %}
+  <div class="filter-actions"><button class="btn btn-secondary" type="submit">Filtrar</button>{% if request.GET.q or request.GET.status %}<a class="btn btn-light" href="{% url 'portal:invoice_list' %}">Limpiar</a>{% endif %}</div>
+</form>
+<section class="panel-card">
+  <div class="panel-header"><div><h2>Comprobantes</h2><p>Facturas, proformas y recibos internos publicados por VINOVA.</p></div></div>
+  <div class="portal-invoice-list">
+    {% for invoice in invoices %}
+      <a class="portal-invoice-row" href="{% url 'portal:invoice_detail' invoice.pk %}">
+        <div><strong>{{ invoice.number }}</strong><span>{{ invoice.get_invoice_type_display }} · {{ invoice.issue_date|date:'d/m/Y' }}</span></div>
+        <div><strong>{{ invoice.currency }} {{ invoice.total }}</strong><span class="state state-invoice-{{ invoice.status }}">{{ invoice.get_status_display }}</span></div>
+      </a>
+    {% empty %}<div class="empty-state"><h3>Sin comprobantes</h3><p>Las facturas emitidas para tu expediente aparecerán aquí.</p></div>{% endfor %}
+  </div>
+</section>
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar" aria-label="Paginación de facturas">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="?q={{ request.GET.q|urlencode }}&amp;status={{ request.GET.status|urlencode }}&amp;page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="?q={{ request.GET.q|urlencode }}&amp;status={{ request.GET.status|urlencode }}&amp;page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

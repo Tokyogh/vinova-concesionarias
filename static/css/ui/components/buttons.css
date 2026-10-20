@@ -1,0 +1,32 @@
+/* ES: Define estilos de static/css/ui/components/buttons, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/components/buttons styles, including states and responsive behavior. */
+/*
+   Botones.
+   Depende de core/tokens.css. */
+
+/* --- Buttons --- */
+.btn {
+  border: 1px solid transparent; border-radius: var(--radius); padding: 0 var(--space-20);
+  min-height: var(--control-h);
+  cursor: pointer; font-weight: var(--fw-semibold); font-family: var(--font); font-size: var(--fs-14);
+  letter-spacing: var(--tracking-normal);
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--space-8); line-height: 1.2; white-space: nowrap; user-select: none;
+  text-decoration: none;
+}
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-primary {
+  color: var(--on-primary);
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+[data-theme="dark"] .btn-primary { color: var(--on-primary); }
+.btn-secondary { color: var(--primary); background: var(--primary-soft); border-color: transparent; }
+.btn-secondary:hover { background: var(--primary-soft-2); }
+.btn-light { color: var(--text-2); background: var(--surface); border-color: var(--border); }
+.btn-light:hover { background: var(--surface-2); border-color: var(--border-strong); color: var(--text); }
+.btn-danger { color: #fff; background: var(--danger); border-color: var(--danger); }
+.btn.full { width: 100%; }
+.btn-small { padding: 0 var(--space-12); min-height: var(--control-h-sm); font-size: var(--fs-13); border-radius: var(--radius-sm); }

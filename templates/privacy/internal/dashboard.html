@@ -1,0 +1,99 @@
+{# ES: Renderiza la interfaz templates/privacy/internal/dashboard; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/privacy/internal/dashboard interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Protección de datos | Vinova Pro{% endblock %}
+{% block page_title %}Protección de datos personales{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">Consentimientos, solicitudes de titulares, exportación, retención y anonimización controlada.</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'privacy:consent_list' %}">Consentimientos</a><a class="btn btn-light" href="{% url 'privacy:retention_list' %}">Retención</a>{% if request.user.can_manage_privacy %}<a class="btn btn-primary" href="{% url 'privacy:request_create' %}">Nueva solicitud</a>{% endif %}
+{% endblock %}
+{% block content %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="metric-grid">
+    <article class="metric-card">
+      <span>Solicitudes</span><strong>{{ metrics.requests_total }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Abiertas</span><strong>{{ metrics.requests_open }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Identidad pendiente</span><strong>{{ metrics.identity_pending }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Vencidas</span><strong>{{ metrics.overdue }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Consentimientos activos</span><strong>{{ metrics.consents_active }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Exportaciones vigentes</span><strong>{{ metrics.exports_active }}</strong>
+    </article>
+  </section>
+  <section class="panel-card table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Solicitudes recientes</h2>
+        <p>Las acciones sensibles requieren verificación de identidad y permisos específicos.</p>
+      </div>
+      <a class="btn btn-light" href="{% url 'privacy:request_list' %}">Ver todas</a>
+    </div>
+    <div class="table-scroll">
+      {# ES: La tabla siguiente presenta datos previamente filtrados por permisos y alcance. #}
+      {# EN: The following table renders data already filtered by permissions and scope. #}
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Solicitante</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Cliente</th>
+            <th>Responsable</th>
+            <th>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in recent_requests %}
+            <tr>
+              <td>{{ item.received_at|date:'d/m/Y H:i' }}</td>
+              <td>{{ item.requester_name }}<span class="table-subtext">{{ item.requester_email|default:item.requester_phone }}</span>
+              </td>
+              <td>{{ item.get_request_type_display }}</td>
+              <td>{{ item.get_status_display }}</td>
+              <td>{{ item.customer|default:'Sin relacionar' }}</td>
+              <td>{{ item.assigned_to|default:'Sin asignar' }}</td>
+              <td>
+                <a class="btn btn-light btn-small" href="{% url 'privacy:request_detail' item.public_id %}">Abrir</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7">No existen solicitudes.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="detail-grid two-columns">
+    <article class="panel-card">
+      <h2>Principios operativos</h2>
+      <ul>
+        <li>Acceso mínimo por rol.</li>
+        <li>Exportaciones privadas con SHA-256 y vencimiento.</li>
+        <li>Anonimización solo después de aprobación.</li>
+        <li>Documentos sujetos a retención no se eliminan automáticamente.</li>
+        <li>Todas las acciones quedan auditadas.</li>
+      </ul>
+    </article>
+    <article class="panel-card">
+      <h2>Canal público</h2>
+      <p>La empresa puede compartir esta ruta con sus clientes:</p>
+      <code class="json-snippet">/privacy/request/</code>
+      <p>El formulario no entrega datos automáticamente; crea un caso con identidad pendiente.</p>
+    </article>
+  </section>
+{% endblock %}

@@ -1,0 +1,181 @@
+/* ES: Define estilos de static/css/ui/components/forms, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/components/forms styles, including states and responsive behavior. */
+/*
+   Sistema compartido de controles de formulario.
+   Estados: default · hover · focus-visible · active · disabled · readonly · error · success.
+   Depende de core/tokens.css (tokens --control-*). */
+
+/* --- Campo base (texto, email, password, number, search, tel, url, date, datetime, select, textarea) --- */
+input[type="text"], input[type="email"], input[type="password"], input[type="number"],
+input[type="search"], input[type="tel"], input[type="url"], input[type="date"],
+input[type="datetime-local"], select, textarea, .form-control, .searchable-select-input {
+  width: 100%; border: 1px solid var(--control-border); border-radius: var(--radius);
+  min-height: var(--control-h);
+  padding: var(--space-8) var(--space-12); background: var(--control-bg); color: var(--text);
+  font-family: var(--font); font-size: var(--fs-14); box-sizing: border-box;
+  transition: background-color var(--t-fast) var(--ease-out),
+              border-color var(--t-fast) var(--ease-out),
+              box-shadow var(--t-fast) var(--ease-out),
+              color var(--t-fast) var(--ease-out);
+}
+
+/* --- Hover --- */
+input[type="text"]:hover:not(:disabled):not([readonly]), input[type="email"]:hover:not(:disabled):not([readonly]),
+input[type="password"]:hover:not(:disabled):not([readonly]), input[type="number"]:hover:not(:disabled):not([readonly]),
+input[type="search"]:hover:not(:disabled):not([readonly]), input[type="tel"]:hover:not(:disabled):not([readonly]),
+input[type="url"]:hover:not(:disabled):not([readonly]), input[type="date"]:hover:not(:disabled):not([readonly]),
+input[type="datetime-local"]:hover:not(:disabled):not([readonly]), select:hover:not(:disabled):not([readonly]),
+textarea:hover:not(:disabled):not([readonly]), .form-control:hover:not(:disabled):not([readonly]),
+.searchable-select-input:hover:not(:disabled):not([readonly]) {
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+}
+
+/* --- Focus: visible solo por teclado; borde primario + anillo --- */
+input:focus-visible, select:focus-visible, textarea:focus-visible,
+.form-control:focus-visible, .searchable-select-input:focus-visible {
+  outline: none; border-color: var(--primary); box-shadow: var(--control-focus-ring);
+  background: var(--control-bg);
+}
+
+/* --- Active (presionado) --- */
+input:active:not(:disabled), select:active:not(:disabled), textarea:active:not(:disabled) {
+  border-color: var(--primary-2);
+}
+
+/* --- Disabled --- */
+input:disabled, select:disabled, textarea:disabled, .form-control:disabled, .searchable-select-input:disabled {
+  background: var(--control-bg-disabled);
+  border-color: var(--control-border);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: .85;
+}
+
+/* --- Readonly --- */
+input[readonly], textarea[readonly], select[readonly] {
+  background: var(--control-bg-readonly);
+  border-style: dashed;
+  color: var(--text-2);
+  cursor: default;
+}
+
+/* --- Placeholder --- */
+input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 1; }
+
+/* --- Selección de texto --- */
+input::selection, textarea::selection { background: var(--primary-soft-2); color: var(--text); }
+
+/* --- Error --- */
+input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"],
+.form-control.is-invalid, .searchable-select-input.is-invalid,
+input.is-invalid, select.is-invalid, textarea.is-invalid {
+  border-color: var(--control-error-border);
+  background: var(--control-error-bg);
+}
+input[aria-invalid="true"]:focus-visible, select[aria-invalid="true"]:focus-visible,
+textarea[aria-invalid="true"]:focus-visible, .form-control.is-invalid:focus-visible,
+input.is-invalid:focus-visible, select.is-invalid:focus-visible, textarea.is-invalid:focus-visible {
+  box-shadow: var(--control-error-ring);
+  border-color: var(--control-error-border);
+}
+
+/* --- Success --- */
+input.is-valid, select.is-valid, textarea.is-valid,
+.form-control.is-valid, .searchable-select-input.is-valid {
+  border-color: var(--control-success-border);
+  background: var(--control-success-bg);
+}
+input.is-valid:focus-visible, select.is-valid:focus-visible, textarea.is-valid:focus-visible,
+/* ES: Las reglas de «.form-control.is-valid:focus-visible» definen estado visual y adaptación sin alterar semántica. */
+/* EN: The «.form-control.is-valid:focus-visible» rules define visual state and adaptation without changing semantics. */
+.form-control.is-valid:focus-visible {
+  box-shadow: var(--control-success-ring);
+}
+
+.field-error, .form-error { color: var(--danger); font-weight: var(--fw-semibold); font-size: var(--fs-13); }
+.form-help, .help-text { color: var(--text-muted); font-size: var(--fs-13); }
+
+/* --- Etiquetas y estructura --- */
+label { font-weight: var(--fw-semibold); color: var(--text); font-size: var(--fs-14); }
+.form-stack { display: grid; gap: var(--space-16); }
+.form-stack label { display: grid; gap: var(--space-8); }
+.form-field { display: grid; gap: var(--space-8); }
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-16); }
+.form-actions { display: flex; gap: var(--space-12); flex-wrap: wrap; margin-top: var(--space-8); }
+.stacked-form { display: grid; gap: var(--space-16); }
+.inline-form { display: flex; gap: var(--space-12); align-items: end; flex-wrap: wrap; }
+.form-panel, .form-panel-wide { padding: var(--space-24); }
+select[multiple] { min-height: 140px; }
+.searchable-select-wrap { display: grid; gap: var(--space-8); width: 100%; }
+.searchable-select-help { color: var(--text-muted); font-size: var(--fs-13); }
+
+/* --- Checkbox y radio nativos con accent tokenizado (Light/Dark) --- */
+input[type="checkbox"], input[type="radio"] {
+  width: 17px; height: 17px; margin: 0;
+  accent-color: var(--control-accent);
+  cursor: pointer;
+  flex: none;
+}
+input[type="checkbox"]:disabled, input[type="radio"]:disabled { cursor: not-allowed; opacity: .6; }
+input[type="checkbox"]:focus-visible, input[type="radio"]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* --- Campo checkbox/radio con etiqueta en línea --- */
+.checkbox-field, .radio-field {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center; gap: var(--space-10);
+}
+.checkbox-field > span, .radio-field > span { font-weight: var(--fw-medium); color: var(--text-2); }
+.checkbox-field small, .checkbox-field .field-error { grid-column: 2; }
+
+/* --- Switch accesible (nativo + track) --- */
+.switch {
+  position: relative;
+  display: inline-flex; align-items: center;
+  width: 46px; height: 26px; flex: none;
+}
+.switch input[type="checkbox"] {
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%; margin: 0; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  background: transparent; border: 0; border-radius: 0;
+}
+.switch input[type="checkbox"]::-webkit-slider-thumb, .switch input[type="checkbox"]::-moz-range-thumb { display: none; }
+.switch-track {
+  position: absolute; inset: 0;
+  border-radius: var(--radius-pill);
+  background: var(--control-track);
+  transition: background var(--t-fast) var(--ease-out);
+  pointer-events: none;
+}
+.switch-track::after {
+  content: "";
+  position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--control-knob);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--t-fast) var(--ease-out);
+}
+.switch input[type="checkbox"]:checked + .switch-track { background: var(--control-track-checked); }
+.switch input[type="checkbox"]:checked + .switch-track::after { transform: translateX(20px); }
+.switch input[type="checkbox"]:focus-visible + .switch-track {
+  outline: 2px solid var(--primary); outline-offset: 2px;
+}
+.switch input[type="checkbox"]:hover:not(:disabled) + .switch-track { background: var(--control-border-hover); }
+.switch input[type="checkbox"]:hover:not(:disabled):checked + .switch-track { background: var(--primary-hover); }
+.switch input[type="checkbox"]:disabled { cursor: not-allowed; }
+.switch input[type="checkbox"]:disabled + .switch-track { opacity: .55; cursor: not-allowed; }
+
+/* --- Archivo (file) --- */
+.form-field input[type="file"] { border-style: dashed; border-color: var(--control-border-hover); }
+.form-field input[type="file"]::file-selector-button {
+  border: 0; border-radius: var(--radius-sm); background: var(--primary); color: var(--on-primary);
+  padding: var(--space-8) var(--space-14); margin-right: var(--space-12);
+  font-weight: var(--fw-semibold); cursor: pointer; font-family: var(--font);
+}
+.form-field input[type="file"]:hover::file-selector-button { background: var(--primary-hover); }
+.form-field input[type="file"]:disabled::file-selector-button { cursor: not-allowed; opacity: .6; }

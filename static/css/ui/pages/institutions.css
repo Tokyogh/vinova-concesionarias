@@ -1,0 +1,126 @@
+/* ES: Define estilos de static/css/ui/pages/institutions, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/pages/institutions styles, including states and responsive behavior. */
+.institutions-page {
+  width: min(1520px, 100%);
+  margin: 0 auto;
+  padding: 24px var(--container-gutter) 48px;
+  background: radial-gradient(circle at 15% 10%, var(--primary-soft), transparent 28%);
+}
+.institution-selector { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-bottom: 30px; }
+.institution-type-card {
+  --type-color: var(--primary);
+  position: relative; isolation: isolate; display: grid; grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: start; gap: 16px; min-height: 198px; padding: 24px; overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--type-color) 42%, var(--border)); border-radius: var(--radius-xl);
+  color: #fff; text-decoration: none; box-shadow: var(--shadow-lg); transition: transform var(--t), border-color var(--t), box-shadow var(--t);
+}
+.institution-type-card::before { content: ""; position: absolute; inset: 0; z-index: -2; background-position: 72% center; background-size: cover; transition: transform var(--t-slow); }
+.institution-type-card::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(7, 31, 55, .96), rgba(9, 58, 91, .78) 48%, rgba(8, 65, 101, .18)); }
+.institution-type-card.type-institution::before { background-image: url('../../../img/institutions/card-institutions.webp'); }
+.institution-type-card.type-dealer::before { background-image: url('../../../img/institutions/card-dealerships.webp'); }
+.institution-type-card.type-care::before { background-image: url('../../../img/institutions/card-service-centers.webp'); }
+.institution-type-card.type-dealer { --type-color: var(--accent); }
+.institution-type-card.type-care { --type-color: var(--info); }
+.institution-type-card:hover, .institution-type-card.active { transform: translateY(-3px); border-color: var(--type-color); box-shadow: 0 22px 46px rgba(11, 75, 113, .2); }
+.institution-type-card:hover::before, .institution-type-card.active::before { transform: scale(1.045); }
+.institution-type-icon { display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid rgba(255,255,255,.32); border-radius: 15px; background: rgba(255,255,255,.14); }
+.institution-type-icon svg { width: 24px; height: 24px; }
+.institution-type-content, .institution-type-card > em { position: relative; z-index: 1; }
+.institution-type-content > strong { display: block; margin-bottom: 10px; color: #fff; font-size: var(--fs-16); }
+.institution-type-content > p { max-width: 38ch; margin: 0 0 22px; color: rgba(255,255,255,.82); font-size: var(--fs-13); line-height: 1.55; }
+.institution-type-content > span { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 14px; border: 1px solid rgba(255,255,255,.25); border-radius: 10px; background: rgba(5,30,49,.56); color: #fff; font-size: var(--fs-12); font-weight: var(--fw-bold); }
+.institution-type-card > em { display: grid; place-items: center; min-width: 38px; height: 30px; border: 1px solid rgba(255,255,255,.28); border-radius: var(--radius-pill); background: rgba(255,255,255,.14); color: #fff; font-size: var(--fs-12); font-style: normal; font-weight: var(--fw-bold); }
+.institutions-heading { margin-bottom: 14px; }
+.institutions-heading > span { color: var(--primary); font-size: var(--fs-11); font-weight: var(--fw-bold); letter-spacing: .14em; }
+.institutions-heading h1 { margin: 6px 0; color: var(--text); font-size: clamp(var(--fs-24), 2.2vw, var(--fs-32)); letter-spacing: -.03em; }
+.institutions-heading p { margin: 0; color: var(--text-muted); font-size: var(--fs-14); }
+.institutions-tools { display: grid; grid-template-columns: minmax(300px, 1fr) 240px auto; align-items: center; gap: 12px; margin-bottom: 14px; }
+.institutions-search, .institutions-tools select { min-height: 44px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); }
+.institutions-search { display: flex; align-items: center; gap: 10px; padding: 0 14px; }
+.institutions-search:focus-within { border-color: var(--primary); box-shadow: var(--shadow-focus); }
+.institutions-search svg { flex: 0 0 auto; width: 17px; height: 17px; color: var(--primary); }
+.institutions-search input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); }
+.institutions-tools select { padding: 0 12px; }
+.institutions-clear-filters { min-height: 44px; white-space: nowrap; }
+.institutions-clear-filters[hidden] { display: none; }
+.institutions-grid { display: grid; grid-template-columns: minmax(290px, .58fr) minmax(420px, 1.2fr) minmax(310px, .72fr); align-items: stretch; gap: 14px; }
+.institutions-list, .institution-detail-panel, .institutions-map { min-width: 0; min-height: 560px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-md); }
+.institutions-list { display: flex; flex-direction: column; gap: 11px; max-height: 680px; padding: 12px; overflow: auto; }
+.institution-list-card { --item-color: var(--primary); position: relative; display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; gap: 12px; padding: 10px; border: 1px solid var(--border-soft); border-radius: 12px; background: var(--surface-2); cursor: pointer; transition: border-color var(--t), transform var(--t), background var(--t); }
+.institution-list-card[data-type="dealership"] { --item-color: var(--accent); }
+.institution-list-card[data-type="service_center"] { --item-color: var(--info); }
+.institution-list-card:hover, .institution-list-card.active { border-color: color-mix(in srgb, var(--item-color) 68%, var(--border)); background: color-mix(in srgb, var(--item-color) 7%, var(--surface)); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.institution-list-card:focus-visible { outline: 2px solid var(--item-color); outline-offset: 2px; }
+.institution-thumb { width: 84px; height: 74px; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-3); }
+.institution-thumb img, .institution-detail-image img { width: 100%; height: 100%; object-fit: cover; }
+.institution-list-info { min-width: 0; }
+.institution-list-info > strong { display: block; margin-bottom: 4px; color: var(--text); font-size: var(--fs-13); }
+.institution-list-info > span { display: inline-flex; margin-bottom: 7px; color: var(--item-color); font-size: var(--fs-11); font-weight: var(--fw-bold); }
+.institution-list-info small { display: flex; align-items: center; gap: 5px; margin-top: 4px; overflow: hidden; color: var(--text-muted); font-size: var(--fs-11); line-height: 1.3; text-overflow: ellipsis; }
+.institution-list-info small svg { flex: 0 0 auto; width: 12px; height: 12px; color: var(--item-color); }
+.institution-list-card > em { color: var(--item-color); font-size: var(--fs-11); font-style: normal; font-weight: var(--fw-bold); }
+.institutions-map { position: relative; overflow: hidden; background: linear-gradient(135deg, var(--bg-blue), var(--surface-3)); }
+/* ES: Las reglas de «.institutions-real-map» definen estado visual y adaptación sin alterar semántica. */
+/* EN: The «.institutions-real-map» rules define visual state and adaptation without changing semantics. */
+.institutions-real-map { width: 100%; height: 100%; min-height: 560px; }
+.institutions-map-fallback { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; padding: 32px; background: radial-gradient(circle at 50% 45%, var(--primary-soft), transparent 52%), repeating-linear-gradient(45deg, transparent 0 32px, color-mix(in srgb, var(--border) 42%, transparent) 33px 34px); color: var(--text); text-align: center; }
+.institutions-map-fallback[hidden] { display: none; }
+.institutions-map-fallback svg { width: 52px; height: 52px; color: var(--primary); }
+.institutions-map-fallback span { max-width: 34ch; color: var(--text-muted); font-size: var(--fs-13); line-height: 1.5; }
+.institution-detail-panel { overflow: hidden; }
+.institution-detail-card { position: relative; display: grid; align-content: start; gap: 12px; height: 100%; padding-bottom: 18px; }
+.institution-detail-card.is-hidden { display: none; }
+.institution-detail-close { position: absolute; z-index: 2; top: 12px; right: 12px; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid rgba(255,255,255,.5); border-radius: 50%; background: rgba(255,255,255,.9); color: var(--navy); font-size: 22px; cursor: pointer; }
+.institution-detail-image { width: 100%; height: 210px; overflow: hidden; background: var(--surface-3); }
+.institution-badge, .institution-detail-card > h2, .institution-detail-card > p, .institution-detail-card > h3, .institution-official, .institution-services, .institution-detail-info, .institution-detail-actions { margin-inline: 18px; }
+.institution-badge { justify-self: start; margin-top: 4px; padding: 5px 10px; border-radius: var(--radius-pill); background: var(--primary-soft); color: var(--primary-3); font-size: var(--fs-11); font-weight: var(--fw-bold); }
+.institution-detail-card > h2 { margin-top: 0; margin-bottom: 0; color: var(--text); font-size: var(--fs-20); }
+.institution-official { color: var(--primary); font-size: var(--fs-11); font-weight: var(--fw-bold); }
+.institution-detail-card > p { margin-top: 0; margin-bottom: 2px; color: var(--text-muted); font-size: var(--fs-13); line-height: 1.55; }
+.institution-detail-card > h3 { margin-top: 4px; margin-bottom: 0; color: var(--text); font-size: var(--fs-13); }
+.institution-services { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.institution-services span { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 8px; border: 1px solid var(--border-soft); border-radius: 9px; background: var(--surface-2); color: var(--text-2); font-size: var(--fs-11); }
+.institution-services b { color: var(--success); }
+.institution-detail-info { display: grid; margin-top: 2px; }
+.institution-detail-info div { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border-soft); }
+.institution-detail-info dt { color: var(--text-muted); font-size: var(--fs-11); font-weight: var(--fw-bold); }
+.institution-detail-info dd { margin: 0; overflow-wrap: anywhere; color: var(--text-2); font-size: var(--fs-11); }
+.institution-detail-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
+.institution-detail-actions .btn { flex: 1 1 110px; }
+.institutions-empty { display: grid; place-content: center; justify-items: center; min-height: 220px; padding: 24px; color: var(--text-muted); text-align: center; }
+.institutions-empty[hidden] { display: none; }
+.institutions-empty > span { color: var(--primary); font-size: 42px; }
+.institutions-empty h2 { margin: 8px 0 4px; color: var(--text); font-size: var(--fs-16); }
+.institutions-empty p { margin: 0; font-size: var(--fs-12); }
+.institution-detail-empty { place-content: center; justify-items: center; text-align: center; }
+.institution-detail-empty > span { color: var(--primary); font-size: 52px; }
+.vinova-map-marker { display: grid; place-items: center; width: 36px; height: 36px; border: 3px solid #fff; border-radius: 50% 50% 50% 8px; background: var(--primary); color: #fff; box-shadow: 0 8px 20px rgba(11,31,58,.3); transform: rotate(-45deg); cursor: pointer; }
+.vinova-map-marker > svg { width: 18px; height: 18px; transform: rotate(45deg); }
+.vinova-map-marker[data-type="dealership"] { background: var(--accent); }
+.vinova-map-marker[data-type="service_center"] { background: var(--info); }
+.vinova-map-marker.active { width: 42px; height: 42px; box-shadow: 0 0 0 5px rgba(0,107,199,.18), 0 10px 24px rgba(11,31,58,.32); }
+.institution-map-popup { display: grid; gap: 3px; max-width: 220px; color: #0b1f3a; }
+.institution-map-popup span, .institution-map-popup small { color: #52647a; }
+@media (max-width: 1200px) {
+  .institution-selector, .institutions-grid { grid-template-columns: minmax(0, 1fr); }
+  .institutions-list, .institution-detail-panel, .institutions-map { min-height: auto; }
+  .institutions-list { max-height: none; }
+  .institutions-map, .institutions-real-map { min-height: 420px; }
+  .institution-detail-card { height: auto; }
+}
+@media (max-width: 760px) {
+  .institutions-page { padding: 16px 12px 34px; }
+  .institution-selector { gap: 12px; }
+  .institution-type-card { grid-template-columns: 44px minmax(0, 1fr); min-height: 180px; padding: 18px; }
+  .institution-type-icon { width: 42px; height: 42px; }
+  .institution-type-card > em { grid-column: 1 / -1; justify-self: start; }
+  .institutions-tools { grid-template-columns: minmax(0, 1fr); }
+  .institution-list-card { grid-template-columns: 72px minmax(0, 1fr); }
+  .institution-thumb { width: 72px; height: 68px; }
+  .institution-list-card > em { grid-column: 1 / -1; }
+  .institutions-map, .institutions-real-map { min-height: 360px; }
+  .institution-services { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .institution-type-card, .institution-type-card::before, .institution-list-card { transition: none; }
+}

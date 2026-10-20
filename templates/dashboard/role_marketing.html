@@ -1,0 +1,22 @@
+{# ES: Renderiza la interfaz templates/dashboard/role_marketing; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/role_marketing interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Dashboard catálogo | Vinova Pro{% endblock %}
+{% block page_title %}Dashboard catálogo y marketing{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Vista para administrar presentación comercial, vehículos publicables y recursos multimedia reutilizables.</p>{% endblock %}
+{% block topbar_actions %}{% if request.user.can_view_analytics %}<a class="btn btn-light" href="{% url 'analytics_internal:home' %}">Analítica</a>{% endif %}<a class="btn btn-primary" href="{% url 'vehicles_internal:create' %}">Nuevo vehículo</a>{% endblock %}
+{% block content %}
+<section class="role-dashboard-hero marketing-hero"><div><span>Catálogo y marketing</span><h2>Contenido comercial controlado</h2><p>Este panel se centra en catálogo, imágenes, modelos 3D, videos y recursos reutilizables.</p></div></section>
+<section class="metric-grid role-metric-grid">
+  <article class="metric-card"><span>Publicados</span><strong>{{ metrics.published }}</strong></article>
+  <article class="metric-card"><span>Destacados</span><strong>{{ metrics.featured }}</strong></article>
+  <article class="metric-card"><span>Disponibles</span><strong>{{ metrics.available }}</strong></article>
+  <article class="metric-card"><span>Recursos</span><strong>{{ metrics.assets }}</strong></article>
+  <article class="metric-card"><span>Leads web</span><strong>{{ metrics.web_leads }}</strong></article>
+  <article class="metric-card"><span>Interacciones</span><strong>{{ metrics.interactions }}</strong></article>
+</section>
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Vehículos destacados</h2><div class="compact-row-list">{% for vehicle in featured_vehicles %}<a class="compact-row" href="{% url 'vehicles_internal:detail' vehicle.pk %}"><strong>{{ vehicle.brand.name }} {{ vehicle.model.name }} {{ vehicle.year }}</strong><span>{{ vehicle.get_status_display }} · {{ vehicle.branch|default:'Sin sucursal' }}</span></a>{% empty %}<p class="muted">Sin vehículos destacados.</p>{% endfor %}</div></article>
+  <article class="panel-card"><h2>Recursos recientes</h2>{% include 'dashboard/snippets/asset_rows.html' with assets=recent_assets empty_text='Sin recursos recientes.' %}</article>
+</section>
+{% endblock %}

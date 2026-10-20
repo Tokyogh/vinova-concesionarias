@@ -1,0 +1,41 @@
+{# ES: Detalle administrativo de una sede y su configuración pública. #}
+{# EN: Administrative branch detail and its public configuration. #}
+
+{% extends 'base/base.html' %}
+{% block title %}{{ branch.name }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ branch.name }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">{{ branch.get_branch_type_display }} · {{ branch.city }} · {{ branch.company.commercial_name }}</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'institutions:list' %}" target="_blank" rel="noopener">Ver directorio público</a><a class="btn btn-primary" href="{% url 'branches:update' branch.pk %}">Editar sucursal</a>{% endblock %}
+{% block content %}
+<section class="detail-grid two-columns">
+  <article class="panel-card">
+    <h2>Datos de la sede</h2>
+    <dl class="spec-list">
+      <div><dt>Empresa</dt><dd>{{ branch.company.commercial_name }}</dd></div>
+      <div><dt>Código</dt><dd>{{ branch.code }}</dd></div>
+      <div><dt>Tipo</dt><dd>{{ branch.get_branch_type_display }}</dd></div>
+      <div><dt>Ciudad</dt><dd>{{ branch.city }}</dd></div>
+      <div><dt>Provincia</dt><dd>{{ branch.province|default:'No definida' }}</dd></div>
+      <div><dt>Correo</dt><dd>{{ branch.email|default:'No definido' }}</dd></div>
+      <div><dt>Teléfono</dt><dd>{{ branch.phone|default:'No definido' }}</dd></div>
+      <div><dt>Visible público</dt><dd>{% if branch.is_public %}Sí{% else %}No{% endif %}</dd></div>
+      <div><dt>Estado</dt><dd>{% if branch.is_active %}Activa{% else %}Inactiva{% endif %}</dd></div>
+      <div><dt>Horario público</dt><dd>{{ branch.opening_hours|default:'No definido' }}</dd></div>
+      <div><dt>Sitio web</dt><dd>{% if branch.website_url %}<a href="{{ branch.website_url }}" target="_blank" rel="noopener noreferrer">Abrir sitio oficial</a>{% else %}No definido{% endif %}</dd></div>
+      <div><dt>Fotografía</dt><dd>{% if branch.photo %}Configurada{% else %}No definida{% endif %}</dd></div>
+      <div><dt>Coordenadas</dt><dd>{% if branch.has_map_coordinates %}{{ branch.latitude }}, {{ branch.longitude }}{% else %}No verificadas{% endif %}</dd></div>
+    </dl>
+  </article>
+  <article class="panel-card">
+    <h2>Trazabilidad operativa</h2>
+    <p class="muted">Esta sede puede asociarse a usuarios operativos, ventas, facturas, vehículos e inventario.</p>
+    <section class="metric-grid mini-metrics">
+      <article class="metric-card"><span>Usuarios directos</span><strong>{{ branch.user_count }}</strong></article>
+      <article class="metric-card"><span>Vehículos</span><strong>{{ branch.vehicle_count }}</strong></article>
+    </section>
+    <p>{{ branch.address|linebreaksbr }}</p>
+    {% if branch.description %}<p>{{ branch.description }}</p>{% endif %}
+    {% if branch.public_services %}<p class="muted">Servicios: {{ branch.public_services|join:', ' }}</p>{% endif %}
+  </article>
+</section>
+{% endblock %}

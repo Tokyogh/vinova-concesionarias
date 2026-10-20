@@ -1,0 +1,18 @@
+{# ES: Renderiza la interfaz templates/sri_integration/internal/sequence_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/sri_integration/internal/sequence_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Secuencia SRI | Vinova Pro{% endblock %}
+{% block page_title %}Secuencia de comprobante{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Configura el número actual y el rango de emisión previsto para cada tipo de documento.</p>{% endblock %}
+{% block content %}
+{% include 'enterprise/internal/_nav.html' %}
+<section class="panel-card form-panel enterprise-form-panel">
+  <form method="post" class="stacked-form enterprise-form-grid">
+    {% csrf_token %}
+    {% for field in form %}
+      <label class="form-field {% if field.name == 'notes' %}span-2{% endif %}"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}</label>
+    {% endfor %}
+    <div class="form-actions span-2"><button class="btn btn-primary">Guardar</button><a class="btn btn-light" href="{% url 'sri_integration:sequences' %}">Volver</a></div>
+  </form>
+</section>
+{% endblock %}

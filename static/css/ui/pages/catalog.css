@@ -1,0 +1,239 @@
+/* ES: Define estilos de static/css/ui/pages/catalog, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/pages/catalog styles, including states and responsive behavior. */
+/*
+   Catalogo publico: encabezado, barra de filtros compacta, sidebar de
+   categorias, contador + ordenamiento y grid de vehiculos. */
+
+.catalog-hero {
+  background:
+    radial-gradient(70% 120% at 12% 0%, var(--primary-soft) 0%, rgba(238, 246, 253, 0) 62%),
+    linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+}
+
+.catalog-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(420px, 1.1fr);
+  align-items: center;
+  gap: var(--space-32);
+  width: 100%;
+  max-width: calc(var(--container) + 2 * var(--container-gutter));
+  min-height: 250px;
+  margin-inline: auto;
+  padding: var(--space-24) var(--container-gutter);
+}
+
+.catalog-hero-text {
+  width: 100%;
+}
+
+.catalog-hero-media {
+  position: relative;
+  min-width: 0;
+  height: 202px;
+}
+
+.catalog-editorial {
+  position: absolute;
+  top: 50%;
+  width: 48%;
+  aspect-ratio: 4 / 3;
+  border: 3px solid var(--surface);
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  box-shadow: var(--shadow-md);
+}
+
+.catalog-editorial--blue { z-index: 1; left: 0; transform: translateY(-50%) rotate(-3deg); object-position: 48% center; }
+.catalog-editorial--silver { z-index: 3; left: 26%; transform: translateY(-50%); object-position: 52% center; }
+.catalog-editorial--dark { z-index: 2; right: 0; transform: translateY(-50%) rotate(3deg); object-position: 52% center; }
+
+@media (max-width: 900px) {
+  .catalog-hero-inner { grid-template-columns: minmax(0, 1fr); gap: var(--space-16); }
+  .catalog-hero-media { height: 176px; }
+  .catalog-editorial { width: 42%; }
+  .catalog-editorial--silver { left: 29%; }
+}
+
+@media (max-width: 520px) {
+  .catalog-hero-inner { min-height: 0; padding-block: var(--space-24); }
+  .catalog-hero-media { height: 132px; }
+  .catalog-editorial { border-width: 2px; border-radius: var(--radius-md); }
+}
+
+.catalog-hero h1 {
+  margin: 0 0 var(--space-12);
+  color: var(--text);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-normal);
+}
+
+.catalog-hero p { margin: 0; max-width: none; color: var(--text-2); font-size: var(--fs-16); line-height: var(--lh-relaxed); }
+
+/* =========================================
+   BARRA DE FILTROS — horizontal y compacta
+   ========================================= */
+.catalog-filters {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-16);
+  max-width: calc(var(--container) + 2 * var(--container-gutter));
+  margin: 0 auto var(--space-16);
+  padding: var(--space-12) var(--space-20);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.catalog-filter-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(132px, 1fr) minmax(132px, 1fr) minmax(120px, 0.9fr)
+    minmax(196px, 1.3fr) minmax(176px, 1.1fr) minmax(224px, 1.6fr) auto;
+  gap: var(--space-16);
+  align-items: end;
+}
+
+.filter-field { display: grid; gap: 6px; min-width: 0; }
+
+.filter-field > span {
+  color: var(--text-muted);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.filter-field select,
+.filter-field input { width: 100%; min-height: var(--control-h); }
+
+.filter-field-range .filter-range { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: var(--space-8); }
+
+.filter-range-sep { color: var(--text-muted); font-size: var(--fs-14); }
+
+.filter-field-search input { padding-inline: var(--space-12); }
+
+.catalog-filter-actions { display: flex; align-items: center; gap: var(--space-8); }
+/* ES: Las reglas de «.catalog-filter-actions .btn» definen estado visual y adaptación sin alterar semántica. */
+/* EN: The «.catalog-filter-actions .btn» rules define visual state and adaptation without changing semantics. */
+.catalog-filter-actions .btn { white-space: nowrap; }
+
+/* =========================================
+   SIDEBAR DE CATEGORIAS + RESULTADOS
+   ========================================= */
+.catalog-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: var(--space-24);
+  align-items: start;
+  max-width: calc(var(--container) + 2 * var(--container-gutter));
+  margin-inline: auto;
+  padding-inline: var(--container-gutter);
+}
+
+.catalog-sidebar {
+  position: sticky;
+  top: calc(var(--header-h) + var(--space-16));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-16);
+  padding: var(--space-20);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.catalog-sidebar-title {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.catalog-categories { display: grid; gap: var(--space-4); }
+
+.catalog-categories a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  min-height: var(--control-h);
+  padding: 0 var(--space-12);
+  border-radius: var(--radius);
+  color: var(--text-2);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+}
+
+.catalog-categories a span {
+  color: var(--text-muted);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+}
+
+.catalog-categories a:hover { background: var(--surface-2); color: var(--text); }
+
+.catalog-categories a.is-active {
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: var(--fw-semibold);
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+.catalog-categories a.is-active span { color: var(--primary); }
+.catalog-sidebar-cta { width: 100%; }
+
+.catalog-results { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-20); min-width: 0; }
+
+.catalog-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+  flex-wrap: wrap;
+}
+
+.catalog-count { margin: 0; color: var(--text-2); font-size: var(--fs-14); }
+.catalog-count strong { color: var(--text); font-weight: var(--fw-bold); }
+
+.catalog-order { display: inline-flex; align-items: center; gap: var(--space-8); }
+
+.catalog-order > span {
+  color: var(--text-muted);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+
+.catalog-order select { min-height: var(--control-h); min-width: 190px; }
+
+.catalog-empty {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--space-12);
+  justify-items: start;
+  padding: var(--space-48) var(--space-32);
+  text-align: left;
+}
+
+.catalog-empty strong { color: var(--text); font-size: var(--fs-18); }
+.catalog-empty p { margin: 0; max-width: 52ch; color: var(--text-muted); }
+
+.catalog-layout .public-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(236px, 100%), 1fr));
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+.catalog-layout .public-pagination {
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 0;
+}

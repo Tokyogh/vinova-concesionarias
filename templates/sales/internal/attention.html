@@ -1,0 +1,15 @@
+{# ES: Renderiza la interfaz templates/sales/internal/attention; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/sales/internal/attention interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Atención comercial | Vinova Pro{% endblock %}
+{% block page_title %}Atención comercial{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Cotizaciones vencidas y reservas expiradas para seguimiento del equipo comercial.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'sales_internal:list' %}">Volver a ventas</a>{% endblock %}
+{% block content %}
+<section class="panel-card table-panel">
+  <div class="panel-header"><div><h2>Operaciones que requieren gestión</h2><p>{{ page_obj.paginator.count }} resultado(s).</p></div></div>
+  <div class="responsive-table"><table class="data-table"><thead><tr><th>Número</th><th>Cliente</th><th>Motivo</th><th>Sucursal</th><th></th></tr></thead><tbody>
+  {% for sale in sales %}<tr><td><strong>{{ sale.number }}</strong><span class="table-subtext">{{ sale.get_status_display }}</span></td><td>{{ sale.customer.display_name }}</td><td>{% if sale.reserved_until %}Reserva hasta {{ sale.reserved_until|date:'d/m/Y H:i' }}{% else %}Cotización hasta {{ sale.valid_until|date:'d/m/Y' }}{% endif %}</td><td>{{ sale.branch.name }}</td><td class="table-actions-cell"><a class="btn btn-light btn-small" href="{% url 'sales_internal:detail' sale.pk %}">Gestionar</a></td></tr>{% empty %}<tr><td colspan="5">No hay operaciones vencidas por ahora.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

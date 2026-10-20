@@ -1,0 +1,44 @@
+{# ES: Renderiza la interfaz templates/documents/internal/document_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/documents/internal/document_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ document.title }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ document.title }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Detalle de documento privado y trazabilidad de descarga.</p>{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-light" href="{% url 'documents_internal:list' %}">Volver</a>
+  {% if request.user.can_manage_documents %}<a class="btn btn-primary" href="{% url 'documents_internal:update' document.pk %}">Editar</a>{% endif %}
+{% endblock %}
+{% block content %}
+<section class="detail-grid two-columns documents-detail-grid">
+  <article class="panel-card documents-summary-card">
+    <span class="eyebrow">{{ document.get_document_type_display }}</span>
+    <h2>{{ document.title }}</h2>
+    <p>{{ document.notes|linebreaksbr|default:'Sin notas internas.' }}</p>
+    <dl class="data-list">
+      <div><dt>Estado</dt><dd><span class="state state-document-{{ document.status }}">{{ document.get_status_display }}</span></dd></div>
+      <div><dt>Categoría</dt><dd>{{ document.category.name|default:'Sin categoría' }}</dd></div>
+      <div><dt>Confidencial</dt><dd>{% if document.is_confidential %}Sí{% else %}No{% endif %}</dd></div>
+      <div><dt>Vence</dt><dd>{{ document.expires_at|date:'d/m/Y'|default:'No aplica' }}</dd></div>
+    </dl>
+    <div class="action-row wrap">
+      {% if request.user.can_download_private_documents %}<a class="btn btn-secondary" href="{% url 'documents_internal:download' document.pk %}">Descargar protegido</a>{% endif %}
+      {% if request.user.can_manage_documents %}<form method="post" action="{% url 'documents_internal:archive' document.pk %}">{% csrf_token %}<button class="btn btn-danger">Archivar</button></form>{% endif %}
+    </div>
+  </article>
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Metadatos</h2><p>Información calculada del archivo cargado.</p></div></div>
+    <dl class="data-list">
+      <div><dt>Archivo</dt><dd>{{ document.original_name|default:'N/D' }}</dd></div>
+      <div><dt>Tamaño</dt><dd>{{ document.size_bytes|filesizeformat }}</dd></div>
+      <div><dt>Tipo MIME</dt><dd>{{ document.mime_type|default:'N/D' }}</dd></div>
+      <div><dt>Hash SHA-256</dt><dd class="hash-text">{{ document.file_hash|default:'N/D' }}</dd></div>
+      <div><dt>Sucursal</dt><dd>{{ document.branch.name|default:'Global' }}</dd></div>
+      <div><dt>Cliente</dt><dd>{{ document.customer.display_name|default:'No asociado' }}</dd></div>
+      <div><dt>Vehículo</dt><dd>{{ document.vehicle|default:'No asociado' }}</dd></div>
+      <div><dt>Venta</dt><dd>{{ document.sale.number|default:'No asociada' }}</dd></div>
+      <div><dt>Subido por</dt><dd>{{ document.uploaded_by.get_full_name|default:document.uploaded_by.username|default:'Sistema' }}</dd></div>
+      <div><dt>Última descarga</dt><dd>{{ document.last_downloaded_at|date:'d/m/Y H:i'|default:'Sin descargas' }}</dd></div>
+    </dl>
+  </article>
+</section>
+{% endblock %}

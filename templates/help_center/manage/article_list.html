@@ -1,0 +1,22 @@
+{# ES: Lista administrativa de artículos, estados y acciones bajo help.manage. #}
+{# EN: Administrative list of articles, states, and actions under help.manage. #}
+{% extends "base/base.html" %}
+{% block title %}Gestionar ayuda | Vinova Pro{% endblock %}
+{% block page_title %}Gestionar artículos de ayuda{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Contenido editable y versionado sin necesidad de desplegar código.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'help_center:home' %}">Centro de ayuda</a><a class="btn btn-primary" href="{% url 'help_center:manage_create' %}">Nuevo artículo</a>{% endblock %}
+{% block content %}
+<section class="panel-card table-panel">
+  <div class="responsive-table"><table class="data-table mobile-card-table">
+    <thead><tr><th>Artículo</th><th>Categoría</th><th>Tipo</th><th>Estado</th><th>Actualización</th><th>Acciones</th></tr></thead>
+    <tbody>{% for article in articles %}<tr>
+      <td data-label="Artículo"><strong>{{ article.title }}</strong><span class="table-subtext">{{ article.slug }}</span></td>
+      <td data-label="Categoría">{{ article.category.name }}</td>
+      <td data-label="Tipo">{{ article.get_article_type_display }}</td>
+      <td data-label="Estado"><span class="state {% if article.is_published %}state-ok{% else %}state-muted{% endif %}">{% if article.is_published %}Publicado{% else %}Borrador{% endif %}</span></td>
+      <td data-label="Actualización">{{ article.updated_at|date:'d/m/Y H:i' }}{% if article.updated_by %}<span class="table-subtext">{{ article.updated_by.get_full_name|default:article.updated_by.username }}</span>{% endif %}</td>
+      <td data-label="Acciones"><div class="action-row wrap"><a class="btn btn-light btn-sm" href="{% url 'help_center:manage_preview' article.pk %}">Previsualizar</a><a class="btn btn-secondary btn-sm" href="{% url 'help_center:manage_edit' article.pk %}">Editar</a><a class="btn btn-light btn-sm" href="{% url 'help_center:manage_history' article.pk %}">Versiones</a></div></td>
+    </tr>{% empty %}<tr class="empty-table-row"><td colspan="6">No hay artículos configurados.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

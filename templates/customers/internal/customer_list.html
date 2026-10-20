@@ -1,0 +1,65 @@
+{# ES: Renderiza la interfaz templates/customers/internal/customer_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/customers/internal/customer_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% load filter_ui %}
+{% block title %}Clientes internos | Vinova Pro{% endblock %}
+{% block page_title %}Clientes{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Gestión comercial de clientes, prospectos, empresas, intereses vehiculares y seguimiento interno.</p>{% endblock %}
+{% block topbar_actions %}
+  {% if request.user.can_manage_customers %}<a class="btn btn-primary" href="{% url 'customers_internal:create' %}">Nuevo cliente</a>{% endif %}
+{% endblock %}
+{% block content %}
+<section class="metric-grid customer-status-grid">
+  <article class="metric-card"><span>Total registrados</span><strong>{{ metrics.total }}</strong></article>
+  <article class="metric-card"><span>Prospectos</span><strong>{{ metrics.prospect }}</strong></article>
+  <article class="metric-card"><span>Activos / VIP</span><strong>{{ metrics.active }}</strong></article>
+  <article class="metric-card"><span>Con sucursal</span><strong>{{ metrics.with_branch }}</strong></article>
+</section>
+
+{% url 'customers_internal:list' as filter_clear_url %}
+{% vinova_filter_panel search_form filter_clear_url 'customers' common='q,status,sort' advanced='identification,first_name,last_name,email,phone,plate,vin,customer_type,branch' %}
+
+<section class="panel-card table-panel">
+  <div class="panel-header">
+    <div>
+      <h2>Base de clientes</h2>
+      <p>{{ page_obj.paginator.count }} resultado(s). Esta información no se expone en la web pública.</p>
+    </div>
+  </div>
+  <div class="responsive-table">
+    <table class="data-table mobile-card-table">
+      <thead>
+        <tr><th>Cliente</th><th>Identificación</th><th>Contacto</th><th>Sucursal / asesor</th><th>Estado</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for customer in customers %}
+          <tr>
+            <td data-label="Cliente">
+              <strong>{{ customer.display_name }}</strong>
+              <span class="table-subtext">{{ customer.get_customer_type_display }}{% if customer.city %} · {{ customer.city }}{% endif %}</span>
+            </td>
+            <td data-label="Identificación">{{ customer.identification_number|default:'No registrada' }}<span class="table-subtext">{{ customer.get_identification_type_display|default:'N/D' }}</span></td>
+            <td data-label="Contacto">{{ customer.primary_contact }}{% if customer.email %}<span class="table-subtext">{{ customer.email }}</span>{% endif %}</td>
+            <td data-label="Sucursal / asesor">
+              {% if customer.assigned_branch %}{{ customer.assigned_branch.name }}<span class="table-subtext">{{ customer.assigned_branch.city|default:customer.assigned_branch.company.commercial_name }}</span>{% else %}<span class="state state-warning">Sin sucursal</span>{% endif %}
+              {% if customer.assigned_advisor %}<span class="table-subtext">Asesor: {{ customer.assigned_advisor.get_full_name|default:customer.assigned_advisor.username }}</span>{% endif %}
+            </td>
+            <td data-label="Estado"><span class="state state-customer-{{ customer.status }}">{{ customer.get_status_display }}</span></td>
+            <td class="table-actions-cell" data-label="Acciones"><a class="btn btn-light btn-small" href="{% url 'customers_internal:detail' customer.pk %}">Gestionar</a></td>
+          </tr>
+        {% empty %}
+          <tr class="empty-table-row"><td colspan="6">No hay clientes registrados con estos filtros.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.previous_page_number %}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.next_page_number %}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

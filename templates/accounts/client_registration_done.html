@@ -1,0 +1,13 @@
+{# ES: Renderiza la interfaz templates/accounts/client_registration_done; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/accounts/client_registration_done interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}Revisa tu correo | Vinova Pro{% endblock %}
+{% block main_class %}auth-public-page{% endblock %}
+{% block content %}
+<section class="auth-public-card">
+  <span class="eyebrow">Registro recibido</span>
+  <h1>Revisa tu correo</h1>
+  <p>Si el registro pudo completarse, recibirás un enlace de activación. El enlace es privado, caduca y solo puede utilizarse una vez.</p>
+  <a class="btn btn-primary" href="{% url 'accounts:login' %}">Ir al inicio de sesión</a>
+</section>
+{% endblock %}

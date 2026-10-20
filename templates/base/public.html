@@ -1,0 +1,91 @@
+{# ES: Renderiza la interfaz templates/base/public; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/base/public interface; permissions and data are resolved server-side. #}
+{% load static ui_assets %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f2f4d'/%3E%3Ctext x='16' y='23' font-family='Inter,Arial,sans-serif' font-size='20' font-weight='800' text-anchor='middle' fill='%23ffffff'%3EV%3C/text%3E%3C/svg%3E">
+  <title>{% block title %}Vinova Pro{% endblock %}</title>
+  {% include 'components/head_assets.html' %}
+  <script defer src="{% static 'vendor/htmx/htmx.min.js' %}?v=2.0.10"></script>
+  {% if vinova_company %}<style nonce="{{ request.csp_nonce }}">:root{--brand-primary:{{ vinova_brand_primary }};--brand-secondary:{{ vinova_brand_secondary }};}</style>{% endif %}
+  <script defer src="{% static 'js/model_viewer.js' %}?v={{ vinova_product_version }}"></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="public-body">
+  <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+  <header class="public-header">
+    <a class="public-brand" href="{% url 'dashboard:home' %}" aria-label="Inicio Vinova Pro">
+      {% ui_final_asset "brand-logo" as brand_logo %}<span class="brand-mark">{% if brand_logo %}<img class="brand-mark-image" src="{{ brand_logo }}" alt="" aria-hidden="true" decoding="async">{% else %}V{% endif %}</span>
+      <span class="public-brand-text"><strong>{{ vinova_company.commercial_name|default:'Vinova Pro' }}</strong><small>Vehículos</small></span>
+    </a>
+    <button class="drawer-menu-button public-menu-toggle" type="button" data-drawer-open="public-nav-drawer" aria-controls="public-nav-drawer" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+      <span>Menú</span>
+    </button>
+    <div class="public-nav-drawer" id="public-nav-drawer" data-drawer data-drawer-query="(max-width: 1180px)" aria-label="Menú principal">
+      <div class="public-drawer-head">
+        <strong>Navegación</strong>
+        <button class="drawer-close-button public-drawer-close" type="button" data-drawer-close aria-label="Cerrar menú">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg>
+        </button>
+      </div>
+      {# ES: La navegación siguiente muestra destinos ya autorizados por el contexto de backend. #}
+      {# EN: The following navigation shows destinations already authorized by backend context. #}
+      <nav class="public-nav" aria-label="Navegación principal">
+        <a href="{% url 'vehicles:catalog' %}"{% if request.resolver_match.namespace == 'vehicles' %} aria-current="page"{% endif %}>Vehículos</a>
+        {% if public_modules.parts_catalog %}<a href="{% url 'parts:catalog' %}"{% if request.resolver_match.namespace == 'parts' %} aria-current="page"{% endif %}>Repuestos</a>{% endif %}
+        <a href="{% url 'dashboard:services' %}#servicios"{% if request.resolver_match.view_name == 'dashboard:services' %} aria-current="page"{% endif %}>Servicios</a>
+        <a href="{% url 'dashboard:about' %}#nosotros"{% if request.resolver_match.view_name == 'dashboard:about' %} aria-current="page"{% endif %}>Nosotros</a>
+        <a href="{% url 'institutions:list' %}"{% if request.resolver_match.namespace == 'institutions' %} aria-current="page"{% endif %}>Instituciones</a>
+        <a href="{% url 'leads:public_request' %}"{% if request.resolver_match.namespace == 'leads' %} aria-current="page"{% endif %}>Contacto</a>
+      </nav>
+      <div class="public-nav-actions">
+        <a class="public-header-search" href="{% url 'vehicles:catalog' %}?q=" aria-label="Buscar vehículos en el catálogo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </a>
+        <button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar a modo oscuro" title="Cambiar a modo oscuro">
+          <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </button>
+        {% if request.user.is_authenticated %}
+          <a class="public-nav-link public-nav-account" href="{% if request.user.can_access_portal %}{% url 'portal:dashboard' %}{% else %}{% url 'accounts:profile' %}{% endif %}">{% include 'components/avatar.html' with avatar_user=request.user avatar_size='avatar-sm' %}<span>{% if request.user.can_access_portal %}Mi cuenta{% else %}Mi perfil{% endif %}</span></a>
+          {% if request.user.can_access_internal_panel %}<a class="btn btn-primary btn-small nav-staff" href="{% url 'dashboard:staff_home' %}">Panel interno</a>{% endif %}
+          {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+          {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+          <form action="{% url 'accounts:logout' %}" method="post" class="public-logout-form">{% csrf_token %}<button type="submit">Salir</button></form>
+        {% else %}
+          <a class="btn btn-primary nav-login" href="{% url 'accounts:login' %}">Ingresar</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+  <button class="drawer-overlay" type="button" data-drawer-overlay="public-nav-drawer" aria-label="Cerrar navegación" tabindex="-1"></button>
+
+  {% if messages %}
+    <section class="public-message-wrap" aria-label="Mensajes del sistema" aria-live="polite">
+      {% for message in messages %}<div class="message message-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}
+    </section>
+  {% endif %}
+
+  <main id="main-content" class="{% block main_class %}{% endblock %}" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="public-footer">
+    <div>
+      <strong>{{ vinova_company.commercial_name|default:'Vinova Pro' }}</strong>
+      <p>{{ vinova_public_settings.footer_text|default:'Plataforma web empresarial para operación automotriz y experiencia comercial de concesionaria.' }}</p>
+    </div>
+    <div>
+      <span>{% if vinova_public_settings.public_phone %}{{ vinova_public_settings.public_phone }} · {% endif %}{% if vinova_public_settings.public_email %}{{ vinova_public_settings.public_email }}{% else %}Catálogo · Cotización · Sucursales · Postventa{% endif %}</span>
+      <small>El área administrativa está protegida por permisos internos. · <a href="{% url 'privacy_public:privacy_policy' %}">Privacidad</a> · <a href="{% url 'privacy_public:cookie_policy' %}">Cookies</a> · <a href="{% url 'privacy_public:terms' %}">Términos</a> · <a href="{% url 'privacy_public:legal_notice' %}">Aviso legal</a> · <a href="{% url 'privacy_public:request' %}">Solicitudes de datos</a> · <a href="{% url 'privacy_public:cookie_settings' %}">Preferencias de cookies</a></small>
+    </div>
+  </footer>
+  <div id="modal-root" aria-live="polite"></div>
+  {% include 'components/cookie_consent.html' %}
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

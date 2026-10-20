@@ -1,0 +1,54 @@
+{# ES: Renderiza la interfaz templates/privacy/internal/retention_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/privacy/internal/retention_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Retención de datos | Vinova Pro{% endblock %}
+{% block page_title %}Políticas de retención{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'privacy:dashboard' %}">Volver</a>{% if request.user.can_manage_privacy %}<a class="btn btn-primary" href="{% url 'privacy:retention_create' %}">Nueva política</a>{% endif %}
+{% endblock %}
+{% block content %}
+  <section class="panel-card table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Retención configurada</h2>
+        <p>Estas políticas no ejecutan borrados ciegos; marcan reglas y revisiones obligatorias.</p>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th>Política</th>
+            <th>Días</th>
+            <th>Acción</th>
+            <th>Revisión legal</th>
+            <th>Activa</th>
+            <th>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in policies %}
+            <tr>
+              <td>{{ item.data_category }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.retention_days }}</td>
+              <td>{{ item.get_action_display }}</td>
+              <td>{{ item.requires_legal_review|yesno:'Sí,No' }}</td>
+              <td>{{ item.is_active|yesno:'Sí,No' }}</td>
+              <td>
+                {% if request.user.can_manage_privacy %}<a class="btn btn-light btn-small" href="{% url 'privacy:retention_update' item.pk %}">Editar</a>{% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7">Ejecuta
+                <code>seed_privacy_policies</code>
+                para crear reglas base.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

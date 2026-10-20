@@ -1,0 +1,26 @@
+{# ES: Renderiza la interfaz templates/dashboard/role_branch; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/role_branch interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Dashboard de sucursal | Vinova Pro{% endblock %}
+{% block page_title %}Dashboard de sucursal{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Panel operativo para administrar una sucursal sin mostrar configuraciones globales innecesarias.</p>{% endblock %}
+{% block content %}
+{% include 'dashboard/snippets/executive_summary.html' %}
+<section class="role-dashboard-hero branch-hero">
+  <div><span>Administración de sucursal</span><h2>{% if branch %}{{ branch.name }}{% else %}Sucursal asignada pendiente{% endif %}</h2><p>Controla vehículos, clientes, ventas, documentos y stock del punto operativo.</p></div>
+  <div class="role-dashboard-actions">
+    {% if request.user.can_view_internal_vehicles %}<a class="btn btn-secondary" href="{% url 'vehicles_internal:list' %}">Vehículos</a>{% endif %}
+    {% if request.user.can_view_inventory %}<a class="btn btn-secondary" href="{% url 'inventory_internal:list' %}">Inventario</a>{% endif %}
+  </div>
+</section>
+<section class="metric-grid role-metric-grid">
+  <article class="metric-card"><span>Vehículos disponibles</span><strong>{{ metrics.vehicles_available }}</strong></article>
+  <article class="metric-card"><span>Vehículos reservados</span><strong>{{ metrics.vehicles_reserved }}</strong></article>
+  <article class="metric-card"><span>Clientes</span><strong>{{ metrics.customers }}</strong></article>
+  <article class="metric-card"><span>Stock bajo</span><strong>{{ metrics.low_stock }}</strong></article>
+</section>
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Ventas abiertas</h2>{% include 'dashboard/snippets/sales_rows.html' with sales=recent_sales empty_text='Sin operaciones abiertas.' %}</article>
+  <article class="panel-card"><h2>Clientes recientes</h2>{% include 'dashboard/snippets/customer_rows.html' with customers=recent_customers empty_text='Sin clientes recientes.' %}</article>
+</section>
+{% endblock %}

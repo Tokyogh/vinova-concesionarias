@@ -1,0 +1,99 @@
+{# ES: Renderiza la interfaz templates/inventory/internal/item_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/inventory/internal/item_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ item.name }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ item.name }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Ficha operativa del artículo, stock por sucursal, movimientos y reglas de reposición.</p>{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-light" href="{% url 'inventory_internal:list' %}">Volver</a>
+  {% if request.user.can_manage_inventory %}<a class="btn btn-primary" href="{% url 'inventory_internal:update' item.pk %}">Editar</a>{% endif %}
+{% endblock %}
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="detail-grid two-columns inventory-detail-grid">
+  <article class="panel-card inventory-summary-card">
+    <span class="eyebrow">{{ item.sku }}</span>
+    <h2>{{ item.name }}</h2>
+    <p>{{ item.description|default:'Sin descripción registrada.'|linebreaksbr }}</p>
+    <div class="vehicle-detail-meta inventory-detail-meta">
+      <span><strong>Estado</strong><em class="state state-inventory-{{ item.status }}">{{ item.get_status_display }}</em></span>
+      <span><strong>Tipo</strong>{{ item.get_item_type_display }}</span>
+      <span><strong>Categoría</strong>{{ item.category.name|default:'Sin categoría' }}</span>
+      <span><strong>Precio</strong>${{ item.price }}</span>
+      <span><strong>Unidad</strong>{{ item.unit }}</span>
+      <span><strong>Controla stock</strong>{% if item.track_stock %}Sí{% else %}No{% endif %}</span>
+    </div>
+    {% if request.user.can_manage_inventory %}
+      <div class="action-row wrap">
+        {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+        {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+        <form method="post" action="{% url 'inventory_internal:status_action' item.pk 'activate' %}">{% csrf_token %}<button class="btn btn-secondary">Activar</button></form>
+        <form method="post" action="{% url 'inventory_internal:status_action' item.pk 'archive' %}">{% csrf_token %}<button class="btn btn-danger">Archivar</button></form>
+      </div>
+    {% endif %}
+  </article>
+
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Stock por sucursal</h2><p>Disponible físico y umbral mínimo para alertas.</p></div></div>
+    <div class="responsive-table">
+      <table class="data-table compact-table">
+        <thead><tr><th>Sucursal</th><th>Stock</th><th>Reservado</th><th>Mínimo</th><th>Ubicación</th><th>Estado</th>{% if request.user.can_manage_inventory %}<th>Reposición</th>{% endif %}</tr></thead>
+        <tbody>
+          {% for stock in stock_records %}
+            <tr>
+              <td>{{ stock.branch.name }}<span class="table-subtext">{{ stock.branch.city|default:stock.branch.company.commercial_name }}</span></td>
+              <td><strong>{{ stock.quantity }}</strong></td>
+              <td>{{ stock.reserved_quantity }}</td>
+              <td>{{ stock.minimum_stock }}</td>
+              <td>{{ stock.location_code|default:'N/D' }}</td>
+              <td>{% if stock.is_low_stock %}<span class="state state-warning">Bajo</span>{% else %}<span class="state state-ok">OK</span>{% endif %}</td>
+              {% if request.user.can_manage_inventory %}
+                <td>
+                  <form method="post" action="{% url 'inventory_internal:stock_settings' item.pk stock.pk %}" class="inline-form inventory-stock-settings-form">
+                    {% csrf_token %}
+                    <label class="form-field"><span>Stock mínimo</span><input class="form-control" type="number" name="minimum_stock" value="{{ stock.minimum_stock }}" min="0" step="0.01" required></label>
+                    <label class="form-field"><span>Ubicación</span><input class="form-control" type="text" name="location_code" value="{{ stock.location_code }}" maxlength="80"></label>
+                    <button class="btn btn-light btn-small" type="submit">Actualizar</button>
+                  </form>
+                </td>
+              {% endif %}
+            </tr>
+          {% empty %}<tr><td colspan="{% if request.user.can_manage_inventory %}7{% else %}6{% endif %}">Aún no hay stock registrado para este artículo.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<section class="detail-grid two-columns inventory-activity-grid">
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Movimientos recientes</h2><p>Trazabilidad de entradas, salidas, ajustes y transferencias.</p></div></div>
+    <div class="timeline-list">
+      {% for movement in movements %}
+        <div class="timeline-item">
+          <strong>{{ movement.get_movement_type_display }} · {{ movement.quantity }} {{ item.unit }}</strong>
+          <span class="table-subtext">{{ movement.confirmed_at|date:'d/m/Y H:i' }} · {{ movement.branch.name }}{% if movement.destination_branch %} → {{ movement.destination_branch.name }}{% endif %}</span>
+          <p>Stock: {{ movement.previous_quantity }} → {{ movement.new_quantity }}{% if movement.destination_branch %}. Destino: {{ movement.destination_previous_quantity }} → {{ movement.destination_new_quantity }}{% endif %}</p>
+          <small>{{ movement.reference|default:'Sin referencia' }}{% if movement.created_by %} · {{ movement.created_by.get_full_name|default:movement.created_by.username }}{% endif %}</small>
+        </div>
+      {% empty %}<p class="muted">Sin movimientos registrados.</p>{% endfor %}
+    </div>
+  </article>
+
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Registrar movimiento</h2><p>Solo personal autorizado puede modificar stock. Todo cambio queda auditado.</p></div></div>
+    {% if request.user.can_manage_inventory %}
+      <form method="post" action="{% url 'inventory_internal:stock_movement_create' item.pk %}" class="stacked-form inventory-inline-form">
+        {% csrf_token %}
+        {% for field in movement_form %}
+          <label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>
+        {% endfor %}
+        <button class="btn btn-primary">Guardar movimiento</button>
+      </form>
+    {% else %}
+      <p class="muted">Tienes acceso de consulta. No puedes registrar movimientos de stock.</p>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

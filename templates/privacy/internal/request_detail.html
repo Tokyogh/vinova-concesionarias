@@ -1,0 +1,139 @@
+{# ES: Renderiza la interfaz templates/privacy/internal/request_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/privacy/internal/request_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Solicitud {{ data_request.public_id }} | Vinova Pro{% endblock %}
+{% block page_title %}Solicitud del titular{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">{{ data_request.public_id }} · {{ data_request.get_request_type_display }}</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'privacy:request_list' %}">Volver</a>{% if request.user.can_manage_privacy %}<a class="btn btn-light" href="{% url 'privacy:request_update' data_request.public_id %}">Editar</a>{% endif %}
+  {% if request.user.can_export_privacy %}
+    {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+    {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+    <form method="post" action="{% url 'privacy:request_export' data_request.public_id %}">
+      {% csrf_token %}<button class="btn btn-secondary">Generar exportación</button>
+    </form>
+  {% endif %}
+{% endblock %}
+{% block content %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="detail-grid two-columns">
+    <article class="panel-card">
+      <h2>Solicitud</h2>
+      <dl class="data-list">
+        <div>
+          <dt>Estado</dt>
+          <dd>{{ data_request.get_status_display }}</dd>
+        </div>
+        <div>
+          <dt>Solicitante</dt>
+          <dd>{{ data_request.requester_name }}</dd>
+        </div>
+        <div>
+          <dt>Correo</dt>
+          <dd>{{ data_request.requester_email|default:'N/D' }}</dd>
+        </div>
+        <div>
+          <dt>Teléfono</dt>
+          <dd>{{ data_request.requester_phone|default:'N/D' }}</dd>
+        </div>
+        <div>
+          <dt>Cliente</dt>
+          <dd>{{ data_request.customer|default:'Sin relacionar' }}</dd>
+        </div>
+        <div>
+          <dt>Identidad</dt>
+          <dd>{{ data_request.identity_verified_at|date:'d/m/Y H:i'|default:'Pendiente' }}</dd>
+        </div>
+        <div>
+          <dt>Plazo</dt>
+          <dd>{{ data_request.due_at|date:'d/m/Y H:i'|default:'Sin definir' }}</dd>
+        </div>
+        <div>
+          <dt>Responsable</dt>
+          <dd>{{ data_request.assigned_to|default:'Sin asignar' }}</dd>
+        </div>
+      </dl>
+      <div class="privacy-note">
+        <strong>Descripción</strong>
+        <p>{{ data_request.description|linebreaksbr }}</p>
+      </div>
+      {% if data_request.legal_hold_reason %}
+        <div class="privacy-note">
+          <strong>Retención legal</strong>
+          <p>{{ data_request.legal_hold_reason }}</p>
+        </div>
+      {% endif %}
+    </article>
+    <article class="panel-card">
+      <h2>Gestión</h2>
+      {% if request.user.can_manage_privacy %}
+        <form method="post" action="{% url 'privacy:request_status' data_request.public_id %}" class="stacked-form">
+          {% csrf_token %}
+          {% for field in status_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}</label>{% endfor %}<button class="btn btn-primary">Actualizar estado</button>
+        </form>
+      {% endif %}
+      <div class="privacy-note">
+        <strong>Resolución</strong>
+        <p>{{ data_request.resolution|default:'Sin resolución.'|linebreaksbr }}</p>
+      </div>
+    </article>
+  </section>
+  <section class="panel-card table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Exportaciones privadas</h2>
+        <p>Disponibles durante siete días y protegidas por permisos.</p>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Archivo</th>
+            <th>SHA-256</th>
+            <th>Expira</th>
+            <th>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for job in exports %}
+            <tr>
+              <td>{{ job.created_at|date:'d/m/Y H:i' }}</td>
+              <td>{{ job.get_status_display }}</td>
+              <td>{{ job.filename|default:'Pendiente' }}</td>
+              <td>
+                <code>{{ job.sha256|truncatechars:18 }}</code>
+              </td>
+              <td>{{ job.expires_at|date:'d/m/Y H:i'|default:'N/D' }}</td>
+              <td>
+                {% if job.status == 'completed' and request.user.can_export_privacy %}<a class="btn btn-light btn-small" href="{% url 'privacy:export_download' job.public_id %}">Descargar</a>{% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">No existen exportaciones.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% if request.user.can_anonymize_privacy and data_request.status == 'approved' %}
+    <section class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Anonimización irreversible</h2>
+          <p>Elimina datos identificativos del perfil y relaciones no legales. Facturas, ventas y documentos sujetos a retención se conservan para revisión.</p>
+        </div>
+      </div>
+      <form method="post" action="{% url 'privacy:request_anonymize' data_request.public_id %}" class="stacked-form">
+        {% csrf_token %}<label class="form-field"><span>Nota de ejecución</span><textarea class="form-control" name="notes" rows="3"></textarea></label><button class="btn btn-danger">Anonimizar cliente</button>
+      </form>
+    </section>
+  {% endif %}
+{% endblock %}

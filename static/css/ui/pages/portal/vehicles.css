@@ -1,0 +1,70 @@
+/* ES: Define estilos de static/css/ui/pages/portal/vehicles, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/pages/portal/vehicles styles, including states and responsive behavior. */
+.portal-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: end;
+}
+
+.portal-toolbar .filter-form { display: flex; gap: .65rem; align-items: end; flex: 1; }
+.portal-toolbar .form-field { flex: 1; }
+
+.portal-garage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.portal-garage-card {
+  overflow: hidden;
+  border: 1px solid var(--border, #d8e0e8);
+  border-radius: .9rem;
+  background: var(--surface, #fff);
+}
+
+.portal-garage-image { aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface-soft, #eef2f5); }
+.portal-garage-image img { width: 100%; height: 100%; object-fit: cover; }
+.portal-garage-body { display: grid; gap: .65rem; padding: 1rem; }
+.portal-garage-body h2,
+.portal-garage-body p { margin: 0; }
+.portal-garage-empty { grid-column: 1 / -1; }
+
+.portal-vehicle-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 1fr);
+  gap: 1.25rem;
+}
+
+.portal-private-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.portal-private-gallery figure { margin: 0; overflow: hidden; border-radius: .85rem; background: var(--surface-soft, #eef2f5); }
+.portal-private-gallery figure:first-child { grid-column: 1 / -1; }
+.portal-private-gallery img { width: 100%; height: 100%; min-height: 10rem; object-fit: cover; }
+.portal-private-gallery figcaption { padding: .5rem .75rem; }
+
+.portal-spec-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.portal-spec-grid article { padding: 1rem; border: 1px solid var(--border, #d8e0e8); border-radius: .75rem; }
+.portal-spec-grid dl div { display: flex; justify-content: space-between; gap: 1rem; }
+.portal-redeem-card { width: min(100%, 40rem); }
+
+.portal-vehicle-tabs { display: flex; gap: .35rem; padding: .35rem; overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); }
+.portal-vehicle-tabs button { min-height: 40px; padding: .65rem 1rem; border: 0; border-radius: 9px; color: var(--text-2); font: inherit; font-size: 12px; font-weight: 700; white-space: nowrap; background: transparent; cursor: pointer; }
+.portal-vehicle-tabs button[aria-selected="true"] { color: var(--on-primary); background: var(--brand-primary); box-shadow: var(--shadow-sm); }
+.portal-vehicle-tabs + [role="tabpanel"],
+.portal-vehicle-tabs ~ [role="tabpanel"] { margin-top: 18px; }
+.portal-vehicle-specs { margin-top: 18px; }
+.portal-detail-dialog .portal-vehicle-detail { grid-template-columns: minmax(0, 1.3fr) minmax(17rem, .8fr); }
+.portal-detail-dialog .portal-private-gallery img { max-height: 300px; }
+
+@media (max-width: 900px) {
+  .portal-garage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .portal-vehicle-detail { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 620px) {
+  .portal-toolbar,
+  .portal-toolbar .filter-form { align-items: stretch; flex-direction: column; }
+  .portal-garage-grid,
+  .portal-spec-grid { grid-template-columns: 1fr; }
+  .portal-detail-dialog .portal-vehicle-detail { grid-template-columns: 1fr; }
+}

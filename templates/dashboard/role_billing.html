@@ -1,0 +1,23 @@
+{# ES: Renderiza la interfaz templates/dashboard/role_billing; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/role_billing interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Dashboard facturación | Vinova Pro{% endblock %}
+{% block page_title %}Dashboard facturación{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Vista para facturación, comprobantes, pagos y documentación privada. No mezcla gestión de staff ni administración global.</p>{% endblock %}
+{% block content %}
+<section class="role-dashboard-hero billing-hero"><div><span>Facturación y documentos</span><h2>Comprobantes, pagos y respaldo documental</h2><p>Controla operaciones listas para facturar, borradores, comprobantes emitidos y documentos privados asociados.</p></div><div class="role-dashboard-actions"><a class="btn btn-primary" href="{% url 'invoices_internal:list' %}">Ir a facturación</a><a class="btn btn-secondary" href="{% url 'invoices_internal:create_from_sale' %}">Crear comprobante</a></div></section>
+<section class="metric-grid role-metric-grid">
+  <article class="metric-card"><span>Ventas listas</span><strong>{{ metrics.ready_sales }}</strong></article>
+  <article class="metric-card"><span>Borradores</span><strong>{{ metrics.invoices_draft }}</strong></article>
+  <article class="metric-card"><span>Emitidas/parciales</span><strong>{{ metrics.invoices_issued }}</strong></article>
+  <article class="metric-card"><span>Documentos privados</span><strong>{{ metrics.private_documents }}</strong></article>
+</section>
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Ventas para facturar</h2>{% include 'dashboard/snippets/sales_rows.html' with sales=ready_sales empty_text='Sin ventas listas.' %}</article>
+  <article class="panel-card"><h2>Comprobantes recientes</h2>{% include 'dashboard/snippets/invoice_rows.html' with invoices=recent_invoices empty_text='Sin comprobantes recientes.' %}</article>
+</section>
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Documentos recientes</h2>{% include 'dashboard/snippets/document_rows.html' with documents=recent_documents empty_text='Sin documentos recientes.' %}</article>
+  <article class="panel-card"><h2>Uso correcto</h2><p class="muted">La persona encargada de facturación debe poder trabajar desde esta interfaz: crear comprobantes desde ventas, emitir, aplicar pagos, imprimir y asociar documentos privados sin tocar carpetas del proyecto.</p></article>
+</section>
+{% endblock %}

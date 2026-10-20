@@ -1,0 +1,39 @@
+{# ES: Renderiza la interfaz templates/companies/company_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/companies/company_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Empresas | Vinova Pro{% endblock %}
+{% block page_title %}Empresas{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Configuración legal y comercial de la instalación empresarial.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-primary" href="{% url 'companies:create' %}">Nueva empresa</a>{% endblock %}
+{% block content %}
+<section class="toolbar panel-card compact">
+  <form method="get" class="search-form">
+    {{ search_form.q }}
+    <button class="btn btn-primary">Buscar</button>
+  </form>
+</section>
+<section class="panel-card table-panel">
+  <div class="panel-header">
+    <div><h2>Empresas registradas</h2><p>{{ page_obj.paginator.count }} resultado(s)</p></div>
+  </div>
+  <div class="responsive-table">
+    <table class="data-table">
+      <thead><tr><th>Empresa</th><th>RUC</th><th>Contacto</th><th>Sucursales</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        {% for company in companies %}
+          <tr>
+            <td><strong>{{ company.commercial_name }}</strong><span class="table-subtext">{{ company.legal_name }}</span></td>
+            <td>{{ company.ruc }}</td>
+            <td>{{ company.email|default:'Sin correo' }}{% if company.phone %}<span class="table-subtext">{{ company.phone }}</span>{% endif %}</td>
+            <td>{{ company.branch_count }}</td>
+            <td>{% if company.is_active %}<span class="state state-ok">Activa</span>{% else %}<span class="state state-danger">Inactiva</span>{% endif %}</td>
+            <td class="table-actions-cell"><a class="btn btn-light btn-small" href="{% url 'companies:detail' company.pk %}">Gestionar</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">No hay empresas registradas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

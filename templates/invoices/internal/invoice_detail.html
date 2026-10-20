@@ -1,0 +1,75 @@
+{# ES: Renderiza la interfaz templates/invoices/internal/invoice_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/invoices/internal/invoice_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ invoice.number }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ invoice.number }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">{{ invoice.get_invoice_type_display }} para {{ invoice.customer_name }}. Control de emisión, pagos, impresión y anulación.</p>{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-light" href="{% url 'invoices_internal:list' %}">Volver</a>
+  <a class="btn btn-secondary" target="_blank" href="{% url 'invoices_internal:print' invoice.pk %}">Vista imprimible</a>
+  {% if invoice.status != 'draft' %}<a class="btn btn-primary" href="{% url 'invoices_internal:pdf_download' invoice.pk %}">Descargar PDF</a>{% endif %}
+{% endblock %}
+{% block content %}
+<section class="detail-grid two-columns invoices-detail-grid">
+  <article class="panel-card invoices-summary-card">
+    <span class="eyebrow">{{ invoice.get_invoice_type_display }}</span>
+    <h2>{{ invoice.customer_name }}</h2>
+    <p>{{ invoice.notes|default:'Sin notas visibles.'|linebreaksbr }}</p>
+    <div class="vehicle-detail-meta invoices-detail-meta">
+      <span><strong>Estado</strong><em class="state state-invoice-{{ invoice.status }}">{{ invoice.get_status_display }}</em></span>
+      <span><strong>Sucursal</strong>{{ invoice.branch.name }}</span>
+      <span><strong>Empresa</strong>{{ invoice.company.commercial_name }}</span>
+      <span><strong>Cliente</strong>{{ invoice.customer_document|default:'Sin documento' }}</span>
+      <span><strong>Emisión</strong>{{ invoice.issue_date|date:'d/m/Y' }}</span>
+      <span><strong>Vencimiento</strong>{{ invoice.due_date|date:'d/m/Y'|default:'N/D' }}</span>
+      {% if invoice.sale %}<span><strong>Venta origen</strong><a href="{% url 'sales_internal:detail' invoice.sale.pk %}">{{ invoice.sale.number }}</a></span>{% endif %}
+      {% if invoice.linked_document %}<span><strong>Documento privado</strong><a href="{% url 'documents_internal:detail' invoice.linked_document.pk %}">{{ invoice.linked_document.title }}</a></span>{% endif %}
+    </div>
+    <div class="action-row wrap sales-action-row">
+      {% if request.user.can_issue_invoices and invoice.can_be_issued %}
+        <form method="post" action="{% url 'invoices_internal:action' invoice.pk 'issue' %}" class="mini-action-form">{% csrf_token %}{{ action_form.note }}<button class="btn btn-primary">Emitir</button></form>
+      {% endif %}
+      {% if request.user.can_issue_invoices and invoice.sale and invoice.status != 'draft' and invoice.balance_due > 0 %}
+        <form method="post" action="{% url 'invoices_internal:action' invoice.pk 'apply_sale_payments' %}" class="mini-action-form">{% csrf_token %}<button class="btn btn-secondary">Aplicar pagos de venta</button></form>
+      {% endif %}
+      {% if request.user.can_void_invoices and invoice.can_be_voided %}
+        <form method="post" action="{% url 'invoices_internal:action' invoice.pk 'void' %}" class="mini-action-form">{% csrf_token %}{{ void_form.reason }}<button class="btn btn-danger">Anular</button></form>
+      {% endif %}
+    </div>
+  </article>
+  <article class="panel-card sales-total-card">
+    <div class="panel-header no-pad"><div><h2>Totales</h2><p>Valores calculados desde las líneas y pagos aplicados.</p></div></div>
+    <dl class="data-list sales-totals-list">
+      <div><dt>Subtotal</dt><dd>${{ invoice.subtotal }}</dd></div>
+      <div><dt>Descuentos</dt><dd>${{ invoice.discount_total }}</dd></div>
+      <div><dt>IVA</dt><dd>${{ invoice.tax_total }}</dd></div>
+      <div><dt>Total</dt><dd><strong>${{ invoice.total }}</strong></dd></div>
+      <div><dt>Pagado</dt><dd>${{ invoice.amount_paid }}</dd></div>
+      <div><dt>Saldo</dt><dd><strong>${{ invoice.balance_due }}</strong></dd></div>
+    </dl>
+  </article>
+</section>
+
+<section class="detail-grid two-columns invoices-lines-grid">
+  <article class="panel-card table-panel">
+    <div class="panel-header"><div><h2>Líneas facturadas</h2><p>Detalle comercial congelado para el comprobante.</p></div></div>
+    <div class="responsive-table"><table class="data-table compact-table"><thead><tr><th>Descripción</th><th>Cant.</th><th>Precio</th><th>Desc.</th><th>IVA</th><th>Total</th></tr></thead><tbody>
+      {% for line in lines %}<tr><td><strong>{{ line.description }}</strong></td><td>{{ line.quantity }}</td><td>${{ line.unit_price }}</td><td>${{ line.discount_amount }}</td><td>${{ line.line_tax }}</td><td><strong>${{ line.line_total }}</strong></td></tr>
+      {% empty %}<tr><td colspan="6">No hay líneas.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </article>
+  <article class="panel-card">
+    <div class="panel-header no-pad"><div><h2>Agregar línea manual</h2><p>Solo permitido mientras el comprobante está en borrador.</p></div></div>
+    {% if request.user.can_issue_invoices and invoice.status == 'draft' %}
+      <form method="post" action="{% url 'invoices_internal:line_create' invoice.pk %}" class="stacked-form sales-inline-form">{% csrf_token %}{% for field in line_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}<button class="btn btn-primary">Agregar línea</button></form>
+    {% else %}<p class="muted">Las líneas se bloquean después de emitir.</p>{% endif %}
+  </article>
+</section>
+
+<section class="detail-grid two-columns invoices-payments-grid">
+  <article class="panel-card"><h2>Pagos aplicados</h2><div class="timeline-list">{% for payment in payments %}<div class="timeline-item"><strong>${{ payment.amount }}</strong><span class="table-subtext">{{ payment.applied_at|date:'d/m/Y H:i' }}{% if payment.sale_payment %} · {{ payment.sale_payment.get_method_display }}{% endif %}</span><p>{{ payment.notes|default:'Sin notas.' }}</p></div>{% empty %}<p class="muted">Sin pagos aplicados.</p>{% endfor %}</div></article>
+  <article class="panel-card"><h2>Aplicar pago manual</h2>{% if request.user.can_issue_invoices and invoice.status != 'draft' and invoice.can_be_voided %}<form method="post" action="{% url 'invoices_internal:payment_apply' invoice.pk %}" class="stacked-form">{% csrf_token %}{% for field in payment_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}<button class="btn btn-primary">Aplicar pago</button></form>{% else %}<p class="muted">Primero emite el comprobante para aplicar pagos.</p>{% endif %}</article>
+</section>
+
+<section class="panel-card"><h2>Historial</h2><div class="timeline-list">{% for item in history %}<div class="timeline-item"><strong>{{ item.previous_status|default:'Inicio' }} → {{ item.get_new_status_display }}</strong><span class="table-subtext">{{ item.created_at|date:'d/m/Y H:i' }}{% if item.changed_by %} · {{ item.changed_by.get_full_name|default:item.changed_by.username }}{% endif %}</span><p>{{ item.note|default:'Sin nota.' }}</p></div>{% empty %}<p class="muted">Sin historial.</p>{% endfor %}</div></section>
+{% endblock %}

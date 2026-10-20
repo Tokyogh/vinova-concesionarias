@@ -1,0 +1,24 @@
+{# ES: Formulario acotado para metadatos, destacados y especificaciones de un vehículo autorizado. #}
+{# EN: Scoped form for metadata, highlights, and specifications of an authorized vehicle. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ page_heading }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ page_heading }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">{{ vehicle }}. Los cambios quedan vinculados al vehículo y auditados.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'vehicles_internal:detail' vehicle.pk %}">Volver al vehículo</a>{% endblock %}
+{% block content %}
+<section class="panel-card form-panel-wide">
+  <form method="post" class="form-grid vehicle-form-grid" novalidate>
+    {% csrf_token %}
+    {% for field in form %}
+      <label class="form-field {% if field.name == 'description' or field.name == 'specs' %}span-2{% endif %} {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}">
+        <span>{{ field.label }}{% if field.field.required %} <b aria-hidden="true">*</b><span class="sr-only"> (obligatorio)</span>{% endif %}</span>
+        {{ field }}
+        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+      </label>
+    {% endfor %}
+    {% if form.non_field_errors %}<div class="field-error span-2">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-actions span-2"><button class="btn btn-primary">Guardar</button><a class="btn btn-light" href="{% url 'vehicles_internal:detail' vehicle.pk %}">Cancelar</a></div>
+  </form>
+</section>
+{% endblock %}

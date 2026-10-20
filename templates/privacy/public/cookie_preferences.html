@@ -1,0 +1,21 @@
+{# ES: Configuración granular y revocable de tecnologías opcionales. EN: Granular, revocable optional-technology settings. #}
+
+{% extends 'base/public.html' %}
+{% block title %}Preferencias de cookies | Vinova Pro{% endblock %}
+{% block content %}
+<section class="page-section narrow-section" aria-labelledby="cookie-settings-title">
+  <header class="section-heading"><span>Privacidad</span><h1 id="cookie-settings-title">Preferencias de cookies y tecnologías similares</h1><p>Las funciones necesarias permanecen activas. Puedes aceptar o retirar las categorías opcionales en cualquier momento.</p></header>
+  <form method="post" action="{% url 'privacy_public:cookie_update' %}" class="panel-card cookie-settings-grid" novalidate>
+    {% csrf_token %}
+    {{ form.next }}
+    <div class="cookie-category is-required"><input type="checkbox" checked disabled aria-describedby="cookie-required-detail"><div><strong>Necesarias</strong><span id="cookie-required-detail">Sesión, CSRF, seguridad y la propia evidencia mínima de esta elección. No pueden desactivarse.</span></div></div>
+    <label class="cookie-category">{{ form.preferences }}<span><strong>{{ form.preferences.label }}</strong><span>Guarda tema, favoritos y vistas de interfaz en este navegador.</span></span></label>
+    <label class="cookie-category">{{ form.analytics }}<span><strong>{{ form.analytics.label }}</strong><span>Permite medir vistas y clics del catálogo con identificadores hash de primera parte.</span></span></label>
+    <label class="cookie-category">{{ form.external_media }}<span><strong>{{ form.external_media.label }}</strong><span>Permite cargar el mapa MapTiler/MapLibre, que comunica el navegador con ese proveedor.</span></span></label>
+    {% for error in form.non_field_errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+    <div class="form-actions"><button class="btn btn-primary" type="submit" name="action" value="save">Guardar preferencias</button><button class="btn btn-light" type="submit" name="action" value="reject_optional">Rechazar opcionales</button></div>
+  </form>
+  {% if current_preferences.decided %}<p class="form-help">Decisión vigente: versión {{ current_preferences.version }}, actualizada {{ current_preferences.updated_at }}.</p>{% endif %}
+  <p class="form-help">Consulta el detalle de tecnologías, duración y proveedores en la <a href="{% url 'privacy_public:cookie_policy' %}">política de cookies</a>.</p>
+</section>
+{% endblock %}

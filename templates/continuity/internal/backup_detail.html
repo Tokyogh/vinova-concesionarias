@@ -1,0 +1,89 @@
+{# ES: Renderiza la interfaz templates/continuity/internal/backup_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/continuity/internal/backup_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Backup {{ backup.public_id }} | Vinova Pro{% endblock %}
+{% block page_title %}Detalle del backup{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">{{ backup.public_id }}</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'continuity:dashboard' %}">Volver</a>{% if request.user.can_manage_continuity and backup.status == 'completed' or request.user.can_manage_continuity and backup.status == 'verified' %}
+    {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+    {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+    <form method="post" action="{% url 'continuity:backup_verify' backup.public_id %}">
+      {% csrf_token %}<button class="btn btn-secondary">Verificar</button>
+    </form>
+    <a class="btn btn-primary" href="{% url 'continuity:backup_download' backup.public_id %}">Descargar</a>{% endif %}
+{% endblock %}
+{% block content %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="detail-grid two-columns">
+    <article class="panel-card">
+      <h2>Información</h2>
+      <dl class="data-list">
+        <div>
+          <dt>Tipo</dt>
+          <dd>{{ backup.get_backup_type_display }}</dd>
+        </div>
+        <div>
+          <dt>Estado</dt>
+          <dd>{{ backup.get_status_display }}</dd>
+        </div>
+        <div>
+          <dt>Modo</dt>
+          <dd>{{ backup.get_execution_mode_display }}</dd>
+        </div>
+        <div>
+          <dt>En cola</dt>
+          <dd>{{ backup.queued_at|date:'d/m/Y H:i:s'|default:'N/D' }}</dd>
+        </div>
+        <div>
+          <dt>ID Celery</dt>
+          <dd>
+            <code>{{ backup.celery_task_id|default:'N/D' }}</code>
+          </dd>
+        </div>
+        <div>
+          <dt>Archivo</dt>
+          <dd>{{ backup.filename|default:'N/D' }}</dd>
+        </div>
+        <div>
+          <dt>Tamaño</dt>
+          <dd>{{ backup.size_display }}</dd>
+        </div>
+        <div>
+          <dt>Inicio</dt>
+          <dd>{{ backup.started_at|date:'d/m/Y H:i:s'|default:'N/D' }}</dd>
+        </div>
+        <div>
+          <dt>Fin</dt>
+          <dd>{{ backup.completed_at|date:'d/m/Y H:i:s'|default:'N/D' }}</dd>
+        </div>
+        <div>
+          <dt>Verificado</dt>
+          <dd>{{ backup.verified_at|date:'d/m/Y H:i:s'|default:'No' }}</dd>
+        </div>
+      </dl>
+    </article>
+    <article class="panel-card">
+      <h2>Integridad</h2>
+      <p>
+        <strong>SHA-256</strong>
+      </p>
+      <code class="json-snippet">{{ backup.sha256|default:'Aún no generado' }}</code>{% if backup.queue_error %}
+        <div class="privacy-note">
+          <strong>Error de cola</strong>
+          <p>{{ backup.queue_error }}</p>
+        </div>
+      {% endif %}
+      {% if backup.error_message %}
+        <div class="privacy-note">
+          <strong>Error de ejecución</strong>
+          <p>{{ backup.error_message }}</p>
+        </div>
+      {% endif %}
+      <h3>Manifiesto</h3>
+      <code class="json-snippet">{{ backup.manifest }}</code>
+    </article>
+  </section>
+{% endblock %}

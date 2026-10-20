@@ -1,0 +1,67 @@
+{# ES: Renderiza la interfaz templates/imports/internal/home; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/imports/internal/home interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Importaciones masivas | Vinova Pro{% endblock %}
+{% block page_title %}Importaciones masivas{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Carga vehículos, clientes, inventario y stock desde CSV/Excel con validación previa, trazabilidad y confirmación antes de aplicar cambios.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-primary" href="{% url 'imports_internal:create' %}">Nueva importación</a>{% endblock %}
+{% block content %}
+{% include 'imports/internal/_nav.html' %}
+<section class="metric-grid imports-status-grid">
+  <article class="metric-card"><span>Lotes registrados</span><strong>{{ total_batches }}</strong><small>Historial total</small></article>
+  <article class="metric-card"><span>Completados</span><strong>{{ completed_batches }}</strong><small>Aplicados correctamente</small></article>
+  <article class="metric-card"><span>Con errores</span><strong>{{ failed_batches }}</strong><small>Requieren revisión</small></article>
+  <article class="metric-card"><span>Filas procesadas</span><strong>{{ rows_processed }}</strong><small>Datos importados/validados</small></article>
+</section>
+
+<section class="dashboard-module-grid imports-module-grid">
+  {% for value,label in import_types %}
+    <article class="dashboard-module-card import-template-card">
+      <strong>{{ label }}</strong>
+      <span>Descarga una plantilla o sube un archivo para validar.</span>
+      <div class="module-actions">
+        <a class="btn btn-light" href="{% url 'imports_internal:template' value %}">Plantilla CSV</a>
+        <a class="btn btn-light" href="{% url 'imports_internal:template' value %}?format=xlsx">Plantilla Excel</a>
+        <a class="btn btn-secondary" href="{% url 'imports_internal:create' %}?type={{ value }}">Importar</a>
+      </div>
+    </article>
+  {% endfor %}
+</section>
+
+<section class="toolbar panel-card compact imports-toolbar">
+  <form method="get" class="search-form internal-filter-form imports-filter-form">
+    {{ filter_form.import_type }} {{ filter_form.status }} {{ filter_form.q }}
+    <button class="btn btn-primary">Filtrar</button>
+    <a class="btn btn-light" href="{% url 'imports_internal:home' %}">Limpiar</a>
+  </form>
+</section>
+
+<section class="panel-card">
+  <div class="panel-header"><div><h2>Historial de importaciones</h2><p>Todo archivo queda registrado con responsable, hash y resultado.</p></div></div>
+  <div class="responsive-table">
+    <table class="data-table">
+      <thead><tr><th>Archivo</th><th>Tipo</th><th>Estado</th><th>Filas</th><th>Resultado</th><th>Responsable</th><th></th></tr></thead>
+      <tbody>
+        {% for batch in batches %}
+          <tr>
+            <td><strong>{{ batch.original_filename }}</strong><span class="table-subtext">{{ batch.created_at|date:'d/m/Y H:i' }}</span></td>
+            <td>{{ batch.get_import_type_display }}</td>
+            <td><span class="state state-import-{{ batch.status }}">{{ batch.get_status_display }}</span></td>
+            <td>{{ batch.total_rows }}<span class="table-subtext">válidas {{ batch.valid_rows }} / errores {{ batch.invalid_rows }}</span></td>
+            <td>+{{ batch.created_count }} / act. {{ batch.updated_count }}<span class="table-subtext">fallos {{ batch.error_count }}</span></td>
+            <td>{{ batch.uploaded_by.get_username|default:'Sistema' }}</td>
+            <td><a class="btn btn-light" href="{% url 'imports_internal:detail' batch.pk %}">Ver</a></td>
+          </tr>
+        {% empty %}<tr><td colspan="7">Todavía no hay importaciones registradas.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+    <nav class="pagination">
+      {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,32 @@
+{# ES: Revisión Staff con decisión temporal y trazable. EN: Staff review with temporary, traceable decisions. #}
+
+{% extends 'base/base.html' %}
+{% block title %}Solicitudes Staff | Vinova Pro{% endblock %}
+{% block page_title %}Solicitudes de acceso Staff{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Las aprobaciones no conceden roles: habilitan temporalmente la sesión, red y señal de dispositivo solicitadas.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'security_center:dashboard' %}">Volver</a>{% endblock %}
+{% block content %}
+<section class="panel-card table-panel">
+  <div class="responsive-table"><table class="data-table"><thead><tr><th>Cuenta</th><th>Solicitud</th><th>Señales</th><th>Estado</th><th>Decisión</th></tr></thead><tbody>
+  {% for item in access_requests %}
+    <tr>
+      <td><strong>{{ item.user.get_full_name|default:item.user.username }}</strong><span class="table-subtext">{{ item.user.username }}</span></td>
+      <td>{{ item.created_at|date:'d/m/Y H:i' }}<span class="table-subtext">Expira {{ item.request_expires_at|date:'d/m/Y H:i' }}</span></td>
+      <td>{% for reason in item.risk_reasons %}<span class="badge">{{ reason }}</span>{% empty %}Sin señal registrada{% endfor %}</td>
+      <td><span class="state {% if item.status == 'approved' %}state-ok{% elif item.status == 'pending' %}state-warning{% else %}state-danger{% endif %}">{{ item.get_status_display }}</span>{% if item.access_expires_at %}<span class="table-subtext">Acceso hasta {{ item.access_expires_at|date:'d/m/Y H:i' }}</span>{% endif %}</td>
+      <td>
+        {% if item.status == 'pending' %}
+          <form method="post" action="{% url 'security_center:staff_access_approve' item.pk %}" class="inline-actions">{% csrf_token %}<input class="form-control" name="note" maxlength="500" placeholder="Observación opcional"><button class="btn btn-primary" type="submit">Aprobar</button></form>
+          <form method="post" action="{% url 'security_center:staff_access_reject' item.pk %}" class="inline-actions">{% csrf_token %}<input class="form-control" name="note" maxlength="500" placeholder="Motivo opcional"><button class="btn btn-danger" type="submit">Rechazar</button></form>
+        {% elif item.status == 'approved' and item.is_active_approval %}
+          <form method="post" action="{% url 'security_center:staff_access_revoke' item.pk %}">{% csrf_token %}<button class="btn btn-danger" type="submit">Revocar</button></form>
+        {% else %}
+          <span class="table-subtext">{{ item.decided_by|default:'Sistema' }}</span>
+        {% endif %}
+      </td>
+    </tr>
+  {% empty %}<tr><td colspan="5">No existen solicitudes registradas.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% include 'components/pagination.html' %}
+{% endblock %}

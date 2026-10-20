@@ -1,0 +1,17 @@
+{# ES: Formulario administrativo de artículo con validación y motivo de versión. #}
+{# EN: Administrative article form with validation and version change note. #}
+{% extends "base/base.html" %}
+{% block title %}{{ page_heading }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ page_heading }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">El contenido se guarda como texto seguro y cada cambio crea una versión auditable.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'help_center:manage_articles' %}">Volver a artículos</a>{% if article %}<a class="btn btn-secondary" href="{% url 'help_center:manage_preview' article.pk %}">Previsualizar</a>{% endif %}{% endblock %}
+{% block content %}
+<section class="panel-card form-panel-wide">
+  <form method="post" class="form-grid" novalidate>
+    {% csrf_token %}
+    {% for field in form %}<label class="form-field {% if field.name == 'content' or field.name == 'summary' or field.name == 'change_note' %}span-2{% endif %} {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}"><span>{{ field.label }}{% if field.field.required %} <b aria-hidden="true">*</b><span class="sr-only"> (obligatorio)</span>{% endif %}</span>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}
+    {% if form.non_field_errors %}<div class="field-error span-2">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-actions span-2"><button class="btn btn-primary">Guardar versión</button><a class="btn btn-light" href="{% url 'help_center:manage_articles' %}">Cancelar</a></div>
+  </form>
+</section>
+{% endblock %}

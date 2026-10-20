@@ -1,0 +1,15 @@
+{# ES: Renderiza la interfaz templates/notifications/internal/campaign_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/notifications/internal/campaign_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Campañas | Vinova Pro{% endblock %}
+{% block page_title %}Campañas{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Segmentación, revisión y confirmación trazable; ninguna campaña se envía automáticamente.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'notifications_internal:sent' %}">Notificaciones</a>{% if can_manage %}<a class="btn btn-primary" href="{% url 'notifications_internal:campaign_create' %}">Nueva campaña</a>{% endif %}{% endblock %}
+{% block content %}
+<section class="panel-card table-panel">
+  <div class="responsive-table"><table class="data-table"><thead><tr><th>Campaña</th><th>Sucursal</th><th>Segmento</th><th>Destinatarios</th><th>Estado</th><th></th></tr></thead><tbody>
+  {% for campaign in campaigns %}<tr><td><strong>{{ campaign.name }}</strong><span class="table-subtext">{{ campaign.created_at|date:'d/m/Y H:i' }}</span></td><td>{{ campaign.branch.name }}</td><td>{{ campaign.get_segment_type_display }}</td><td>{{ campaign.recipient_count }}</td><td><span class="state">{{ campaign.get_status_display }}</span></td><td><a class="btn btn-secondary" href="{% url 'notifications_internal:campaign_detail' campaign.pk %}">Ver</a></td></tr>
+  {% empty %}<tr><td colspan="6">No hay campañas.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

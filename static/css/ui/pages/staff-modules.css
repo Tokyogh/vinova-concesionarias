@@ -1,0 +1,97 @@
+/* ES: Define estilos de static/css/ui/pages/staff-modules, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/pages/staff-modules styles, including states and responsive behavior. */
+/*
+   F12 - Módulos staff (vehículos, inventario, CRM, ventas, postventa, clientes,
+   facturación, reportes, usuarios y roles).
+   Capa de página: anatomía común toolbar + panel de tabla + grids de estado.
+   Los componentes viven en components/{cards,filters,tables,badges,pagination}.css. */
+
+/* --- Barra de herramientas: título de sección + filtros en una sola banda --- */
+.toolbar {
+  margin-bottom: var(--space-16);
+  padding: var(--space-16) var(--space-20);
+}
+.toolbar .panel-header {
+  margin-bottom: var(--space-12);
+  padding-bottom: var(--space-12);
+}
+.toolbar .panel-header p,
+.panel-header p {
+  margin: var(--space-4) 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-13);
+}
+
+/* --- Panel de tabla: encabezado + tabla + paginación, sin huecos dobles --- */
+.table-panel { margin-bottom: var(--space-20); }
+.table-panel > .panel-header {
+  margin: 0; padding: var(--space-16) var(--space-20);
+  border-bottom: 1px solid var(--border);
+}
+.table-panel > .panel-header h2,
+.table-panel > .panel-header h3 { font-size: var(--fs-15); }
+.table-panel .responsive-table,
+.table-panel .table-scroll { max-width: 100%; }
+.table-panel > .pagination-bar:last-child { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+
+/* --- Rejilla de KPI: 4 por fila en desktop denso --- */
+.metric-grid {
+  display: grid; gap: var(--space-12);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  margin-bottom: var(--space-16);
+}
+.metric-grid > .metric-card { min-width: 0; }
+.metric-grid .metric-card span,
+.metric-grid .metric-card strong { overflow-wrap: anywhere; }
+
+/* --- Paneles laterales de módulo (atención de ventas, totales, últimos movimientos) --- */
+.sales-attention-card, .invoices-ready-card, .recent-movements-panel { margin-bottom: var(--space-16); }
+/* ES: Las reglas de «.sales-total-card .panel-header» definen estado visual y adaptación sin alterar semántica. */
+/* EN: The «.sales-total-card .panel-header» rules define visual state and adaptation without changing semantics. */
+.sales-total-card .panel-header {
+  padding: 0 0 var(--space-12); margin-bottom: 0; border-bottom: 0;
+}
+
+/* --- Roles y usuarios --- */
+.role-badge-wrap { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+.role-badge {
+  display: inline-flex; align-items: center; white-space: nowrap;
+  padding: 2px 8px; border-radius: var(--radius-sm);
+  background: var(--blue-soft); color: var(--primary-3);
+  font-size: var(--fs-11); font-weight: var(--fw-semibold);
+}
+
+/* --- Importaciones: listas de campos compactas --- */
+.compact-row-list { display: grid; gap: var(--space-8); margin-top: var(--space-12); }
+.compact-row {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-12);
+  padding: var(--space-10) var(--space-12);
+  border: 1px solid var(--border-soft); border-radius: var(--radius);
+  background: var(--surface);
+}
+.compact-row:hover { border-color: var(--border-strong); background: var(--surface-2); }
+.compact-row strong { color: var(--text); }
+.compact-row span { color: var(--text-muted); font-size: var(--fs-12); }
+.vehicle-import-field-list .compact-row { padding: var(--space-12) 0; }
+
+/* --- Bloques de código / JSON en paneles --- */
+.panel-card > pre, .audit-json-grid pre {
+  max-width: 100%; overflow: auto;
+  padding: var(--space-12); border-radius: var(--radius);
+  background: var(--surface-2); color: var(--text-2);
+  font-size: var(--fs-12);
+}
+
+/* --- Etiquetas de perfil --- */
+.profile-meta { display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; }
+.profile-meta span:not(.state) {
+  padding: 4px 10px; border: 1px solid var(--border); border-radius: var(--radius-pill);
+  color: var(--text-2); font-size: var(--fs-12); font-weight: var(--fw-medium);
+}
+
+/* --- Toolbar de analítica y reportes --- */
+.analytics-toolbar, .reports-toolbar, .imports-toolbar { margin-bottom: var(--space-16); }
+.analytics-toolbar { padding: var(--space-16) var(--space-20); }
+
+/* --- Badges de funnel / timeline en reportes --- */
+.funnel-list, .timeline-list { display: grid; gap: var(--space-10); }

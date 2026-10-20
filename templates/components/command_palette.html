@@ -1,0 +1,23 @@
+{# ES: Renderiza la interfaz templates/components/command_palette; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/components/command_palette interface; permissions and data are resolved server-side. #}
+<div class="command-palette" id="command-palette" hidden data-command-palette data-assist-url="{% url 'dashboard:assist' %}" data-search-url="{% url 'dashboard:universal_search' %}" role="dialog" aria-modal="true" aria-label="Buscar o preguntar a VINOVA">
+  <div class="command-palette-backdrop" data-command-palette-close tabindex="-1" aria-hidden="true"></div>
+  <div class="command-palette-dialog" role="document">
+    <div class="command-palette-field">
+      <svg class="command-palette-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="command-palette-input" type="search" name="command-palette" aria-label="Buscar o preguntar a VINOVA" placeholder="Buscar o preguntar a VINOVA..." autocomplete="off" role="combobox" aria-expanded="false" aria-controls="command-palette-results">
+      <kbd>Esc</kbd>
+      <button class="command-palette-close" type="button" data-command-palette-close aria-label="Cerrar búsqueda">×</button>
+    </div>
+    <ul class="command-palette-results" id="command-palette-results" role="listbox" aria-label="Destinos disponibles"></ul>
+    <p class="command-palette-empty" data-command-palette-empty hidden>Sin resultados. Prueba con cualquiera de las opciones del menú.</p>
+    <div class="command-palette-assist" data-command-palette-assist hidden aria-live="polite">
+      <strong>VINOVA Assist</strong><span data-command-palette-answer></span>
+    </div>
+    <div class="command-palette-footer">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> navegar</span>
+      <span><kbd>Enter</kbd> abrir</span>
+      <span><kbd>Esc</kbd> cerrar</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,35 @@
+/* ES: Define estilos de static/css/ui/layouts/auth, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/layouts/auth styles, including states and responsive behavior. */
+/*
+   Esqueleto de autenticación: dos columnas a ancho completo, sin tarjeta.
+   El tratamiento visual de cada panel vive en pages/login.css. */
+
+.login-body {
+  min-height: 100vh;
+  background: var(--surface);
+}
+
+.split-login {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  background: var(--surface);
+}
+
+.login-visual,
+.login-form-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.login-theme-corner {
+  position: fixed;
+  top: var(--space-16);
+  right: var(--space-16);
+  z-index: var(--z-header);
+}

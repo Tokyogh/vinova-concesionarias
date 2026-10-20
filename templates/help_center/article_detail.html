@@ -1,0 +1,30 @@
+{# ES: Renderiza la interfaz templates/help_center/article_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/help_center/article_detail interface; permissions and data are resolved server-side. #}
+{% extends "base/base.html" %}
+{% block title %}{{ article.title }} · Ayuda{% endblock %}
+{% block page_title %}{{ article.title }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">{{ article.summary }}</p>{% endblock %}
+{% block topbar_actions %}
+<a class="btn btn-light" href="{% url 'help_center:home' %}">Centro de ayuda</a>
+<a class="btn btn-secondary" href="{% url 'help_center:article_print' article.slug %}" target="_blank" rel="noopener">Vista imprimible</a>
+{% if request.user.can_manage_help %}<a class="btn btn-primary" href="{% url 'help_center:manage_edit' article.pk %}">Editar artículo</a>{% endif %}
+{% endblock %}
+{% block content %}
+<div class="help-article-layout">
+  <article class="panel-card help-article-body">
+    <div class="article-meta">
+      <span class="help-type">{{ article.get_article_type_display }}</span>
+      <span>{{ article.category.name }}</span>
+      <span>{{ article.estimated_minutes }} min</span>
+      <span>Actualizado {{ article.updated_at|date:"d/m/Y" }}</span>
+    </div>
+    <div class="article-content">{{ article.content|linebreaks }}</div>
+  </article>
+  <aside class="panel-card help-article-aside">
+    <h3>Uso responsable</h3>
+    <p>Este manual orienta la operación, pero no sustituye permisos, políticas internas ni asesoría legal o tributaria.</p>
+    {% if article.route_name %}<p><strong>Ayuda contextual:</strong> este contenido puede aparecer automáticamente en el módulo relacionado cuando activas el modo capacitación.</p>{% endif %}
+    <a class="btn btn-primary full" href="{% url 'help_center:home' %}">Ver más manuales</a>
+  </aside>
+</div>
+{% endblock %}

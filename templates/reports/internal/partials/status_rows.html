@@ -1,0 +1,3 @@
+{# ES: Renderiza la interfaz templates/reports/internal/partials/status_rows; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/reports/internal/partials/status_rows interface; permissions and data are resolved server-side. #}
+<div class="responsive-table compact-table"><table class="data-table"><thead><tr><th>Estado</th><th>Cantidad</th><th>{{ value_label|default:'Valor' }}</th></tr></thead><tbody>{% for row in rows %}<tr><td>{{ row.status }}</td><td>{{ row.count }}</td><td>{% if row.total is not None %}${{ row.total }}{% elif row.value is not None %}${{ row.value }}{% else %}$0.00{% endif %}</td></tr>{% empty %}<tr><td colspan="3">Sin datos.</td></tr>{% endfor %}</tbody></table></div>

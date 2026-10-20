@@ -1,0 +1,19 @@
+{# ES: Renderiza la interfaz templates/privacy/internal/request_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/privacy/internal/request_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Solicitud de datos | Vinova Pro{% endblock %}
+{% block page_title %}
+  {% if object %}Editar solicitud{% else %}Registrar solicitud{% endif %}
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% if object %}{% url 'privacy:request_detail' object.public_id %}{% else %}{% url 'privacy:request_list' %}{% endif %}">Cancelar</a>{% endblock %}
+{% block content %}
+  <section class="panel-card">
+    <form method="post" class="form-grid">
+      {% csrf_token %}
+      {% for field in form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}
+      <div class="form-actions span-2">
+        <button class="btn btn-primary">Guardar solicitud</button>
+      </div>
+    </form>
+  </section>
+{% endblock %}

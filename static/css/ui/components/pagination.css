@@ -1,0 +1,34 @@
+/* ES: Define estilos de static/css/ui/components/pagination, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/components/pagination styles, including states and responsive behavior. */
+/*
+   Paginación.
+   Depende de core/tokens.css. */
+
+/* --- Pagination --- */
+.pagination, .pagination-bar, .public-pagination {
+  display: flex; align-items: center; justify-content: center; gap: var(--space-8); margin: var(--space-32) 0 0;
+}
+.pagination a, .pagination span, .pagination-bar a, .pagination-bar span,
+.public-pagination a, .public-pagination span {
+  padding: var(--space-8) var(--space-14); border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface); font-weight: var(--fw-semibold); font-size: var(--fs-14);
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+
+/* Paginación interna: barra compacta pegada al final del panel de tabla. */
+.pagination-bar {
+  justify-content: space-between;
+  margin: 0; padding: var(--space-12) var(--space-16);
+  border-top: 1px solid var(--border-soft);
+}
+.pagination-bar > span {
+  border-color: transparent; background: transparent;
+  color: var(--text-muted); font-size: var(--fs-13); font-weight: var(--fw-medium);
+}
+.pagination a:hover, .pagination-bar a:hover, .public-pagination a:hover {
+  background: var(--surface-2); border-color: var(--border-strong);
+}
+.pagination .current, .pagination-bar .current {
+  background: var(--primary); color: var(--on-primary); border-color: var(--primary);
+}

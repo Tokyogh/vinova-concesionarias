@@ -1,0 +1,39 @@
+[tool.pytest.ini_options]
+markers = ["e2e: recorridos funcionales Playwright aislados"]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py", "*_test.py"]
+testpaths = ["apps", "tests"]
+norecursedirs = [
+  ".git",
+  ".pytest_cache",
+  ".ruff_cache",
+  "backups",
+  "logs",
+  "media",
+  "private",
+  "run",
+  "staticfiles",
+  "tmp",
+  "web_carros",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = [
+  "backups",
+  "logs",
+  "media",
+  "private",
+  "run",
+  "staticfiles",
+  "tmp",
+  "web_carros",
+]
+
+[tool.ruff.lint]
+# Contrato de lint explicito y estable: el runner QA ejecuta `ruff check .` dentro
+# de la imagen Docker (ruff 0.16.x) mientras el host puede usar otra version.
+# Sin `select` explicito, cada version de ruff aplica sus propios defaults y el
+# resultado del gate de calidad deja de ser reproducible.
+select = ["E4", "E7", "E9", "F"]

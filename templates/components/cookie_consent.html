@@ -1,0 +1,13 @@
+{# ES: Elección equivalente para aceptar, rechazar o configurar. EN: Equivalent accept, reject, and settings choices. #}
+
+{% if vinova_cookie_consent_required and request.resolver_match.view_name != 'privacy_public:cookie_settings' %}
+<aside class="cookie-consent" role="dialog" aria-labelledby="cookie-consent-title" aria-describedby="cookie-consent-description">
+  <h2 id="cookie-consent-title">Tus preferencias de privacidad</h2>
+  <p id="cookie-consent-description">Usamos tecnologías necesarias para seguridad y sesión. Analítica, preferencias y el mapa externo permanecen apagados hasta que los aceptes.</p>
+  <div class="cookie-consent-actions">
+    <form method="post" action="{% url 'privacy_public:cookie_update' %}">{% csrf_token %}<input type="hidden" name="action" value="accept_all"><input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-primary" type="submit">Aceptar opcionales</button></form>
+    <form method="post" action="{% url 'privacy_public:cookie_update' %}">{% csrf_token %}<input type="hidden" name="action" value="reject_optional"><input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-light" type="submit">Rechazar opcionales</button></form>
+    <a class="btn btn-light" href="{% url 'privacy_public:cookie_settings' %}?next={{ request.get_full_path|urlencode }}">Configurar</a>
+  </div>
+</aside>
+{% endif %}

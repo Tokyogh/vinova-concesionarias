@@ -1,0 +1,47 @@
+{# ES: Renderiza la interfaz templates/security_center/internal/dashboard; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/security_center/internal/dashboard interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Seguridad y hardening | Vinova Pro{% endblock %}
+{% block page_title %}Seguridad y hardening{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Control central de 2FA, contraseñas, sesiones, rate limiting y configuración segura.</p>{% endblock %}
+{% block topbar_actions %}{% if request.user.can_approve_staff_access %}<a class="btn btn-light" href="{% url 'security_center:staff_access_requests' %}">Solicitudes Staff</a>{% endif %}{% if request.user.can_manage_security %}<a class="btn btn-primary" href="{% url 'security_center:policy' %}">Editar política</a>{% endif %}{% endblock %}
+{% block content %}
+<section class="metric-grid">
+  <article class="metric-card"><span>Usuarios con 2FA</span><strong>{{ two_factor_total }}</strong></article>
+  <article class="metric-card"><span>Administradores sin 2FA</span><strong>{{ admin_without_2fa }}</strong></article>
+  <article class="metric-card"><span>Sesiones activas</span><strong>{{ active_sessions }}</strong></article>
+  <article class="metric-card"><span>Fallos de login 24 h</span><strong>{{ failed_logins_24h }}</strong></article>
+  <article class="metric-card"><span>Alertas abiertas</span><strong>{{ open_alerts }}</strong></article>
+</section>
+<section class="detail-grid two-columns security-grid">
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Política vigente</h2><p>Controles aplicados a toda la instalación.</p></div></div>
+    <dl class="detail-list">
+      <div><span>Contraseña mínima</span><strong>{{ policy.min_password_length }} caracteres</strong></div>
+      <div><span>Vencimiento</span><strong>{{ policy.password_max_age_days }} días</strong></div>
+      <div><span>Historial</span><strong>{{ policy.password_history_count }} contraseñas</strong></div>
+      <div><span>Inactividad</span><strong>{{ policy.session_idle_minutes }} minutos</strong></div>
+      <div><span>Sesiones máximas</span><strong>{{ policy.max_active_sessions }}</strong></div>
+      <div><span>2FA administrativo</span><strong>{% if policy.require_2fa_for_admin_roles %}Obligatorio{% else %}Opcional{% endif %}</strong></div>
+      <div><span>Acceso Staff adaptativo</span><strong>{{ policy.get_staff_access_mode_display }}</strong></div>
+    </dl>
+  </article>
+  <article class="panel-card">
+    <h2>Estado de hardening</h2>
+    <div class="security-checklist">
+      <div><span class="state state-ok">Activo</span><strong>CSRF, XSS y ORM seguro</strong></div>
+      <div><span class="state state-ok">Activo</span><strong>CSP, X-Frame-Options y nosniff</strong></div>
+      <div><span class="state state-ok">Activo</span><strong>Throttling global de API</strong></div>
+      <div><span class="state state-ok">Activo</span><strong>Rate limiting de inicio de sesión</strong></div>
+      <div><span class="state state-ok">Activo</span><strong>Documentos privados con alcance por sucursal</strong></div>
+      <div><span class="state state-warning">Producción</span><strong>Ejecutar check --deploy antes de publicar</strong></div>
+    </div>
+  </article>
+</section>
+<section class="panel-card table-panel">
+  <div class="panel-header"><div><h2>Sesiones recientes</h2><p>Direcciones IP anonimizadas mediante hash.</p></div></div>
+  <div class="responsive-table"><table class="data-table"><thead><tr><th>Usuario</th><th>Última actividad</th><th>2FA</th><th>Estado</th><th>Dispositivo</th></tr></thead><tbody>
+  {% for item in recent_sessions %}<tr><td>{{ item.user.get_full_name|default:item.user.username }}</td><td>{{ item.last_seen_at|date:'d/m/Y H:i' }}</td><td>{% if item.two_factor_verified_at %}Verificado{% else %}No verificado{% endif %}</td><td>{% if item.revoked_at %}<span class="state state-danger">Revocada</span>{% else %}<span class="state state-ok">Activa</span>{% endif %}</td><td>{{ item.user_agent|truncatechars:70|default:'No identificado' }}</td></tr>{% empty %}<tr><td colspan="5">No hay sesiones registradas.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

@@ -1,0 +1,204 @@
+/* ES: Define estilos de static/css/ui/pages/home, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/pages/home styles, including states and responsive behavior. */
+/*
+   Home: escenario fotográfico, copy editorial y franja de beneficios. */
+
+/* =========================================
+   HERO — un solo escenario fotográfico
+   ========================================= */
+.public-hero {
+  position: relative;
+  min-height: clamp(500px, 42vw, 570px);
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.public-hero-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: min(52%, 760px);
+  min-height: inherit;
+  padding-block: var(--space-64);
+  padding-left: max(var(--container-gutter), calc((100vw - var(--container)) / 2));
+  padding-right: var(--space-40);
+}
+
+.public-hero-content .eyebrow {
+  display: inline-block;
+  align-self: flex-start;
+  margin-bottom: var(--space-20);
+  padding: var(--space-8) var(--space-16);
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-caps);
+}
+
+.public-hero-content h1 {
+  margin: 0 0 var(--space-20);
+  max-width: 14ch;
+  color: var(--text);
+  font-size: var(--fs-hero);
+  font-weight: var(--fw-bold);
+  line-height: 1.06;
+  letter-spacing: var(--tracking-tight);
+}
+
+.public-hero-content h1 .accent-word { color: var(--primary); }
+
+.public-hero-content p {
+  margin: 0 0 var(--space-32);
+  max-width: 46ch;
+  color: var(--text-2);
+  font-size: var(--fs-18);
+  line-height: var(--lh-relaxed);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+}
+
+/* La fotografía, su iluminación y el copy comparten el mismo stage. */
+.hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  transform: none;
+  background: linear-gradient(115deg, transparent 0 34%, var(--primary-soft) 100%);
+}
+
+.hero-image.asset-slot {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  transform: none;
+  aspect-ratio: auto;
+  overflow: hidden;
+  background: transparent;
+  -webkit-mask-image: linear-gradient(90deg,
+    transparent 0%,
+    transparent 20%,
+    rgba(0, 0, 0, .12) 35%,
+    rgba(0, 0, 0, .38) 50%,
+    rgba(0, 0, 0, .72) 65%,
+    rgba(0, 0, 0, .94) 80%,
+    #000 85%,
+    #000 100%);
+  mask-image: linear-gradient(90deg,
+    transparent 0%,
+    transparent 20%,
+    rgba(0, 0, 0, .12) 35%,
+    rgba(0, 0, 0, .38) 50%,
+    rgba(0, 0, 0, .72) 65%,
+    rgba(0, 0, 0, .94) 80%,
+    #000 85%,
+    #000 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+/* ES: Las reglas de «.hero-image img» definen estado visual y adaptación sin alterar semántica. */
+/* EN: The «.hero-image img» rules define visual state and adaptation without changing semantics. */
+.hero-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  max-width: none;
+  z-index: 0;
+  object-fit: contain;
+  object-position: right center;
+}
+
+[data-theme="dark"] .hero-image img { filter: brightness(.78) saturate(.88) contrast(.97); }
+
+/* --- Indicadores de carrusel --- */
+.hero-indicators {
+  position: absolute;
+  z-index: 3;
+  right: var(--container-gutter);
+  bottom: calc(var(--space-32) + 12px);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.hero-indicators span {
+  width: var(--space-8);
+  height: var(--space-8);
+  border-radius: var(--radius-pill);
+  background: rgba(11, 31, 56, .18);
+}
+
+.hero-indicators span.is-active {
+  width: var(--space-24);
+  background: var(--primary);
+}
+
+[data-theme="dark"] .hero-indicators span { background: rgba(255, 255, 255, .22); }
+[data-theme="dark"] .hero-indicators span.is-active { background: var(--primary); }
+
+/* =========================================
+   FRANJA DE BENEFICIOS
+   ========================================= */
+.hero-benefits {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-32);
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding: var(--space-48) var(--container-gutter) var(--space-64);
+  background: var(--bg);
+}
+
+.hero-benefit { display: grid; gap: var(--space-12); align-content: start; }
+
+.hero-benefit .benefit-icon {
+  width: var(--space-40);
+  height: var(--space-40);
+  border-radius: var(--radius);
+  display: grid;
+  place-items: center;
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.hero-benefit .benefit-icon svg { width: 20px; height: 20px; }
+
+.hero-benefit strong {
+  display: block;
+  color: var(--text);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+}
+
+.hero-benefit p {
+  margin: 0;
+  max-width: 30ch;
+  color: var(--text-muted);
+  font-size: var(--fs-14);
+  line-height: var(--lh-normal);
+}

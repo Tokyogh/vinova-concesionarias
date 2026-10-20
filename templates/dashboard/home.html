@@ -1,0 +1,31 @@
+{# ES: Renderiza la interfaz templates/dashboard/home; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/home interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Dashboard | Vinova Pro{% endblock %}
+{% block page_title %}Dashboard operativo{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Resumen funcional de empresas, sucursales, usuarios y catálogo vehicular.</p>{% endblock %}
+{% block content %}
+<section class="metric-grid">
+  <article class="metric-card"><span>Empresas activas</span><strong>{{ metrics.active_companies }}</strong></article>
+  <article class="metric-card"><span>Sucursales activas</span><strong>{{ metrics.active_branches }}</strong></article>
+  <article class="metric-card"><span>Usuarios activos</span><strong>{{ metrics.active_users }}</strong></article>
+  <article class="metric-card"><span>Vehículos disponibles</span><strong>{{ metrics.available_vehicles }}</strong></article>
+</section>
+<section class="metric-grid">
+  <article class="metric-card"><span>Reservados</span><strong>{{ metrics.reserved_vehicles }}</strong></article>
+  <article class="metric-card"><span>Vendidos</span><strong>{{ metrics.sold_vehicles }}</strong></article>
+  <article class="metric-card"><span>Destacados</span><strong>{{ metrics.featured_vehicles }}</strong></article>
+  <article class="metric-card"><span>Versión</span><strong>0.3</strong></article>
+</section>
+<section class="detail-grid two-columns">
+  <article class="panel-card">
+    <h2>Correcciones aplicadas</h2>
+    <p>La ruta principal <code>/</code> queda como dashboard. El perfil vive en <code>/accounts/profile/</code>.</p>
+    <p>La sucursal principal del usuario es opcional; los roles operativos como vendedor, facturación o bodega requieren sucursal al asignarse.</p>
+  </article>
+  <article class="panel-card">
+    <h2>Siguiente bloque funcional</h2>
+    <p>Con empresas y sucursales listas, el siguiente paso natural es robustecer vehículos: CRUD completo, galería, recursos reutilizables, especificaciones por partes y archivado.</p>
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,90 @@
+{# ES: Renderiza la interfaz templates/accounts/user_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/accounts/user_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ managed_user.username }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ managed_user.get_full_name|default:managed_user.username }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Gestión de acceso, roles múltiples, sucursal y estado del usuario.</p>{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-light" href="{% url 'accounts:user_list' %}">Volver</a>
+  <a class="btn btn-secondary" href="{% url 'accounts:user_update' managed_user.pk %}">Editar usuario</a>
+{% endblock %}
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="detail-grid user-access-summary">
+  <article class="panel-card profile-card">
+    {% include 'components/avatar.html' with avatar_user=managed_user avatar_size='avatar-profile' avatar_alt='Fotografía de perfil' %}
+    <h2>{{ managed_user.get_full_name|default:managed_user.username }}</h2>
+    <p>{{ managed_user.email }}</p>
+    <div class="profile-meta">
+      <span>@{{ managed_user.username }}</span>
+      <span>{% if managed_user.branch %}{{ managed_user.branch.name }}{% else %}Sin sucursal{% endif %}</span>
+      {% if managed_user.is_active %}<span class="state state-ok">Activo</span>{% else %}<span class="state state-danger">Inactivo</span>{% endif %}
+      {% if managed_user.is_locked %}<span class="state state-warning">Bloqueado temporalmente</span>{% endif %}
+    </div>
+    {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+    {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+    <form method="post" action="{% url 'accounts:user_toggle_active' managed_user.pk %}" class="inline-form">
+      {% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+      <button class="btn {% if managed_user.is_active %}btn-danger{% else %}btn-primary{% endif %}" {% if managed_user.pk == request.user.pk %}disabled title="No puedes desactivar tu propio usuario"{% endif %}>{% if managed_user.is_active %}Desactivar{% else %}Activar{% endif %}</button>
+    </form>
+  </article>
+
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Roles activos</h2><p>Un usuario puede tener varios roles y también roles limitados por sucursal.</p></div></div>
+    <div class="role-list">
+      {% for user_role in active_roles %}
+        <div class="role-row">
+          <div>
+            <strong>{{ user_role.role.name }}</strong>
+            <span>{{ user_role.role.code }} · {% if user_role.branch %}{{ user_role.branch.name }}{% else %}Toda la empresa{% endif %}</span>
+          </div>
+          <form method="post" action="{% url 'accounts:user_remove_role' managed_user.pk user_role.pk %}">{% csrf_token %}<button class="btn btn-light">Retirar</button></form>
+        </div>
+      {% empty %}
+        <p class="muted">Este usuario aún no tiene roles activos.</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+
+<section class="detail-grid two-columns user-access-actions">
+  <article class="panel-card">
+    <h2>Asignar nuevo rol</h2>
+    <form method="post" action="{% url 'accounts:user_assign_role' managed_user.pk %}" class="form-grid compact-grid" novalidate>
+      {% csrf_token %}
+      {% for field in role_form %}
+        <label class="form-field"><span>{{ field.label }}</span>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}</label>
+      {% endfor %}
+      <button class="btn btn-primary">Asignar rol</button>
+    </form>
+  </article>
+  <article class="panel-card">
+    <h2>Restablecer contraseña</h2>
+    <form method="post" action="{% url 'accounts:user_admin_password' managed_user.pk %}" class="form-grid compact-grid" novalidate>
+      {% csrf_token %}
+      {% for field in password_form %}
+        <label class="form-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}"><span>{{ field.label }}</span>{{ field }}</label>
+      {% endfor %}
+      <button class="btn btn-secondary">Actualizar contraseña</button>
+    </form>
+  </article>
+</section>
+
+<section class="panel-card user-security-section">
+  <div class="panel-header"><div><h2>Seguridad avanzada</h2><p>Estado de segundo factor y recuperación administrativa.</p></div></div>
+  <div class="detail-grid two-columns">
+    <dl class="detail-list">
+      <div><span>2FA</span><strong>{% if managed_user.security_profile.two_factor_enabled %}Activo{% else %}No configurado{% endif %}</strong></div>
+      <div><span>Última verificación</span><strong>{{ managed_user.security_profile.last_two_factor_at|date:'d/m/Y H:i'|default:'No registrada' }}</strong></div>
+      <div><span>Códigos disponibles</span><strong>{{ managed_user.security_profile.backup_code_hashes|length }}</strong></div>
+    </dl>
+    {% if request.user.can_manage_security and managed_user.pk != request.user.pk and managed_user.security_profile.two_factor_enabled %}
+      <form method="post" action="{% url 'security_center:admin_reset_2fa' managed_user.pk %}" class="form-grid compact-grid">{% csrf_token %}
+        <p class="muted">Usa esta acción únicamente después de verificar la identidad del usuario. Se cerrarán todas sus sesiones.</p>
+        <button class="btn btn-danger">Restablecer 2FA y cerrar sesiones</button>
+      </form>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

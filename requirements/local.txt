@@ -1,0 +1,9 @@
+-r base.txt
+pytest>=8.2
+pytest-django>=4.8
+factory-boy>=3.3
+coverage>=7.6
+ruff>=0.6
+pytest-playwright>=0.7,<0.8
+playwright>=1.60,<1.61
+tzdata>=2024.1; platform_system == "Windows"

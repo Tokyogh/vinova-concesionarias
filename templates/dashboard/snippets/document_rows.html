@@ -1,0 +1,12 @@
+{# ES: Renderiza la interfaz templates/dashboard/snippets/document_rows; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/snippets/document_rows interface; permissions and data are resolved server-side. #}
+<div class="compact-row-list">
+  {% for document in documents %}
+    <a class="compact-row" href="{% url 'documents_internal:detail' document.pk %}">
+      <strong>{{ document.title }}</strong>
+      <span>{{ document.get_document_type_display }} · {{ document.get_status_display }}</span>
+    </a>
+  {% empty %}
+    <p class="muted">{{ empty_text }}</p>
+  {% endfor %}
+</div>

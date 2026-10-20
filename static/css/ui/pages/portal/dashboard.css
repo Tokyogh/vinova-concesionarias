@@ -1,0 +1,82 @@
+/* ES: Define estilos de static/css/ui/pages/portal/dashboard, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/pages/portal/dashboard styles, including states and responsive behavior. */
+.portal-body .portal-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.portal-body .portal-metric-card { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 14px; min-height: 116px; padding: 20px; border: 1px solid var(--border-soft); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-sm); }
+.portal-metric-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 13px; font-size: 21px; }
+.portal-metric-icon svg { width: 21px; height: 21px; }
+.portal-metric-blue .portal-metric-icon { color: var(--primary); background: var(--primary-soft); }
+.portal-metric-green .portal-metric-icon { color: var(--success); background: var(--success-bg); }
+.portal-metric-violet .portal-metric-icon { color: var(--accent); background: var(--accent-soft); }
+.portal-metric-orange .portal-metric-icon { color: var(--warning); background: var(--warning-bg); }
+.portal-metric-card > div { display: grid; min-width: 0; }
+.portal-metric-card > div > span { color: var(--text-2); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .045em; }
+.portal-metric-card strong { margin-top: 3px; overflow: hidden; font-size: clamp(19px, 1.7vw, 27px); line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.portal-metric-card small { margin-top: 5px; overflow: hidden; color: var(--text-2); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+
+.portal-home-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.portal-body .portal-home-panel { min-height: 326px; padding: 23px; }
+.portal-home-panel .panel-header { align-items: flex-start; margin-bottom: 20px; }
+.portal-home-panel .panel-header h2 { margin: 0; font-size: 17px; }
+.portal-home-panel .panel-header p { margin: 4px 0 0; color: var(--text-muted); font-size: 12px; }
+.portal-home-panel .panel-header > a { color: var(--primary); font-size: 12px; font-weight: 700; text-decoration: none; }
+
+.portal-dashboard-vehicles { display: grid; gap: 5px; }
+.portal-dashboard-vehicle { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; align-items: center; gap: 13px; min-height: 72px; padding: 8px; border-radius: 12px; color: inherit; text-decoration: none; }
+.portal-dashboard-vehicle:hover { background: var(--surface-2); }
+.portal-dashboard-vehicle-image { display: grid; place-items: center; width: 58px; height: 50px; overflow: hidden; border-radius: 9px; color: var(--primary); background: var(--primary-soft); }
+.portal-dashboard-vehicle-image img { width: 100%; height: 100%; object-fit: cover; }
+.portal-dashboard-vehicle > div:nth-child(2) { display: grid; gap: 4px; min-width: 0; }
+.portal-dashboard-vehicle strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.portal-dashboard-vehicle span { color: var(--text-2); font-size: 11px; }
+.portal-dashboard-vehicle > .state { color: var(--success); font-size: 10px; }
+
+.portal-upcoming-list { display: grid; }
+.portal-upcoming-list > a { display: grid; grid-template-columns: 49px minmax(0, 1fr) auto; align-items: center; gap: 13px; min-height: 71px; padding: 9px 0; border-top: 1px solid var(--border-soft); color: inherit; text-decoration: none; }
+.portal-upcoming-list > a:first-child { border-top: 0; }
+.portal-upcoming-list time { display: grid; place-items: center; width: 46px; height: 50px; border-radius: 10px; color: var(--primary); background: var(--primary-soft); }
+.portal-upcoming-list time strong { font-size: 19px; line-height: 1; }
+.portal-upcoming-list time span { margin-top: 3px; font-size: 9px; text-transform: uppercase; }
+.portal-upcoming-list > a > span { display: grid; gap: 4px; min-width: 0; }
+.portal-upcoming-list > a > span strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+/* ES: Las reglas de «.portal-upcoming-list small» definen estado visual y adaptación sin alterar semántica. */
+/* EN: The «.portal-upcoming-list small» rules define visual state and adaptation without changing semantics. */
+.portal-upcoming-list small { color: var(--text-2); font-size: 11px; }
+.portal-upcoming-list .state { font-size: 9px; }
+
+.portal-service-chart { display: grid; grid-template-columns: repeat(6, 1fr); align-items: end; gap: 16px; height: 220px; padding: 20px 10px 0; border-bottom: 1px solid var(--border); background: repeating-linear-gradient(to bottom, transparent 0, transparent 54px, var(--border-soft) 55px); }
+.portal-chart-column { display: grid; grid-template-rows: 22px 1fr 28px; align-items: end; justify-items: center; height: 100%; }
+.portal-chart-column i { display: block; width: min(30px, 70%); min-height: 4px; height: max(4px, var(--chart-height)); border-radius: 7px 7px 2px 2px; background: linear-gradient(180deg, var(--brand-primary), var(--brand-secondary)); }
+.portal-chart-value { color: var(--text-2); font-size: 10px; }
+.portal-chart-column small { align-self: center; color: var(--text-muted); font-size: 10px; }
+.portal-service-chart > .empty-state { grid-column: 1 / -1; align-self: center; width: 100%; }
+
+.portal-body .portal-activity-list { display: grid; margin: 0; padding: 0; list-style: none; }
+.portal-body .portal-activity-list li + li { border-top: 1px solid var(--border-soft); }
+.portal-body .portal-activity-list a { display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 55px; padding: 7px 0; color: inherit; text-decoration: none; }
+.portal-activity-dot { width: 8px; height: 8px; border: 2px solid var(--surface); border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft-2); }
+.portal-activity-list a > span:nth-child(2) { display: grid; gap: 2px; min-width: 0; }
+.portal-activity-list small { color: var(--text-muted); font-size: 10px; }
+.portal-activity-list strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.portal-activity-list time { color: var(--text-muted); font-size: 10px; }
+
+@media (max-width: 1240px) {
+  .portal-body .portal-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .portal-home-grid { grid-template-columns: 1fr; }
+  .portal-body .portal-home-panel { min-height: auto; }
+}
+
+@media (max-width: 520px) {
+  .portal-body .portal-metrics { grid-template-columns: 1fr; gap: 12px; }
+  .portal-body .portal-metric-card { min-height: 96px; padding: 16px; }
+  .portal-body .portal-home-panel { padding: 18px; }
+  .portal-dashboard-vehicle { grid-template-columns: 52px minmax(0, 1fr); }
+  .portal-dashboard-vehicle > .state { display: none; }
+  .portal-upcoming-list > a { grid-template-columns: 44px minmax(0, 1fr); }
+  .portal-upcoming-list > a > .state { display: none; }
+  .portal-service-chart { gap: 8px; height: 190px; padding-inline: 0; }
+  .portal-activity-list time { display: none; }
+  .portal-body .portal-activity-list a { grid-template-columns: 9px minmax(0, 1fr); }
+}

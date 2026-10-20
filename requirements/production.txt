@@ -1,0 +1,5 @@
+-r base.txt
+sentry-sdk>=2.13
+boto3>=1.35
+django-storages>=1.14
+cloudinary>=1.44,<2

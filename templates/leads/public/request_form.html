@@ -1,0 +1,103 @@
+{# ES: Renderiza la interfaz templates/leads/public/request_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/leads/public/request_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% load ui_assets %}
+{% block title %}Contacto | Vinova Pro{% endblock %}
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="contact-hero">
+  <div class="contact-hero-inner">
+    <span class="eyebrow">Contacto</span>
+    <h1>Conversemos sobre tu próximo vehículo</h1>
+    <p>Registra tu solicitud y el equipo comercial o de postventa te contactará desde la sucursal más cercana.</p>
+  </div>
+</section>
+
+<section class="public-contact-layout">
+  <aside class="contact-channels">
+    <h2 class="contact-channels-title">Canales de atención</h2>
+
+    <article class="contact-channel">
+      <span class="contact-channel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5c0-.6.4-1 1-1h3l2 4-2 1.4a12 12 0 0 0 5.6 5.6L15 13l4 2v3c0 .6-.4 1-1 1A15 15 0 0 1 4 5z"/></svg></span>
+      <div>
+        <h3>Ventas</h3>
+        {% if public_settings.public_phone %}<a class="contact-channel-link" href="tel:{{ public_settings.public_phone }}">{{ public_settings.public_phone }}</a>{% else %}<p>Atención en sucursal.</p>{% endif %}
+        {% if public_settings.whatsapp %}<a class="contact-channel-link" href="https://wa.me/{{ public_settings.whatsapp|cut:'+'|cut:' ' }}" rel="noopener">WhatsApp {{ public_settings.whatsapp }}</a>{% endif %}
+      </div>
+    </article>
+
+    <article class="contact-channel">
+      <span class="contact-channel-icon service-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0 0 5.7l1.4 1.4a4 4 0 0 0 5.7 0l2.6-2.6"/><path d="m12.6 8.4-2.9-2.9-6 6a2.1 2.1 0 0 0 0 3l1.6 1.6a2.1 2.1 0 0 0 3 0l6-6z"/><path d="m9.6 8.4 2.9 2.9"/><path d="m7.4 10.6 2.9 2.9"/></svg></span>
+      <div>
+        <h3>Postventa</h3>
+        {% if public_settings.opening_hours %}<p>{{ public_settings.opening_hours }}</p>{% else %}<p>Mantenimiento y repuestos en taller propio.</p>{% endif %}
+        <a class="contact-channel-link" href="{% url 'dashboard:home' %}#servicios">Ver servicios</a>
+      </div>
+    </article>
+
+    <article class="contact-channel">
+      <span class="contact-channel-icon service-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg></span>
+      <div>
+        <h3>Matriz</h3>
+        {% if public_settings.public_email %}<a class="contact-channel-link" href="mailto:{{ public_settings.public_email }}">{{ public_settings.public_email }}</a>{% else %}<p>Contacto desde el formulario.</p>{% endif %}
+        {% if public_settings.public_address %}<p>{{ public_settings.public_address|linebreaksbr }}</p>{% endif %}
+      </div>
+    </article>
+
+    {% if vehicle %}
+      <article class="contact-channel contact-channel-vehicle">
+        <span class="eyebrow">Vehículo de interés</span>
+        <h3>{{ vehicle.year }} {{ vehicle.brand.name }} {{ vehicle.model.name }}</h3>
+        {% if vehicle.price %}<p class="contact-channel-price">${{ vehicle.price }}</p>{% endif %}
+      </article>
+    {% endif %}
+  </aside>
+
+  <article class="panel-card public-lead-form-card">
+    <div class="panel-header">
+      <div>
+        <h2>Solicitud de atención</h2>
+        <p>Registra al menos un medio de contacto. El equipo asignará la sucursal y el asesor correspondientes.</p>
+      </div>
+    </div>
+    {% if form.non_field_errors %}<div class="message message-error">{{ form.non_field_errors }}</div>{% endif %}
+    {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+    {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+    <form method="post" class="form-grid lead-public-form">{% csrf_token %}
+      {{ form.website }}
+      {% for field in form.visible_fields %}
+        <label class="form-field {% if field.name == 'message' or field.name == 'consent_data_processing' %}span-2{% endif %} {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}">
+          <span>{% if field.name == 'consent_data_processing' %}Autorizo el tratamiento de mis datos para responder esta solicitud comercial, conforme a la <a href="{% url 'privacy_public:privacy_policy' %}" target="_blank" rel="noopener">política de privacidad</a>.{% else %}{{ field.label }}{% if field.field.required %} <b aria-hidden="true">*</b><span class="sr-only"> (obligatorio)</span>{% endif %}{% endif %}</span>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+        </label>
+      {% endfor %}
+      <div class="form-actions span-2"><button class="btn btn-primary">Enviar solicitud</button><a class="btn btn-light" href="{% url 'vehicles:catalog' %}">Ver vehículos</a></div>
+    </form>
+    <p class="privacy-note"><strong>Privacidad</strong> Registramos la versión del aviso y la autorización necesaria para responder esta solicitud. No autoriza marketing independiente.</p>
+  </article>
+
+  <aside class="contact-aside">
+    {% ui_final_asset "contact-branch" as contact_asset %}{% ui_final_srcset "contact-branch" as contact_srcset %}<div class="contact-photo media-slot asset-slot" data-asset-slot="contact-branch" role="img" aria-label="Asesoría personalizada en el showroom de Vinova Pro">
+      {% if contact_asset %}<img class="asset-slot-image" src="{{ contact_asset }}" srcset="{{ contact_srcset }}" sizes="(max-width: 900px) 100vw, 33vw" width="1670" height="942" alt="" aria-hidden="true" loading="lazy" decoding="async">{% else %}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l4-3 4 3v14"/><path d="M13 21V10l7-4v15"/><path d="M9 10v.01"/><path d="M9 14v.01"/><path d="M9 18v.01"/></svg>
+      <small>Sucursal Vinova Pro</small>
+      {% endif %}
+    </div>
+
+    <div class="contact-branches panel-card">
+      <h2>Nuestras sucursales</h2>
+      <ul class="contact-branch-list">
+        {% for branch in public_branches %}
+          <li>
+            <strong>{{ branch.name }}</strong>
+            <span>{{ branch.get_branch_type_display }}{% if branch.city %} · {{ branch.city }}{% endif %}</span>
+            {% if branch.address %}<small>{{ branch.address }}</small>{% endif %}
+          </li>
+        {% empty %}
+          <li><span>Las sucursales se publicarán cuando estén activas.</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </aside>
+</section>
+{% endblock %}

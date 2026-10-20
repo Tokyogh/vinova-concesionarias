@@ -1,0 +1,27 @@
+/* ES: Define estilos de static/css/ui/pages/portal/documents, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/pages/portal/documents styles, including states and responsive behavior. */
+.portal-document-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-4);
+}
+
+.portal-document-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-subtle);
+}
+
+.portal-document-card h3,
+.portal-document-card p {
+  margin: 0;
+}
+
+.portal-document-card .btn {
+  justify-self: start;
+  margin-top: auto;
+}

@@ -1,0 +1,67 @@
+{# ES: Renderiza la interfaz templates/accounts/login; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/accounts/login interface; permissions and data are resolved server-side. #}
+{% load static ui_assets %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f2f4d'/%3E%3Ctext x='16' y='23' font-family='Inter,Arial,sans-serif' font-size='20' font-weight='800' text-anchor='middle' fill='%23ffffff'%3EV%3C/text%3E%3C/svg%3E">
+  <title>Ingresar | Vinova Pro</title>
+  {% include 'components/head_assets.html' %}
+</head>
+<body class="login-body">
+  <button class="theme-toggle login-theme-corner" data-theme-toggle type="button" aria-label="Cambiar a modo oscuro" title="Cambiar a modo oscuro">
+    <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+    <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+  </button>
+  <main class="split-login">
+    <section class="login-visual">
+      {% ui_final_asset "auth-cover" as auth_cover %}{% ui_final_srcset "auth-cover" as auth_cover_srcset %}<div class="auth-cover asset-slot" data-asset-slot="auth-cover" role="img" aria-label="Vehículo premium en el showroom de Vinova Pro">{% if auth_cover %}<img class="asset-slot-image" src="{{ auth_cover }}" srcset="{{ auth_cover_srcset }}" sizes="(max-width: 900px) 1px, 53vw" width="1670" height="942" alt="" aria-hidden="true" loading="eager" fetchpriority="high" decoding="async">{% endif %}</div>
+      <div class="login-visual-body">
+        <div class="brand-block login-brand">
+          {% ui_final_asset "brand-logo" as brand_logo %}<div class="brand-mark">{% if brand_logo %}<img class="brand-mark-image" src="{{ brand_logo }}" alt="" aria-hidden="true" decoding="async">{% else %}V{% endif %}</div>
+          <div>
+            <strong>VINOVA</strong>
+            <span>{% if vinova_company %}{{ vinova_company.name }}{% else %}Vinova Pro{% endif %}</span>
+          </div>
+        </div>
+        <h1>Bienvenido de vuelta</h1>
+        <p>Tu concesionaria, tus vehículos y tu equipo en un solo lugar. Ingresa para continuar donde lo dejaste.</p>
+      </div>
+      <div class="login-visual-foot">
+        <span class="auth-cover-label">Showroom · VINOVA</span>
+        <ul class="login-points">
+          <li>Catálogo y cotizaciones</li>
+          <li>CRM comercial</li>
+          <li>Panel interno protegido</li>
+        </ul>
+        {% if vinova_public_settings.opening_hours %}<p class="login-visual-meta">Horario de atención: {{ vinova_public_settings.opening_hours }}</p>{% endif %}
+      </div>
+    </section>
+    <section class="login-form-panel">
+      <div class="login-form-inner">
+        <h2>Iniciar sesión</h2>
+        <p class="login-form-sub">Accede de forma segura al portal de clientes o al panel interno, según los permisos de tu cuenta.</p>
+        {% if messages %}{% for message in messages %}<div class="message message-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}{% endif %}
+        <form method="post" class="form-stack" novalidate>
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+          <label>{{ form.username.label }} {{ form.username }}</label>
+          <label>{{ form.password.label }} {{ form.password }}</label>
+          <button class="btn btn-primary full">Ingresar</button>
+        </form>
+        <p class="login-form-note"><a href="{% url 'accounts:password_reset' %}">¿Olvidaste tu contraseña?</a></p>
+        {% if vinova_public_settings.allow_client_registration %}<p class="login-form-note"><a href="{% url 'accounts:client_registration' %}">Crear cuenta de cliente</a></p>{% endif %}
+        <div class="login-form-foot">
+          <span class="login-form-support">{% if vinova_public_settings.public_phone %}Soporte: {{ vinova_public_settings.public_phone }}{% else %}Soporte: contacta al administrador de tu sucursal{% endif %}</span>
+          {% if vinova_public_settings.public_email %}<span>{{ vinova_public_settings.public_email }}</span>{% endif %}
+          <a href="{% url 'vehicles:catalog' %}">Volver al catálogo público</a>
+          <a href="{% url 'privacy_public:cookie_settings' %}">Preferencias de cookies</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  {% include 'components/cookie_consent.html' %}
+</body>
+</html>

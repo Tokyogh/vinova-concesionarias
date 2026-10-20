@@ -1,0 +1,53 @@
+{# ES: Renderiza la interfaz templates/portal/notifications/list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/notifications/list interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}Notificaciones{% endblock %}
+{% block portal_heading %}Notificaciones{% endblock %}
+{% block portal_lead %}Avisos privados sobre tu expediente, facturas, documentos y servicios.{% endblock %}
+{% block portal_content %}
+<form method="get" class="portal-filter-form" role="search" aria-label="Filtrar notificaciones">
+  {% for field in filter_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}</label>{% endfor %}
+  <div class="filter-actions"><button class="btn btn-secondary" type="submit">Filtrar</button>{% if request.GET.q or request.GET.message_type or request.GET.delivery_status %}<a class="btn btn-light" href="{% url 'portal:notification_list' %}">Limpiar</a>{% endif %}</div>
+</form>
+<section class="panel-card portal-notifications">
+  <div class="panel-header">
+    <div><h2>Bandeja de entrada</h2><p>Los avisos se muestran únicamente al cliente destinatario.</p></div>
+    <div class="module-actions">
+      <form method="post" action="{% url 'portal:notification_read_all' %}">
+        {% csrf_token %}
+        <button class="btn btn-secondary" type="submit">Marcar todas como leídas</button>
+      </form>
+      <a class="btn btn-light" href="{% url 'portal:settings' %}">Preferencias</a>
+    </div>
+  </div>
+  <div class="portal-notification-list">
+    {% for recipient in recipients %}
+      <article class="portal-notification-row{% if not recipient.read_at %} is-unread{% endif %}">
+        <a href="{% url 'portal:notification_detail' recipient.pk %}">
+          <div class="portal-notification-copy">
+            <div class="portal-notification-meta">
+              <span class="state{% if not recipient.read_at %} state-info{% endif %}">{% if recipient.read_at %}Leída{% else %}Nueva{% endif %}</span>
+              <time datetime="{{ recipient.notification.sent_at|date:'c' }}">{{ recipient.notification.sent_at|date:'d/m/Y H:i' }}</time>
+            </div>
+            <strong>{{ recipient.notification.title }}</strong>
+            <p>{{ recipient.notification.body|truncatechars:180 }}</p>
+          </div>
+        </a>
+        <form method="post" action="{% url 'portal:notification_archive' recipient.pk %}">
+          {% csrf_token %}
+          <button class="btn btn-light" type="submit">Archivar</button>
+        </form>
+      </article>
+    {% empty %}
+      <div class="empty-state"><h3>No tienes notificaciones</h3><p>Los nuevos avisos de tu expediente aparecerán aquí.</p></div>
+    {% endfor %}
+  </div>
+  {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="pagination-bar" aria-label="Paginación de notificaciones">
+      {% if page_obj.has_previous %}<a class="btn btn-light" href="?q={{ request.GET.q|urlencode }}&amp;message_type={{ request.GET.message_type|urlencode }}&amp;delivery_status={{ request.GET.delivery_status|urlencode }}&amp;page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a class="btn btn-light" href="?q={{ request.GET.q|urlencode }}&amp;message_type={{ request.GET.message_type|urlencode }}&amp;delivery_status={{ request.GET.delivery_status|urlencode }}&amp;page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

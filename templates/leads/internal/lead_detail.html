@@ -1,0 +1,243 @@
+{# ES: Renderiza la interfaz templates/leads/internal/lead_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/leads/internal/lead_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ lead.code }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ lead.full_name }}{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">{{ lead.code }} · {{ lead.get_request_type_display }} · Creado {{ lead.created_at|date:'d/m/Y H:i' }}</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'leads_internal:list' %}">Volver</a>{% if request.user.can_manage_leads %}<a class="btn btn-light" href="{% url 'leads_internal:update' lead.pk %}">Editar</a>{% endif %}
+  {% if request.user.can_manage_leads and not lead.customer %}
+    {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+    {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+    <form method="post" action="{% url 'leads_internal:convert_customer' lead.pk %}">
+      {% csrf_token %}<button class="btn btn-secondary">Crear cliente</button>
+    </form>
+    {% elif lead.customer %}<a class="btn btn-secondary" href="{% url 'analytics_customer_profile' lead.customer.pk %}">Perfil ejecutivo</a>{% endif %}
+  {% if request.user.can_manage_quotes %}
+    <form method="post" action="{% url 'leads_internal:create_quote' lead.pk %}">
+      {% csrf_token %}<button class="btn btn-primary">{% if lead.linked_sale %}Abrir cotización{% else %}Crear cotización{% endif %}</button>
+    </form>
+  {% endif %}
+{% endblock %}
+{% block content %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="metric-grid crm-detail-metrics">
+    <article class="metric-card">
+      <span>Estado</span><strong class="crm-badge crm-status-{{ lead.status }}">{{ lead.get_status_display }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Prioridad</span><strong>{{ lead.get_priority_display }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Puntaje</span><strong>{{ lead.score }}/100</strong>
+    </article>
+    <article class="metric-card">
+      <span>Origen</span><strong>{{ lead.get_source_display }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Próximo seguimiento</span><strong>{% if lead.next_follow_up_at %}{{ lead.next_follow_up_at|date:'d/m H:i' }}{% else %}Sin fecha{% endif %}</strong>
+    </article>
+  </section>
+  <section class="detail-grid two-columns crm-detail-grid">
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Contacto e interés</h2>
+          <p>Datos entregados por el cliente o registrados por el equipo.</p>
+        </div>
+      </div>
+      <dl class="data-list">
+        <div>
+          <dt>Contacto</dt>
+          <dd>{{ lead.contact_value }}</dd>
+        </div>
+        <div>
+          <dt>Correo</dt>
+          <dd>{{ lead.email|default:'N/D' }}</dd>
+        </div>
+        <div>
+          <dt>Teléfono</dt>
+          <dd>{{ lead.phone|default:'N/D' }}</dd>
+        </div>
+        <div>
+          <dt>WhatsApp</dt>
+          <dd>{{ lead.whatsapp|default:'N/D' }}</dd>
+        </div>
+        <div>
+          <dt>Ciudad</dt>
+          <dd>{{ lead.city|default:'N/D' }} {{ lead.province }}</dd>
+        </div>
+        <div>
+          <dt>Vehículo</dt>
+          <dd>
+            {% if lead.vehicle %}<a href="{% url 'vehicles_internal:detail' lead.vehicle.pk %}">{{ lead.vehicle }} · {{ lead.vehicle.internal_code }}</a>{% else %}{{ lead.vehicle_interest_label }}{% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt>Presupuesto</dt>
+          <dd>
+            {% if lead.budget_min %}${{ lead.budget_min }}{% endif %}
+            {% if lead.budget_max %}
+              – ${{ lead.budget_max }}{% endif %}
+            {% if not lead.budget_min and not lead.budget_max %}N/D{% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt>Compra estimada</dt>
+          <dd>{{ lead.expected_purchase_date|date:'d/m/Y'|default:'N/D' }}</dd>
+        </div>
+      </dl>
+      <div class="crm-message">
+        <strong>Consulta</strong>
+        <p>{{ lead.message|default:'Sin mensaje.'|linebreaksbr }}</p>
+      </div>
+    </article>
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Asignación y relaciones</h2>
+          <p>Conexiones con sucursal, asesor, cliente y operación comercial.</p>
+        </div>
+      </div>
+      <dl class="data-list">
+        <div>
+          <dt>Sucursal</dt>
+          <dd>{{ lead.branch|default:'Sin asignar' }}</dd>
+        </div>
+        <div>
+          <dt>Asesor</dt>
+          <dd>
+            {% if lead.assigned_advisor %}<a href="{% url 'analytics_user_profile' lead.assigned_advisor.pk %}">{{ lead.assigned_advisor.get_full_name|default:lead.assigned_advisor.username }}</a>{% else %}Sin asignar{% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt>Cliente</dt>
+          <dd>
+            {% if lead.customer %}<a href="{% url 'analytics_customer_profile' lead.customer.pk %}">{{ lead.customer.display_name }}</a>{% else %}Aún no convertido{% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt>Cotización/venta</dt>
+          <dd>
+            {% if lead.linked_sale %}<a href="{% url 'sales_internal:detail' lead.linked_sale.pk %}">{{ lead.linked_sale.number }}</a>{% else %}Sin operación vinculada{% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt>Consentimiento</dt>
+          <dd>
+            {% if lead.consent_data_processing %}Aceptado {{ lead.consent_at|date:'d/m/Y H:i' }}{% else %}Registro interno / no aplica formulario público{% endif %}
+          </dd>
+        </div>
+      </dl>
+      {% if request.user.can_assign_leads %}
+        <form method="post" action="{% url 'leads_internal:assign' lead.pk %}" class="stacked-form">
+          {% csrf_token %}
+          <h3>Reasignar</h3>
+          {% for field in assignment_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}</label>{% endfor %}<button class="btn btn-secondary">Actualizar asignación</button>
+        </form>
+      {% endif %}
+    </article>
+  </section>
+  <section class="detail-grid two-columns crm-actions-grid">
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Pipeline y seguimiento</h2>
+          <p>Actualiza el estado y programa la siguiente acción.</p>
+        </div>
+      </div>
+      {% if request.user.can_manage_leads %}
+        <form method="post" action="{% url 'leads_internal:status' lead.pk %}" class="stacked-form">
+          {% csrf_token %}
+          {% for field in status_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}<button class="btn btn-primary">Actualizar etapa</button>
+        </form>
+      {% endif %}
+    </article>
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Agendar test drive</h2>
+          <p>Reserva fecha, sucursal, vehículo y asesor.</p>
+        </div>
+      </div>
+      {% if request.user.can_manage_leads %}
+        <form method="post" action="{% url 'leads_internal:test_drive' lead.pk %}" class="stacked-form">
+          {% csrf_token %}
+          {% for field in test_drive_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}</label>{% endfor %}<button class="btn btn-secondary">Agendar test drive</button>
+        </form>
+      {% endif %}
+    </article>
+  </section>
+  <section class="detail-grid two-columns crm-activity-grid">
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Historial comercial</h2>
+          <p>Llamadas, WhatsApp, cambios de estado, cotizaciones y conversiones.</p>
+        </div>
+      </div>
+      <div class="timeline-list">
+        {% for activity in lead.activities.all %}
+          <div class="timeline-item">
+            <strong>{{ activity.title }}</strong><span class="table-subtext">{{ activity.get_activity_type_display }} · {{ activity.created_at|date:'d/m/Y H:i' }}{% if activity.created_by %}
+                · {{ activity.created_by.get_full_name|default:activity.created_by.username }}{% endif %}</span>{% if activity.detail %}
+              <p>{{ activity.detail|linebreaksbr }}</p>
+            {% endif %}
+            {% if activity.scheduled_for %}<small>Programado: {{ activity.scheduled_for|date:'d/m/Y H:i' }}</small>{% endif %}
+          </div>
+          {% empty %}
+          <p class="muted">Sin actividades.</p>
+        {% endfor %}
+      </div>
+    </article>
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Registrar actividad</h2>
+          <p>Documenta cada contacto para que el seguimiento no dependa de la memoria del vendedor.</p>
+        </div>
+      </div>
+      {% if request.user.can_manage_leads %}
+        <form method="post" action="{% url 'leads_internal:activity' lead.pk %}" class="stacked-form">
+          {% csrf_token %}
+          {% for field in activity_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}</label>{% endfor %}<button class="btn btn-primary">Guardar actividad</button>
+        </form>
+      {% endif %}
+    </article>
+  </section>
+  {% if lead.test_drives.all %}
+    <section class="panel-card table-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Test drives</h2>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Vehículo</th>
+              <th>Sucursal</th>
+              <th>Asesor</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in lead.test_drives.all %}
+              <tr>
+                <td>{{ item.starts_at|date:'d/m/Y H:i' }} – {{ item.ends_at|date:'H:i' }}</td>
+                <td>{{ item.vehicle }}</td>
+                <td>{{ item.branch.name }}</td>
+                <td>{{ item.advisor.get_full_name|default:item.advisor.username }}</td>
+                <td>{{ item.get_status_display }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

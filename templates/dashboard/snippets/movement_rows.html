@@ -1,0 +1,12 @@
+{# ES: Renderiza la interfaz templates/dashboard/snippets/movement_rows; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/snippets/movement_rows interface; permissions and data are resolved server-side. #}
+<div class="compact-row-list">
+  {% for movement in movements %}
+    <div class="compact-row">
+      <strong>{{ movement.item.sku }} · {{ movement.item.name }}</strong>
+      <span>{{ movement.get_movement_type_display }} · {{ movement.branch.name }} · {{ movement.quantity }}</span>
+    </div>
+  {% empty %}
+    <p class="muted">{{ empty_text }}</p>
+  {% endfor %}
+</div>

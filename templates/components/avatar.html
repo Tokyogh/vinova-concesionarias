@@ -1,0 +1,17 @@
+{# ES: Renderiza la interfaz templates/components/avatar; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/components/avatar interface; permissions and data are resolved server-side. #}
+{% comment %}
+Avatar reutilizable del usuario.
+
+Parámetros:
+- avatar_user: instancia de User (obligatorio).
+- avatar_size: clase de tamaño opcional (p. ej. "avatar-sm").
+- avatar_alt: texto alternativo opcional.
+
+Sin fotografía muestra las iniciales del usuario como respaldo accesible.
+{% endcomment %}
+{% if avatar_user.avatar_url %}
+  <img class="avatar {{ avatar_size }}" src="{{ avatar_user.avatar_url }}" alt="{{ avatar_alt|default:'Fotografía de perfil' }}" loading="lazy" decoding="async">
+{% else %}
+  <span class="avatar avatar-fallback {{ avatar_size }}" role="img" aria-label="{{ avatar_alt|default:'Fotografía de perfil' }}">{{ avatar_user.avatar_initials }}</span>
+{% endif %}

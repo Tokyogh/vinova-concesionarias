@@ -1,0 +1,110 @@
+{# ES: Renderiza la interfaz templates/post_sales/order_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/post_sales/order_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ order.number }} | Postventa{% endblock %}
+{% block page_title %}{{ order.number }}{% endblock %}
+{% block content %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="detail-grid two-columns">
+    <article class="panel-card">
+      <h2>Orden</h2>
+      <p>{{ order.description }}</p>
+      <dl class="detail-list">
+        <dt>Sucursal</dt>
+        <dd>{{ order.branch.name }}</dd>
+        <dt>Cliente</dt>
+        <dd>{{ order.customer.display_name }}</dd>
+        <dt>Vehículo</dt>
+        <dd>{{ order.vehicle }}</dd>
+        <dt>Responsable</dt>
+        <dd>{{ order.responsible|default:'Sin asignar' }}</dd>
+        <dt>Estado</dt>
+        <dd>{{ order.get_status_display }}</dd>
+        <dt>Kilometraje de recepción</dt>
+        <dd>{{ order.reception_mileage|default:'No registrado' }}</dd>
+        <dt>Kilometraje de entrega</dt>
+        <dd>{{ order.delivery_mileage|default:'No registrado' }}</dd>
+        <dt>Diagnóstico</dt>
+        <dd>{{ order.diagnosis|default:'No registrado' }}</dd>
+        <dt>Próxima atención</dt>
+        <dd>{% if order.next_service_date %}{{ order.next_service_date|date:'d/m/Y' }}{% endif %}{% if order.next_service_mileage %}{% if order.next_service_date %} · {% endif %}{{ order.next_service_mileage }} km{% endif %}{% if not order.next_service_date and not order.next_service_mileage %}Sin recomendación{% endif %}</dd>
+        {% if order.cancellation_reason %}<dt>Motivo de cancelación</dt><dd>{{ order.cancellation_reason }}</dd>{% endif %}
+        <dt>Mano de obra</dt>
+        <dd>${{ order.labor_cost }}</dd>
+        <dt>Repuestos</dt>
+        <dd>${{ order.parts_cost }}</dd>
+        <dt>Externos</dt>
+        <dd>${{ order.external_cost }}</dd>
+        <dt>Costo total</dt>
+        <dd>${{ order.total_cost }}</dd>
+      </dl>
+    </article>
+    {% if can_manage %}
+      <article class="panel-card">
+        <h2>Cambiar estado</h2>
+        {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+        {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+        <form method="post" action="{% url 'post_sales:status' order.pk %}">
+          {% csrf_token %}{{ status_form.as_p }}<button class="btn btn-primary">Actualizar</button>
+        </form>
+      </article>
+    {% endif %}
+  </section>
+  {% if can_manage %}
+  <section class="panel-card">
+    <h2>Recepción, diagnóstico y próxima atención</h2>
+    <form method="post" action="{% url 'post_sales:operational_update' order.pk %}">
+      {% csrf_token %}{{ operational_form.as_p }}<button class="btn btn-primary">Guardar datos operativos</button>
+    </form>
+  </section>
+  {% endif %}
+  <section class="panel-card">
+    <h2>Servicios y costos</h2>
+    <div class="responsive-table">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Responsable</th>
+            <th>Cantidad</th>
+            <th>Costo unitario</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for line in order.lines.all %}
+            <tr>
+              <td>{{ line.get_line_type_display }}</td>
+              <td>{{ line.description }}</td>
+              <td>{{ line.responsible|default:'Sin asignar' }}</td>
+              <td>{{ line.quantity }}</td>
+              <td>${{ line.unit_cost }}</td>
+              <td>${{ line.total_cost }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">Sin servicios registrados.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if can_manage %}
+      <form method="post" action="{% url 'post_sales:line_create' order.pk %}">
+        {% csrf_token %}{{ line_form.as_p }}<button class="btn btn-primary">Agregar servicio</button>
+      </form>
+    {% endif %}
+  </section>
+  <section class="panel-card">
+    <h2>Historial</h2>
+    {% for event in order.history.all %}
+      <p>
+        <strong>{{ event.get_new_status_display }}</strong>
+        · {{ event.created_at }} · {{ event.changed_by|default:'Sistema' }}<br>{{ event.note }}</p>
+      {% empty %}
+      <p>Sin historial.</p>
+    {% endfor %}
+  </section>
+{% endblock %}

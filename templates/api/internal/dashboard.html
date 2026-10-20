@@ -1,0 +1,202 @@
+{# ES: Renderiza la interfaz templates/api/internal/dashboard; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/api/internal/dashboard interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Integraciones y BI | Vinova Pro{% endblock %}
+{% block page_title %}Integraciones, API y BI{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">Clientes API empresariales, webhooks firmados, trazabilidad e interfaces estables para analítica.</p>
+{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-light" href="{% url 'swagger-ui-v1' %}">Swagger v1</a>
+  {% if request.user.can_manage_integrations %}<a class="btn btn-secondary" href="{% url 'api_internal:webhook_create' %}">Nuevo webhook</a><a class="btn btn-primary" href="{% url 'api_internal:client_create' %}">Nuevo cliente API</a>{% endif %}
+{% endblock %}
+{% block content %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="metric-grid">
+    <article class="metric-card">
+      <span>Clientes API activos</span><strong>{{ client_count }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Webhooks activos</span><strong>{{ webhook_count }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Entregas fallidas</span><strong>{{ failed_delivery_count }}</strong>
+    </article>
+  </section>
+  <section class="detail-grid two-columns">
+    <article class="panel-card">
+      <h2>API versionada</h2>
+      <p>La versión estable está disponible en
+        <code>/api/v1/</code>. La ruta histórica
+        <code>/api/</code>
+        se conserva por compatibilidad.</p>
+      <dl class="data-list">
+        <div>
+          <dt>Metadatos</dt>
+          <dd>
+            <code>/api/v1/meta/</code>
+          </dd>
+        </div>
+        <div>
+          <dt>Datasets BI</dt>
+          <dd>
+            <code>/api/v1/bi/</code>
+          </dd>
+        </div>
+        <div>
+          <dt>Exportación contable</dt>
+          <dd>
+            <code>/api/v1/integrations/accounting/export/</code>
+          </dd>
+        </div>
+        <div>
+          <dt>Ingreso idempotente de leads</dt>
+          <dd>
+            <code>/api/v1/integrations/leads/</code>
+          </dd>
+        </div>
+      </dl>
+    </article>
+    <article class="panel-card">
+      <h2>Seguridad operativa</h2>
+      <div class="privacy-note">
+        <strong>Los secretos se muestran una sola vez.</strong>
+        <p>Guárdalos en un gestor de secretos. Cada cliente debe tener solo los alcances mínimos, una IP permitida y vencimiento cuando sea posible.</p>
+      </div>
+    </article>
+  </section>
+  <section class="panel-card table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Clientes API recientes</h2>
+        <p>Usuario de servicio, sucursal, alcances y último uso.</p>
+      </div>
+    </div>
+    <div class="table-scroll">
+      {# ES: La tabla siguiente presenta datos previamente filtrados por permisos y alcance. #}
+      {# EN: The following table renders data already filtered by permissions and scope. #}
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Usuario</th>
+            <th>Sucursal</th>
+            <th>Alcances</th>
+            <th>Último uso</th>
+            <th>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for client in recent_clients %}
+            <tr>
+              <td>{{ client.name }}{% if not client.is_active %}
+                  · Inactivo{% endif %}
+              </td>
+              <td>{{ client.service_user.email }}</td>
+              <td>{{ client.branch|default:'Global' }}</td>
+              <td>
+                {% for scope in client.scopes.all|slice:':4' %}<code>{{ scope.code }}</code>{% if not forloop.last %},
+                  {% endif %}
+                {% endfor %}
+              </td>
+              <td>{{ client.last_used_at|date:'d/m/Y H:i'|default:'Sin uso' }}</td>
+              <td>
+                {% if request.user.can_manage_integrations %}
+                  <form method="post" action="{% url 'api_internal:client_rotate' client.public_id %}">
+                    {% csrf_token %}<button class="btn btn-light btn-small">Rotar</button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">No existen clientes API.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="panel-card table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Entregas webhook recientes</h2>
+        <p>Estado, endpoint, evento y respuesta.</p>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Endpoint</th>
+            <th>Evento</th>
+            <th>Estado</th>
+            <th>Intentos</th>
+            <th>HTTP</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for delivery in recent_deliveries %}
+            <tr>
+              <td>{{ delivery.created_at|date:'d/m/Y H:i' }}</td>
+              <td>{{ delivery.endpoint.name }}</td>
+              <td>{{ delivery.event.event_type }}</td>
+              <td>
+                <span class="state state-{{ delivery.status }}">{{ delivery.get_status_display }}</span>
+              </td>
+              <td>{{ delivery.attempts }}</td>
+              <td>{{ delivery.response_code|default:'—' }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">Aún no existen entregas webhook.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="panel-card table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Actividad de integraciones</h2>
+        <p>Registro sin cuerpos sensibles: se conserva hash, resultado y metadatos saneados.</p>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Dirección</th>
+            <th>Acción</th>
+            <th>Estado</th>
+            <th>Cliente</th>
+            <th>HTTP</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in recent_logs %}
+            <tr>
+              <td>{{ log.created_at|date:'d/m/Y H:i:s' }}</td>
+              <td>{{ log.get_direction_display }}</td>
+              <td>
+                <code>{{ log.action }}</code>
+              </td>
+              <td>{{ log.get_status_display }}</td>
+              <td>{{ log.client|default:'Sesión interna' }}</td>
+              <td>{{ log.http_status|default:'—' }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">Sin actividad registrada.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,20 @@
+{# ES: Renderiza la interfaz templates/sri_integration/internal/establishment_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/sri_integration/internal/establishment_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Establecimientos SRI | Vinova Pro{% endblock %}
+{% block page_title %}Establecimientos y puntos de emisión{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Relaciona códigos SRI con sucursales operativas cuando aplique, para trazabilidad automática en facturas y comprobantes.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-primary" href="{% url 'sri_integration:establishment_create' %}">Nuevo punto</a>{% endblock %}
+{% block content %}
+{% include 'enterprise/internal/_nav.html' %}
+<section class="panel-card table-panel">
+  <div class="responsive-table"><table class="data-table">
+    <thead><tr><th>Código</th><th>Nombre</th><th>Sucursal</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+    {% for establishment in establishments %}
+      <tr><td><strong>{{ establishment.establishment_code }}-{{ establishment.emission_point_code }}</strong>{% if establishment.is_default %}<span class="table-subtext">Predeterminado</span>{% endif %}</td><td>{{ establishment.name }}<span class="table-subtext">{{ establishment.address|default:'Sin dirección' }}</span></td><td>{{ establishment.branch.name|default:'Sin sucursal relacionada' }}</td><td>{% if establishment.is_active %}Activo{% else %}Inactivo{% endif %}</td><td><a class="btn btn-light" href="{% url 'sri_integration:establishment_update' establishment.pk %}">Editar</a></td></tr>
+    {% empty %}<tr><td colspan="5">No hay establecimientos SRI configurados.</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}

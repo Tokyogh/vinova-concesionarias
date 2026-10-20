@@ -1,0 +1,32 @@
+{# ES: Renderiza la interfaz templates/notifications/internal/message_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/notifications/internal/message_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ notification.title }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ notification.title }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">{{ notification.get_message_type_display }} · {{ notification.get_priority_display }} · {{ notification.sent_at|date:'d/m/Y H:i' }}</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'notifications_internal:inbox' %}">Bandeja</a><a class="btn btn-light" href="{% url 'notifications_internal:sent' %}">Enviadas</a>{% endblock %}
+{% block content %}
+<section class="detail-grid two-columns notifications-detail-grid">
+  <article class="panel-card notifications-summary-card">
+    <span class="state state-notification-{{ notification.priority }}">{{ notification.get_priority_display }}</span>
+    <h2>{{ notification.title }}</h2>
+    <p>{{ notification.body|linebreaksbr }}</p>
+    <dl class="data-list">
+      <div><dt>Remitente</dt><dd>{{ notification.sender.get_full_name|default:notification.sender.username|default:'Sistema' }}</dd></div>
+      <div><dt>Sucursal</dt><dd>{{ notification.branch.name|default:'Sin sucursal específica' }}</dd></div>
+      <div><dt>Cliente</dt><dd>{{ notification.related_customer.display_name|default:'N/D' }}</dd></div>
+      <div><dt>Vehículo</dt><dd>{{ notification.related_vehicle|default:'N/D' }}</dd></div>
+      <div><dt>Venta</dt><dd>{{ notification.related_sale.number|default:'N/D' }}</dd></div>
+      <div><dt>Documento</dt><dd>{{ notification.related_document.title|default:'N/D' }}</dd></div>
+    </dl>
+    <div class="action-row wrap">
+      {% if user_recipient %}<form method="post" action="{% url 'notifications_internal:archive_inbox' notification.pk %}">{% csrf_token %}<button class="btn btn-light">Archivar de mi bandeja</button></form>{% endif %}
+      {% if request.user.can_send_notifications %}<form method="post" action="{% url 'notifications_internal:archive_message' notification.pk %}">{% csrf_token %}<button class="btn btn-danger">Archivar mensaje global</button></form>{% endif %}
+    </div>
+  </article>
+  <article class="panel-card table-panel">
+    <div class="panel-header"><div><h2>Destinatarios</h2><p>Lectura individual por usuario o cliente.</p></div></div>
+    <div class="responsive-table"><table class="data-table compact-table"><thead><tr><th>Destinatario</th><th>Tipo</th><th>Estado</th><th>Lectura</th></tr></thead><tbody>{% for recipient in recipients %}<tr><td><strong>{{ recipient.display_name_snapshot }}</strong><span class="table-subtext">{{ recipient.email_snapshot|default:'Sin correo' }}</span></td><td>{{ recipient.get_recipient_type_display }}</td><td><span class="state state-recipient-{{ recipient.status }}">{{ recipient.get_status_display }}</span></td><td>{{ recipient.read_at|date:'d/m/Y H:i'|default:'N/D' }}</td></tr>{% empty %}<tr><td colspan="4">Sin destinatarios.</td></tr>{% endfor %}</tbody></table></div>
+  </article>
+</section>
+{% endblock %}

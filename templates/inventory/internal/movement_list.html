@@ -1,0 +1,54 @@
+{# ES: Renderiza la interfaz templates/inventory/internal/movement_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/inventory/internal/movement_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Movimientos de inventario | Vinova Pro{% endblock %}
+{% block page_title %}Movimientos de inventario{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Historial operativo de stock para auditoría, trazabilidad de sucursales y control interno.</p>{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-light" href="{% url 'inventory_internal:list' %}">Inventario</a>
+  {% if request.user.can_manage_inventory %}<a class="btn btn-primary" href="{% url 'inventory_internal:movement_create' %}">Nuevo movimiento</a>{% endif %}
+{% endblock %}
+{% block content %}
+<section class="toolbar panel-card compact">
+  <form method="get" class="internal-filter-form dense-filter-form inventory-filter-form">
+    <label class="filter-field"><span>Buscar</span>
+    <input class="form-control" type="search" name="q" value="{{ query }}" placeholder="SKU, artículo, referencia o motivo...">
+    </label>
+    <label class="filter-field"><span>Tipo de movimiento</span><select class="form-control" name="movement_type">
+      <option value="">Todos los movimientos</option>
+      {% for code,label in movement_types %}<option value="{{ code }}" {% if movement_type == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select></label>
+    <div class="filter-actions"><button class="btn btn-primary">Filtrar</button>
+    <a class="btn btn-light" href="{% url 'inventory_internal:movement_list' %}">Limpiar</a></div>
+  </form>
+</section>
+<section class="panel-card table-panel">
+  <div class="panel-header"><div><h2>Historial de movimientos</h2><p>{{ page_obj.paginator.count }} registro(s) confirmado(s).</p></div></div>
+  <div class="responsive-table">
+    <table class="data-table mobile-card-table">
+      <thead><tr><th>Fecha</th><th>Artículo</th><th>Tipo</th><th>Origen / destino</th><th>Cantidad</th><th>Stock</th><th>Referencia</th><th>Usuario</th></tr></thead>
+      <tbody>
+        {% for movement in movements %}
+          <tr>
+            <td data-label="Fecha">{{ movement.confirmed_at|date:'d/m/Y H:i' }}</td>
+            <td data-label="Artículo"><strong>{{ movement.item.sku }}</strong><span class="table-subtext">{{ movement.item.name }}</span></td>
+            <td data-label="Tipo"><span class="state state-movement-{{ movement.movement_type }}">{{ movement.get_movement_type_display }}</span></td>
+            <td data-label="Origen / destino">{{ movement.branch.name }}{% if movement.destination_branch %}<span class="table-subtext">→ {{ movement.destination_branch.name }}</span>{% endif %}</td>
+            <td data-label="Cantidad">{{ movement.quantity }}</td>
+            <td data-label="Stock">{{ movement.previous_quantity }} → {{ movement.new_quantity }}{% if movement.destination_branch %}<span class="table-subtext">Destino: {{ movement.destination_previous_quantity }} → {{ movement.destination_new_quantity }}</span>{% endif %}</td>
+            <td data-label="Referencia">{{ movement.reference|default:'N/D' }}</td>
+            <td data-label="Usuario">{% if movement.created_by %}{{ movement.created_by.get_full_name|default:movement.created_by.username }}{% else %}Sistema{% endif %}</td>
+          </tr>
+        {% empty %}<tr class="empty-table-row"><td colspan="8">No hay movimientos con estos filtros.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="?page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

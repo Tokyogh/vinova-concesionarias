@@ -1,0 +1,5 @@
+{# ES: Renderiza la interfaz templates/imports/internal/_nav; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/imports/internal/_nav interface; permissions and data are resolved server-side. #}
+<nav class="enterprise-tabs imports-tabs" aria-label="Navegación de importaciones">
+  {% for label, url in imports_nav %}<a href="{{ url }}">{{ label }}</a>{% endfor %}
+</nav>

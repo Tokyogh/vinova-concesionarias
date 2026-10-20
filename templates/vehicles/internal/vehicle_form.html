@@ -1,0 +1,32 @@
+{# ES: Renderiza la interfaz templates/vehicles/internal/vehicle_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/vehicles/internal/vehicle_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ page_heading }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ page_heading }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">El código interno se genera automáticamente. El VIN real del fabricante puede registrarse cuando esté disponible.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'vehicles_internal:list' %}">Volver a vehículos</a>{% endblock %}
+{% block content %}
+<section class="panel-card form-panel-wide">
+  {% if not form.fields.brand.queryset.exists or not form.fields.model.queryset.exists %}
+    <div class="message message-warning">Antes de crear vehículos debes registrar al menos una marca y un modelo.</div>
+  {% endif %}
+  <div class="message message-info">Vinova Pro generará una referencia interna única con formato <strong>VIN-MARCA-MODELO-AÑO</strong>. No necesitas escribirla manualmente.</div>
+  <form method="post" class="form-grid vehicle-form-grid">
+    {% csrf_token %}
+    {% for field in form %}
+      <label class="form-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %} {% if field.name == 'description' or field.name == 'short_description' %}span-2{% endif %}">
+        <span>{{ field.label }}</span>
+        {{ field }}
+        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+      </label>
+    {% endfor %}
+    {% if form.non_field_errors %}<div class="field-error span-2">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-actions span-2">
+      <button class="btn btn-primary">Guardar vehículo</button>
+      <a class="btn btn-light" href="{% url 'vehicles_internal:list' %}">Cancelar</a>
+      <a class="btn btn-secondary" href="{% url 'vehicles_internal:catalog_data' %}">Gestionar marcas/modelos</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

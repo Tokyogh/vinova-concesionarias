@@ -1,0 +1,47 @@
+{# ES: Renderiza la interfaz templates/notifications/internal/inbox; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/notifications/internal/inbox interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Notificaciones | Vinova Pro{% endblock %}
+{% block page_title %}Bandeja de notificaciones{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Mensajes internos, alertas y avisos operativos. La comunicación queda trazable por usuario, fecha y lectura.</p>{% endblock %}
+{% block topbar_actions %}
+  {% if request.user.can_send_notifications %}<a class="btn btn-primary" href="{% url 'notifications_internal:compose' %}">Enviar notificación</a>{% endif %}
+  <a class="btn btn-light" href="{% url 'notifications_internal:sent' %}">Enviadas</a>
+  {% if request.user.can_manage_notification_templates %}<a class="btn btn-light" href="{% url 'notifications_internal:templates' %}">Plantillas</a>{% endif %}
+{% endblock %}
+{% block content %}
+<section class="metric-grid notifications-status-grid">
+  <article class="metric-card"><span>No leídas</span><strong>{{ metrics.unread_for_user }}</strong></article>
+  <article class="metric-card"><span>Mensajes enviados</span><strong>{{ metrics.sent_messages }}</strong></article>
+  <article class="metric-card"><span>Urgentes</span><strong>{{ metrics.urgent_messages }}</strong></article>
+  <article class="metric-card"><span>Plantillas activas</span><strong>{{ metrics.templates }}</strong></article>
+</section>
+<section class="toolbar panel-card compact">
+  <form method="get" class="search-form internal-filter-form notifications-filter-form">
+    {{ search_form.q }}{{ search_form.status }}
+    <button class="btn btn-primary">Filtrar</button>
+    <a class="btn btn-light" href="{% url 'notifications_internal:inbox' %}">Limpiar</a>
+  </form>
+</section>
+<section class="panel-card table-panel">
+  <div class="panel-header"><div><h2>Mensajes recibidos</h2><p>{{ page_obj.paginator.count }} resultado(s). Los mensajes se marcan como leídos al abrirlos.</p></div></div>
+  <div class="responsive-table">
+    <table class="data-table">
+      <thead><tr><th>Mensaje</th><th>Remitente</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+      <tbody>
+        {% for recipient in recipients %}
+          <tr>
+            <td><strong>{{ recipient.notification.title }}</strong><span class="table-subtext">{{ recipient.notification.body|truncatechars:120 }}</span></td>
+            <td>{{ recipient.notification.sender.get_full_name|default:recipient.notification.sender.username|default:'Sistema' }}<span class="table-subtext">{{ recipient.notification.branch.name|default:'Sin sucursal' }}</span></td>
+            <td><span class="state state-notification-{{ recipient.notification.priority }}">{{ recipient.notification.get_priority_display }}</span><span class="table-subtext">{{ recipient.notification.get_message_type_display }}</span></td>
+            <td><span class="state state-recipient-{{ recipient.status }}">{{ recipient.get_status_display }}</span></td>
+            <td>{{ recipient.notification.sent_at|date:'d/m/Y H:i' }}</td>
+            <td class="table-actions-cell"><a class="btn btn-light btn-small" href="{% url 'notifications_internal:detail' recipient.notification.pk %}">Abrir</a></td>
+          </tr>
+        {% empty %}<tr><td colspan="6">No hay mensajes con estos filtros.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% if page_obj.paginator.num_pages > 1 %}<nav class="pagination-bar">{% if page_obj.has_previous %}<a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}<span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a class="btn btn-light" href="?page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}</nav>{% endif %}
+{% endblock %}

@@ -1,0 +1,66 @@
+{# ES: Renderiza la interfaz templates/vehicles/internal/vehicle_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/vehicles/internal/vehicle_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% load filter_ui %}
+{% block title %}Vehículos internos | Vinova Pro{% endblock %}
+{% block page_title %}Vehículos{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Gestión operativa del catálogo: publicación, sucursal, estado, trazabilidad y presentación comercial.</p>{% endblock %}
+{% block topbar_actions %}
+  {% if request.user.can_manage_vehicles %}
+    <a class="btn btn-light" href="{% url 'vehicles_internal:catalog_data' %}">Marcas y modelos</a>
+    {% if request.user.can_manage_imports %}
+      <a class="btn btn-secondary" href="{% url 'imports_internal:create' %}?type=vehicles">Importar vehículos</a>
+    {% endif %}
+    <a class="btn btn-primary" href="{% url 'vehicles_internal:create' %}">Nuevo vehículo</a>
+  {% endif %}
+{% endblock %}
+{% block content %}
+<section class="metric-grid vehicle-status-grid">
+  <article class="metric-card"><span>Disponibles</span><strong>{{ status_counts.available }}</strong></article>
+  <article class="metric-card"><span>Reservados</span><strong>{{ status_counts.reserved }}</strong></article>
+  <article class="metric-card"><span>Vendidos</span><strong>{{ status_counts.sold }}</strong></article>
+  <article class="metric-card"><span>Ocultos / archivados</span><strong>{{ status_counts.hidden|add:status_counts.archived }}</strong></article>
+</section>
+
+{% url 'vehicles_internal:list' as filter_clear_url %}
+{% vinova_filter_panel search_form filter_clear_url 'vehicles' common='q,status,sort' advanced='vin,plate,internal_code,brand,model,branch' %}
+
+<section class="panel-card table-panel">
+  <div class="panel-header">
+    <div>
+      <h2>Inventario vehicular</h2>
+      <p>{{ page_obj.paginator.count }} resultado(s). En la web pública solo aparecen vehículos disponibles y publicados.</p>
+    </div>
+  </div>
+  <div class="responsive-table">
+    <table class="data-table mobile-card-table">
+      <thead>
+        <tr><th>Vehículo</th><th>Código / VIN / Placa</th><th>Sucursal</th><th>Precio</th><th>Estado</th><th>Destacado</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for vehicle in vehicles %}
+          <tr>
+            <td data-label="Vehículo"><strong>{{ vehicle.year }} {{ vehicle.brand.name }} {{ vehicle.model.name }}</strong><span class="table-subtext">{{ vehicle.version|default:'Versión no indicada' }}</span></td>
+            <td data-label="Código / VIN / placa">{{ vehicle.internal_code }}{% if vehicle.vin %}<span class="table-subtext">VIN: {{ vehicle.vin }}</span>{% endif %}{% if vehicle.plate %}<span class="table-subtext">Placa: {{ vehicle.plate }}</span>{% endif %}</td>
+            <td data-label="Sucursal">{% if vehicle.branch %}{{ vehicle.branch.name }}<span class="table-subtext">{{ vehicle.branch.city|default:vehicle.branch.company.commercial_name }}</span>{% else %}<span class="state state-warning">Sin sucursal</span>{% endif %}</td>
+            <td data-label="Precio">{% if vehicle.price %}${{ vehicle.price }}{% else %}<span class="table-subtext">No definido</span>{% endif %}</td>
+            <td data-label="Estado"><span class="state state-vehicle-{{ vehicle.status }}">{{ vehicle.get_status_display }}</span></td>
+            <td data-label="Destacado">{% if vehicle.is_featured %}<span class="state state-ok">Sí</span>{% else %}<span class="table-subtext">No</span>{% endif %}</td>
+            <td class="table-actions-cell" data-label="Acciones"><a class="btn btn-light btn-small" href="{% url 'vehicles_internal:detail' vehicle.pk %}">Gestionar</a></td>
+          </tr>
+        {% empty %}
+          <tr class="empty-table-row"><td colspan="7">No hay vehículos registrados con estos filtros.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.previous_page_number %}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.next_page_number %}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

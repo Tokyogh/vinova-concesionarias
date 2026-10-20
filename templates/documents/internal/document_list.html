@@ -1,0 +1,62 @@
+{# ES: Renderiza la interfaz templates/documents/internal/document_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/documents/internal/document_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% load filter_ui %}
+{% block title %}Documentos privados | Vinova Pro{% endblock %}
+{% block page_title %}Documentos privados{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Biblioteca protegida para contratos, facturas, comprobantes, documentos de cliente, garantías y expedientes vehiculares.</p>{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-light" href="{% url 'documents_internal:assets' %}">Recursos reutilizables</a>
+  {% if request.user.can_manage_documents %}
+    <a class="btn btn-light" href="{% url 'documents_internal:catalog_data' %}">Categorías</a>
+    <a class="btn btn-primary" href="{% url 'documents_internal:create' %}">Cargar documento</a>
+  {% endif %}
+{% endblock %}
+{% block content %}
+<section class="metric-grid documents-status-grid">
+  <article class="metric-card"><span>Documentos privados</span><strong>{{ metrics.private_documents }}</strong></article>
+  <article class="metric-card"><span>Confidenciales</span><strong>{{ metrics.confidential_documents }}</strong></article>
+  <article class="metric-card"><span>Recursos públicos</span><strong>{{ metrics.public_assets }}</strong></article>
+  <article class="metric-card"><span>Almacenamiento</span><strong>{{ metrics.storage_bytes|filesizeformat }}</strong></article>
+</section>
+
+{% url 'documents_internal:list' as filter_clear_url %}
+{% vinova_filter_panel search_form filter_clear_url 'documents' common='q,status,sort' advanced='document_type,branch' %}
+
+<section class="panel-card table-panel">
+  <div class="panel-header">
+    <div><h2>Expediente documental</h2><p>{{ page_obj.paginator.count }} resultado(s). Los archivos se descargan mediante rutas protegidas, no desde static.</p></div>
+  </div>
+  <div class="responsive-table">
+    <table class="data-table">
+      <thead><tr><th>Documento</th><th>Tipo</th><th>Relacionado con</th><th>Sucursal</th><th>Estado</th><th>Archivo</th><th></th></tr></thead>
+      <tbody>
+        {% for document in documents %}
+          <tr>
+            <td><strong>{{ document.title }}</strong><span class="table-subtext">{{ document.original_name|default:'Archivo protegido' }}</span></td>
+            <td>{{ document.get_document_type_display }}<span class="table-subtext">{{ document.category.name|default:'Sin categoría' }}</span></td>
+            <td>
+              {% if document.customer %}{{ document.customer.display_name }}{% elif document.vehicle %}{{ document.vehicle }}{% elif document.sale %}{{ document.sale.number }}{% else %}General{% endif %}
+              {% if document.is_confidential %}<span class="table-subtext state state-document-confidential">Confidencial</span>{% endif %}
+            </td>
+            <td>{{ document.branch.name|default:'Global' }}</td>
+            <td><span class="state state-document-{{ document.status }}">{{ document.get_status_display }}</span></td>
+            <td>{{ document.size_bytes|filesizeformat }}<span class="table-subtext">{{ document.extension|default:'N/D' }}</span></td>
+            <td class="table-actions-cell"><a class="btn btn-light btn-small" href="{% url 'documents_internal:detail' document.pk %}">Ver</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">No hay documentos con estos filtros.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.previous_page_number %}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.next_page_number %}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,33 @@
+{# ES: Renderiza la interfaz templates/reports/internal/partials/vehicles_table; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/reports/internal/partials/vehicles_table interface; permissions and data are resolved server-side. #}
+<div class="responsive-table">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Vehículo</th>
+        <th>Código / VIN / Placa</th>
+        <th>Sucursal</th>
+        <th>Estado</th>
+        <th>Precio</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for vehicle in vehicles %}
+        <tr>
+          <td>
+            <strong>{{ vehicle.year }} {{ vehicle.brand.name }} {{ vehicle.model.name }}</strong><span class="table-subtext">{{ vehicle.version }}</span>
+          </td>
+          <td>{{ vehicle.internal_code }}{% if vehicle.vin %}<span class="table-subtext">VIN: {{ vehicle.vin }}</span>{% endif %}<span class="table-subtext">Placa: {{ vehicle.plate|default:'Sin placa' }}</span>
+          </td>
+          <td>{{ vehicle.branch.name|default:'Sin sucursal' }}</td>
+          <td>{{ vehicle.get_status_display }}</td>
+          <td>${{ vehicle.price|default:'0.00' }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5">Sin vehículos.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

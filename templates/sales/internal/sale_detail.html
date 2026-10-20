@@ -1,0 +1,136 @@
+{# ES: Renderiza la interfaz templates/sales/internal/sale_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/sales/internal/sale_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ sale.number }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ sale.number }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">{{ sale.get_kind_display }} para {{ sale.customer.display_name }}. Control de vehículo, artículos, pagos y estado comercial.</p>{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-light" href="{% url 'sales_internal:list' %}">Volver</a>
+  {% if request.user.can_manage_quotes and not sale.is_closed %}<a class="btn btn-primary" href="{% url 'sales_internal:update' sale.pk %}">Editar</a>{% endif %}
+{% endblock %}
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="detail-grid two-columns sales-detail-grid">
+  <article class="panel-card sales-summary-card">
+    <span class="eyebrow">{{ sale.get_kind_display }}</span>
+    <h2>{{ sale.customer.display_name }}</h2>
+    <p>{{ sale.notes|default:'Sin notas comerciales registradas.'|linebreaksbr }}</p>
+    <div class="vehicle-detail-meta sales-detail-meta">
+      <span><strong>Estado</strong><em class="state state-sale-{{ sale.status }}">{{ sale.get_status_display }}</em></span>
+      <span><strong>Sucursal</strong>{{ sale.branch.name }}</span>
+      <span><strong>Asesor</strong>{{ sale.advisor.get_full_name|default:sale.advisor.username|default:'Sin asesor' }}</span>
+      <span><strong>Origen</strong>{{ sale.get_source_display }}</span>
+      <span><strong>Válida hasta</strong>{{ sale.valid_until|date:'d/m/Y'|default:'N/D' }}</span>
+      <span><strong>Reserva hasta</strong>{{ sale.reserved_until|date:'d/m/Y H:i'|default:'N/D' }}</span>
+    </div>
+    {% if sale.vehicle %}
+      <div class="sales-vehicle-box">
+        <strong>{{ sale.vehicle }}</strong>
+        <span>{{ sale.vehicle.internal_code }}{% if sale.vehicle.vin %} · VIN {{ sale.vehicle.vin }}{% endif %} · {{ sale.vehicle.get_status_display }}</span>
+        <small>{{ sale.vehicle.branch.name|default:'Sin sucursal' }}</small>
+      </div>
+    {% endif %}
+    <div class="action-row wrap sales-action-row">
+      {% if request.user.can_manage_reservations and sale.can_be_reserved %}
+        {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+        {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+        <form method="post" action="{% url 'sales_internal:action' sale.pk 'reserve' %}" class="mini-action-form">{% csrf_token %}{{ reserve_form.reserved_until }}{{ reserve_form.note }}<button class="btn btn-secondary">Reservar</button></form>
+      {% endif %}
+      {% if request.user.can_confirm_sales and sale.can_be_confirmed %}
+        <form method="post" action="{% url 'sales_internal:action' sale.pk 'confirm' %}" class="mini-action-form">{% csrf_token %}{{ action_form.note }}<button class="btn btn-primary">Confirmar venta</button></form>
+      {% endif %}
+      {% if not sale.is_closed %}
+        <form method="post" action="{% url 'sales_internal:action' sale.pk 'cancel' %}" class="mini-action-form">{% csrf_token %}{{ action_form.note }}<button class="btn btn-danger">Cancelar</button></form>
+      {% endif %}
+    </div>
+  </article>
+
+  <article class="panel-card sales-total-card">
+    <div class="panel-header no-pad"><div><h2>Resumen financiero</h2><p>Valores calculados automáticamente.</p></div></div>
+    <dl class="data-list sales-totals-list">
+      <div><dt>Vehículo</dt><dd>${{ sale.vehicle_price }}</dd></div>
+      <div><dt>Descuento vehículo</dt><dd>${{ sale.vehicle_discount }}</dd></div>
+      <div><dt>Artículos/servicios</dt><dd>${{ sale.line_subtotal }}</dd></div>
+      <div><dt>Descuentos totales</dt><dd>${{ sale.discount_total }}</dd></div>
+      <div><dt>Subtotal</dt><dd>${{ sale.subtotal }}</dd></div>
+      <div><dt>IVA</dt><dd>${{ sale.tax_total }}</dd></div>
+      <div><dt>Total</dt><dd><strong>${{ sale.total }}</strong></dd></div>
+      <div><dt>Pagado</dt><dd>${{ sale.amount_paid }}</dd></div>
+      <div><dt>Saldo</dt><dd><strong>${{ sale.balance_due }}</strong></dd></div>
+    </dl>
+  </article>
+</section>
+
+<section class="detail-grid two-columns sales-lines-grid">
+  <article class="panel-card table-panel">
+    <div class="panel-header"><div><h2>Líneas de artículos y servicios</h2><p>Accesorios, repuestos, mantenimiento o servicios asociados.</p></div></div>
+    <div class="responsive-table">
+      <table class="data-table compact-table">
+        <thead><tr><th>Descripción</th><th>Cant.</th><th>Precio</th><th>Desc.</th><th>Total</th><th>Stock</th></tr></thead>
+        <tbody>
+          {% for line in lines %}
+            <tr>
+              <td><strong>{{ line.description }}</strong>{% if line.item %}<span class="table-subtext">{{ line.item.sku }} · {{ line.item.get_item_type_display }}</span>{% endif %}</td>
+              <td>{{ line.quantity }}</td><td>${{ line.unit_price }}</td><td>${{ line.discount_amount }}</td><td><strong>${{ line.line_total }}</strong></td>
+              <td><span class="table-subtext">Reservado: {{ line.reserved_quantity }}<br>Entregado: {{ line.fulfilled_quantity }}</span></td>
+            </tr>
+          {% empty %}<tr><td colspan="6">No hay líneas agregadas.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+  <article class="panel-card">
+    <div class="panel-header no-pad"><div><h2>Agregar línea</h2><p>Se recalculan totales al guardar.</p></div></div>
+    {% if request.user.can_manage_quotes and not sale.is_closed %}
+      <form method="post" action="{% url 'sales_internal:line_create' sale.pk %}" class="stacked-form sales-inline-form">
+        {% csrf_token %}
+        {% for field in line_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}
+        <button class="btn btn-primary">Agregar línea</button>
+      </form>
+    {% else %}<p class="muted">No puedes agregar líneas a esta operación.</p>{% endif %}
+  </article>
+</section>
+
+<section class="detail-grid two-columns sales-payments-grid">
+  <article class="panel-card">
+    <div class="panel-header no-pad"><div><h2>Pagos</h2><p>Anticipos, pagos completos o financiamiento registrado.</p></div></div>
+    <div class="timeline-list">
+      {% for payment in payments %}
+        <div class="timeline-item">
+          <strong>${{ payment.amount }} · {{ payment.get_method_display }}</strong>
+          <span class="table-subtext">{{ payment.get_status_display }} · {{ payment.paid_at|date:'d/m/Y H:i' }}</span>
+          <p>{{ payment.reference|default:'Sin referencia' }}</p>
+          {% if payment.notes %}<p class="table-subtext">{{ payment.notes|linebreaksbr }}</p>{% endif %}
+          {% if can_void_payments and payment.status != 'void' %}
+            <form method="post" action="{% url 'sales_internal:payment_void' sale.pk payment.pk %}" class="stacked-form">
+              {% csrf_token %}
+              <input class="form-control" type="text" name="reason" maxlength="220" required placeholder="Motivo de anulación">
+              <button class="btn btn-light btn-small">Anular pago</button>
+            </form>
+          {% endif %}
+        </div>
+      {% empty %}<p class="muted">Sin pagos registrados.</p>{% endfor %}
+    </div>
+  </article>
+  <article class="panel-card">
+    <div class="panel-header no-pad"><div><h2>Registrar pago</h2><p>Solo usuarios con permiso de venta/facturación comercial.</p></div></div>
+    {% if request.user.can_confirm_sales %}
+      <form method="post" action="{% url 'sales_internal:payment_create' sale.pk %}" class="stacked-form sales-inline-form">
+        {% csrf_token %}
+        {% for field in payment_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}
+        <button class="btn btn-primary">Registrar pago</button>
+      </form>
+    {% else %}<p class="muted">Tienes acceso comercial sin permiso para registrar pagos.</p>{% endif %}
+  </article>
+</section>
+
+<section class="panel-card">
+  <div class="panel-header no-pad"><div><h2>Historial</h2><p>Cambios de estado y trazabilidad comercial.</p></div></div>
+  <div class="timeline-list">
+    {% for item in history %}
+      <div class="timeline-item"><strong>{{ item.previous_status|default:'Inicio' }} → {{ item.get_new_status_display }}</strong><span class="table-subtext">{{ item.created_at|date:'d/m/Y H:i' }}{% if item.changed_by %} · {{ item.changed_by.get_full_name|default:item.changed_by.username }}{% endif %}</span><p>{{ item.note|default:'Sin nota.' }}</p></div>
+    {% empty %}<p class="muted">Sin historial registrado.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

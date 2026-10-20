@@ -1,0 +1,34 @@
+{# ES: Renderiza la interfaz templates/components/filter_panel; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/components/filter_panel interface; permissions and data are resolved server-side. #}
+<section class="filter-panel" data-filter-panel data-filter-namespace="{{ namespace }}" data-filter-user="{{ user_id }}">
+  <form method="get" class="internal-filter-form dense-filter-form filter-panel-form">
+    <div class="filter-panel-common">
+      {% for field in common_fields %}
+        <label class="filter-field{% if field.field.widget.input_type == 'checkbox' %} checkbox-field{% endif %}"><span>{{ field.label }}</span>{{ field }}</label>
+      {% endfor %}
+      <div class="filter-actions">
+        <button class="btn btn-primary" type="submit">Aplicar</button>
+        {% if advanced_fields %}<button class="btn btn-light" type="button" data-filter-more aria-expanded="{% if advanced_active %}true{% else %}false{% endif %}" aria-controls="filter-advanced-{{ namespace }}">Más filtros</button>{% endif %}
+      </div>
+    </div>
+    {% if advanced_fields %}
+      <div class="filter-panel-advanced" id="filter-advanced-{{ namespace }}"{% if not advanced_active %} hidden{% endif %}>
+        {% for field in advanced_fields %}
+          <label class="filter-field{% if field.field.widget.input_type == 'checkbox' %} checkbox-field{% endif %}"><span>{{ field.label }}</span>{{ field }}</label>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </form>
+  <div class="filter-panel-footer">
+    <div class="filter-chips" aria-label="Filtros activos">
+      {% for chip in chips %}<a class="filter-chip" href="{{ chip.href }}" aria-label="Quitar filtro {{ chip.label }}: {{ chip.value }}"><span>{{ chip.label }}: {{ chip.value }}</span><span aria-hidden="true">×</span></a>{% empty %}<span class="filter-empty">Sin filtros activos</span>{% endfor %}
+      {% if chips %}<a class="filter-clear" href="{{ clear_url }}">Limpiar todo</a>{% endif %}
+    </div>
+    <div class="saved-views" data-saved-views>
+      <label class="sr-only" for="saved-view-{{ namespace }}">Vistas guardadas</label>
+      <select id="saved-view-{{ namespace }}" class="form-control" data-saved-view-select><option value="">Vistas guardadas</option></select>
+      <button class="btn btn-light btn-sm" type="button" data-saved-view-save>Guardar vista</button>
+      <button class="btn btn-ghost btn-sm" type="button" data-saved-view-delete disabled>Eliminar</button>
+    </div>
+  </div>
+</section>

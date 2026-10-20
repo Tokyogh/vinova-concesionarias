@@ -1,0 +1,52 @@
+{# ES: Renderiza la interfaz templates/components/sidebar; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/components/sidebar interface; permissions and data are resolved server-side. #}
+{% load ui_assets %}
+<aside class="sidebar" id="staff-sidebar" data-drawer data-drawer-query="(max-width: 900px)" aria-label="Menú interno">
+  <div class="brand-block">
+    <a class="sidebar-brand-link" href="{% url 'dashboard:home' %}" aria-label="Ir al inicio público de Vinova Pro">
+      {% ui_final_asset "brand-logo" as brand_logo %}<span class="brand-mark">{% if brand_logo %}<img class="brand-mark-image" src="{{ brand_logo }}" alt="" aria-hidden="true" decoding="async">{% else %}V{% endif %}</span>
+      <span class="sidebar-brand-copy"><strong>Vinova Pro</strong><span>Área interna</span></span>
+    </a>
+    <button class="drawer-close-button sidebar-close" type="button" data-drawer-close aria-label="Cerrar menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <nav class="side-nav" aria-label="Navegación interna">
+    {% if staff_nav_groups %}
+      <section class="side-nav-dynamic" data-nav-favorites hidden>
+        <span class="side-nav-label">Favoritos</span>
+        <div class="side-nav-dynamic-list" data-nav-favorites-list></div>
+      </section>
+      <section class="side-nav-dynamic" data-nav-recents hidden>
+        <span class="side-nav-label">Recientes</span>
+        <div class="side-nav-dynamic-list" data-nav-recents-list></div>
+      </section>
+      {% for group in staff_nav_groups %}
+        <section class="side-nav-group" data-nav-group="{{ group.key }}">
+          <button type="button" class="side-nav-group-toggle" aria-expanded="true" aria-controls="side-nav-group-{{ group.key }}" data-nav-group-toggle>
+            <span>{{ group.title }}</span>
+            <svg class="side-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="side-nav-group-items" id="side-nav-group-{{ group.key }}" data-nav-group-items>
+            {% for item in group.items %}
+              <div class="side-nav-row">
+                <a class="side-nav-link" href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %} data-nav-key="{{ item.key }}">
+                  {% include 'components/nav_icons.html' %}
+                  <span>{{ item.title }}</span>
+                </a>
+                <button type="button" class="side-nav-star" data-nav-star="{{ item.key }}" aria-label="Agregar {{ item.title }} a favoritos" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </button>
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+    {% endif %}
+  </nav>
+  <div class="sidebar-footer">
+    <span>v{{ vinova_product_version }} Stable</span>
+    <small>Flujos funcionales automatizados y preparaci&oacute;n de release</small>
+    <a href="{% url 'privacy_public:cookie_settings' %}">Preferencias de cookies</a>
+  </div>
+</aside>

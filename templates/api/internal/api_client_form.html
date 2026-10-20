@@ -1,0 +1,7 @@
+{# ES: Renderiza la interfaz templates/api/internal/api_client_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/api/internal/api_client_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Nuevo cliente API | Vinova Pro{% endblock %}
+{% block page_title %}Nuevo cliente API{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Crea una identidad técnica limitada por permisos, alcances, sucursal, IP y vencimiento.</p>{% endblock %}
+{% block content %}<section class="panel-card"><form method="post" class="stacked-form">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{{ field.errors }}</label>{% endfor %}<div class="form-actions"><a class="btn btn-light" href="{% url 'api_internal:dashboard' %}">Cancelar</a><button class="btn btn-primary">Crear y generar token</button></div></form></section>{% endblock %}

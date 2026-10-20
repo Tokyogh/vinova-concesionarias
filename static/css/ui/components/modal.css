@@ -1,0 +1,77 @@
+/* ES: Define estilos de static/css/ui/components/modal, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/components/modal styles, including states and responsive behavior. */
+/*
+   Modales, tabs y galería.
+   Depende de core/tokens.css. */
+
+/* --- Modals --- */
+.modal-backdrop {
+  position: fixed; inset: 0; display: grid; place-items: center; padding: var(--space-24);
+  background: var(--overlay); z-index: var(--z-modal); backdrop-filter: blur(3px);
+}
+body.modal-open { overflow: hidden; }
+.vehicle-modal {
+  position: relative; width: min(1160px, 95vw); max-height: 92vh; overflow-y: auto;
+  background: var(--surface); border-radius: var(--radius-lg); padding: var(--space-32);
+  box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+}
+.modal-close {
+  position: absolute; top: var(--space-16); right: var(--space-16); z-index: 5;
+  width: var(--space-40); height: var(--space-40); border: 0;
+  border-radius: var(--radius-pill); background: var(--surface-2); cursor: pointer;
+  color: var(--text); display: grid; place-items: center;
+}
+.modal-close:hover { background: var(--surface-3); }
+.modal-tabs {
+  display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px;
+  border-bottom: 1px solid var(--border); padding-bottom: 12px;
+}
+.modal-tabs button {
+  border: 1px solid var(--border); border-radius: var(--radius-pill);
+  padding: 8px 14px; background: var(--surface); cursor: pointer;
+  color: var(--text-2); font-weight: 650; font-size: .84rem;
+}
+.modal-tabs button.active, .modal-tabs button[aria-selected="true"] {
+  background: var(--primary); color: var(--on-primary); border-color: var(--primary);
+}
+.vehicle-modal-split {
+  display: grid; grid-template-columns: minmax(0, 1.28fr) minmax(0, .72fr);
+  gap: clamp(20px, 3vw, 34px); align-items: start;
+}
+.vehicle-modal-main { min-width: 0; }
+.vehicle-modal-aside {
+  position: sticky; top: 0; display: grid; gap: 14px; align-content: start;
+  padding: clamp(18px, 2.4vw, 28px); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+.vehicle-modal-aside h2 { font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -.02em; margin: 2px 0 0; }
+.modal-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.modal-branch-chip {
+  padding: 5px 11px; border-radius: 999px; background: var(--surface-2);
+  color: var(--text-2); font-size: .78rem; font-weight: 650;
+}
+.modal-description { color: var(--muted); line-height: 1.65; font-size: .92rem; margin: 0; }
+.modal-price {
+  display: flex; flex-direction: column; gap: 2px;
+  padding-top: 16px; border-top: 1px solid var(--border);
+}
+.modal-price span { color: var(--muted); font-size: .74rem; font-weight: 650; text-transform: uppercase; letter-spacing: .08em; }
+.modal-price strong { font-size: 1.6rem; color: var(--primary); letter-spacing: -.02em; font-weight: 750; }
+.modal-commercial-actions {
+  display: flex; justify-content: flex-end; gap: 8px;
+  margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);
+}
+.modal-commercial-actions .btn { min-height: 44px; justify-content: center; }
+.gallery-layout { display: grid; gap: 12px; }
+.gallery-main {
+  min-height: 0; aspect-ratio: 16/10; background: var(--surface-2);
+  border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border);
+}
+.gallery-main img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+.gallery-thumbs button { border: 2px solid transparent; border-radius: 10px; padding: 0; overflow: hidden; cursor: pointer; background: none; opacity: .7; }
+.gallery-thumbs button.active, .gallery-thumbs button[aria-current="true"] { border-color: var(--primary); opacity: 1; }
+.gallery-thumbs img { width: 100%; aspect-ratio: 16/10; object-fit: cover; display: block; }
+.experience-panel { background: var(--surface-2); border-radius: var(--radius-lg); padding: 14px; border: 1px solid var(--border); }
+.model-viewer-box { width: 100%; height: 480px; background: var(--surface-3); border-radius: var(--radius); }

@@ -1,0 +1,29 @@
+{# ES: Renderiza la interfaz templates/portal/documents/detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/documents/detail interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}{{ document.title }}{% endblock %}
+{% block portal_heading %}{{ document.title }}{% endblock %}
+{% block portal_lead %}Documento privado de tu expediente.{% endblock %}
+{% block portal_content %}
+<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="{% url 'portal:document_list' %}">Documentos</a><span aria-hidden="true">/</span><span aria-current="page">{{ document.title }}</span></nav>
+<section class="portal-grid">
+  <article class="panel-card">
+    <span class="eyebrow">{{ document.get_document_type_display }}</span>
+    <h2>{{ document.title }}</h2>
+    <p>{{ document.notes|default:'Sin notas adicionales.'|linebreaksbr }}</p>
+    <a class="btn btn-primary" href="{% url 'portal:document_download' document.pk %}">Descargar archivo</a>
+  </article>
+  <article class="panel-card">
+    <h2>Información</h2>
+    <dl class="data-list">
+      <div><dt>Fecha</dt><dd>{{ document.created_at|date:'d/m/Y H:i' }}</dd></div>
+      <div><dt>Vehículo</dt><dd>{{ document.vehicle|default:'No asociado' }}</dd></div>
+      <div><dt>Categoría</dt><dd>{{ document.category.name|default:'Sin categoría' }}</dd></div>
+      <div><dt>Vigencia</dt><dd>{{ document.expires_at|date:'d/m/Y'|default:'Sin vencimiento' }}</dd></div>
+      <div><dt>Archivo</dt><dd>{{ document.original_name|default:'Archivo protegido' }}</dd></div>
+      <div><dt>Tamaño</dt><dd>{{ document.size_bytes|filesizeformat }}</dd></div>
+    </dl>
+    <p class="muted">La descarga se entrega por una ruta autenticada y queda registrada para seguridad.</p>
+  </article>
+</section>
+{% endblock %}

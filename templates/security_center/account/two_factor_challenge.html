@@ -1,0 +1,5 @@
+{# ES: Renderiza la interfaz templates/security_center/account/two_factor_challenge; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/security_center/account/two_factor_challenge interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}Verificación 2FA | Vinova Pro{% endblock %}
+{% block content %}<section class="security-account-card panel-card"><span class="eyebrow">Segundo factor</span><h1>Confirma tu identidad</h1><p>Ingresa el código temporal de tu aplicación o uno de tus códigos de recuperación.</p><form method="post" class="form-grid compact-grid" novalidate>{% csrf_token %}{% for field in form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}<button class="btn btn-primary">Verificar</button></form></section>{% endblock %}

@@ -1,0 +1,5 @@
+{# ES: Renderiza la interfaz templates/enterprise/internal/_nav; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/enterprise/internal/_nav interface; permissions and data are resolved server-side. #}
+<nav class="enterprise-tabs" aria-label="Centro empresarial">
+  {% for label,url in enterprise_nav %}<a href="{{ url }}">{{ label }}</a>{% endfor %}
+</nav>

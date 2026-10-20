@@ -1,0 +1,28 @@
+{# ES: Renderiza la interfaz templates/enterprise/internal/approval_policy_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/enterprise/internal/approval_policy_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Políticas de aprobación | Vinova Pro{% endblock %}
+{% block page_title %}Políticas de aprobación{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Configura cuándo una acción es automática y cuándo necesita autorización. Las ventas normales no deben frenarse innecesariamente.</p>{% endblock %}
+{% block content %}
+{% include 'enterprise/internal/_nav.html' %}
+<section class="panel-card table-panel">
+  <div class="responsive-table">
+    <table class="data-table">
+      <thead><tr><th>Acción</th><th>Modo</th><th>Umbrales</th><th>Roles</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        {% for policy in approval_policies %}
+          <tr>
+            <td><strong>{{ policy.get_action_display }}</strong><span class="table-subtext">{{ policy.notes|default:'Sin notas' }}</span></td>
+            <td>{{ policy.get_mode_display }}</td>
+            <td>{% if policy.threshold_amount %}${{ policy.threshold_amount }}{% endif %}{% if policy.threshold_percent %} · {{ policy.threshold_percent }}%{% endif %}{% if not policy.threshold_amount and not policy.threshold_percent %}No aplica{% endif %}</td>
+            <td>{{ policy.role_count|default:0 }} roles</td>
+            <td><span class="state {% if policy.is_active %}state-active{% else %}state-archived{% endif %}">{% if policy.is_active %}Activa{% else %}Inactiva{% endif %}</span></td>
+            <td><a class="btn btn-light" href="{% url 'enterprise:approval_policy_update' policy.pk %}">Editar</a></td>
+          </tr>
+        {% empty %}<tr><td colspan="6">No hay políticas creadas.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

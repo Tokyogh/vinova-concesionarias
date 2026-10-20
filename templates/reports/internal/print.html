@@ -1,0 +1,25 @@
+{# ES: Renderiza la interfaz templates/reports/internal/print; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/reports/internal/print interface; permissions and data are resolved server-side. #}
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>{{ report_title }} | Vinova Pro</title>
+  <style nonce="{{ request.csp_nonce }}">
+    body{font-family:Arial,sans-serif;color:#1f2937;margin:28px;background:#fff}h1{margin:0 0 4px;color:#123b63}p{color:#64748b}table{width:100%;border-collapse:collapse;margin-top:18px;font-size:12px}th,td{border:1px solid #d9e2ec;padding:8px;text-align:left;vertical-align:top}th{background:#eef3f8;color:#123b63}.actions{margin:18px 0}@media print{.actions{display:none}body{margin:0}}
+  </style>
+  <script defer src="{% static 'js/vinova.js' %}?v={{ vinova_product_version }}"></script>
+</head>
+<body>
+  <h1>{{ report_title }}</h1>
+  <p>Rango: {{ filters.start_date }} - {{ filters.end_date }}{% if filters.branch %} · Sucursal: {{ filters.branch.name }}{% endif %}</p>
+  <div class="actions"><button type="button" data-print-page>Imprimir / Guardar como PDF</button></div>
+  <table>
+    <thead><tr>{% for h in headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+    <tbody>
+      {% for row in rows %}<tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>{% empty %}<tr><td colspan="20">Sin datos para este filtro.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

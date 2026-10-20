@@ -1,0 +1,183 @@
+{# ES: Renderiza la interfaz templates/vehicles/detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/vehicles/detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}{{ vehicle.brand.name }} {{ vehicle.model.name }} {{ vehicle.year }} | Vinova Pro{% endblock %}
+{% block main_class %}public-main-surface{% endblock %}
+{% block content %}
+{# ES: La navegación siguiente muestra destinos ya autorizados por el contexto de backend. #}
+{# EN: The following navigation shows destinations already authorized by backend context. #}
+<nav class="breadcrumbs" aria-label="Ruta de navegación">
+  <a href="{% url 'vehicles:catalog' %}">Vehículos</a>
+  <span aria-hidden="true">/</span>
+  <a href="{% url 'vehicles:catalog' %}?marca={{ vehicle.brand_id }}">{{ vehicle.brand.name }}</a>
+  <span aria-hidden="true">/</span>
+  <span aria-current="page">{{ vehicle.model.name }} {{ vehicle.year }}</span>
+</nav>
+
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="vehicle-detail">
+  <div class="vehicle-gallery">
+    {% if gallery|length > 1 %}
+      <div class="vehicle-gallery-thumbs" role="group" aria-label="Miniaturas de la galería">
+        {% for media in gallery %}
+          <button type="button" class="vehicle-thumb{% if forloop.first %} is-active{% endif %}" data-gallery-thumb aria-label="Ver {{ media.title|default:'imagen del vehículo' }}"{% if forloop.first %} aria-current="true"{% endif %}>
+            <img src="{{ media.resource.file.url }}" alt="" loading="lazy" decoding="async">
+          </button>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="vehicle-stage">
+      <div class="vehicle-stage-media" data-gallery-stage>
+        {% for media in gallery %}
+          <img class="vehicle-stage-image asset-slot-image" data-gallery-image src="{{ media.resource.file.url }}" alt="{{ media.alt_text|default:vehicle }}"{% if forloop.first %} loading="eager" fetchpriority="high"{% else %} loading="lazy"{% endif %}{% if not forloop.first %} hidden{% endif %} decoding="async">
+        {% empty %}
+          <div class="vehicle-image-placeholder large asset-slot" data-asset-slot="vehicle-detail" role="img" aria-label="Fotografía de {{ vehicle }}"></div>
+        {% endfor %}
+      </div>
+      {% if model_3d and model_3d.resource.file %}
+        <model-viewer
+          class="model-viewer-box vehicle-stage-3d"
+          data-stage-3d
+          src="{{ model_3d.resource.file.url }}"
+          alt="Vista tridimensional de {{ vehicle }}"
+          camera-controls
+          auto-rotate
+          shadow-intensity="1"
+          hidden
+        ></model-viewer>
+      {% endif %}
+      <div class="vehicle-stage-actions">
+        {% if model_3d and model_3d.resource.file %}
+          <button type="button" class="vehicle-stage-chip" data-stage-toggle="3d" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg>
+            Vista 360°
+          </button>
+        {% else %}
+          <span class="vehicle-stage-chip is-muted">Fotografías</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <aside class="vehicle-summary">
+    <span class="eyebrow">{{ vehicle.brand.name }}{% if vehicle.model.segment %} · {{ vehicle.model.segment }}{% endif %}</span>
+    <h1 class="vehicle-title">{{ vehicle.model.name }}{% if vehicle.version %} {{ vehicle.version }}{% endif %}</h1>
+    <p class="vehicle-subtitle">{{ vehicle.year }}{% if vehicle.color %} · {{ vehicle.color }}{% endif %}</p>
+
+    <div class="vehicle-summary-badges">
+      <span class="status-badge status-{{ vehicle.status }}">{{ vehicle.get_status_display }}</span>
+      {% if vehicle.branch %}<span class="vehicle-branch-chip">{{ vehicle.branch.name }}</span>{% endif %}
+    </div>
+
+    <p class="vehicle-description">{{ vehicle.description|default:vehicle.short_description|default:'Vehículo disponible para información comercial.' }}</p>
+
+    {% if headline_specs %}
+      <ul class="vehicle-highlight-list">
+        {% for label, value, group in headline_specs %}
+          <li><span>{{ label }}</span><strong>{{ value }}</strong></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="vehicle-price-block">
+      {% if vehicle.price %}
+        <span class="vehicle-price-label">Precio referencial</span>
+        <strong class="vehicle-price">${{ vehicle.price|floatformat:"0" }}</strong>
+      {% else %}
+        <span class="vehicle-price-label">Precio referencial</span>
+        <strong class="vehicle-price is-empty">A consultar</strong>
+      {% endif %}
+      {% if vehicle.mileage %}<span class="vehicle-price-note">{{ vehicle.mileage|floatformat:"0" }} km</span>{% endif %}
+    </div>
+
+    <div class="vehicle-summary-actions">
+      <a class="btn btn-primary full" href="{% url 'leads:public_vehicle_request' vehicle.pk %}">Solicitar información</a>
+      <button class="btn btn-secondary full" type="button" hx-get="{% url 'vehicles:detail_modal' vehicle.pk %}" hx-target="#modal-root" hx-swap="innerHTML">Ver ficha técnica</button>
+    </div>
+    <p class="vehicle-summary-note">Precios y especificaciones referenciales. Confirma la disponibilidad con tu asesor.</p>
+  </aside>
+</section>
+
+<section class="vehicle-tabs" data-detail-tabs>
+  <div class="tabs-list" role="tablist" aria-label="Secciones del vehículo">
+    {% for tab_id, tab_label, tab_parts in tab_groups %}
+      <button type="button" role="tab" id="detail-tab-{{ tab_id }}" data-detail-tab="{{ tab_id }}" aria-controls="detail-panel-{{ tab_id }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" tabindex="{% if forloop.first %}0{% else %}-1{% endif %}">{{ tab_label }}</button>
+    {% endfor %}
+    <button type="button" role="tab" id="detail-tab-gallery" data-detail-tab="gallery" aria-controls="detail-panel-gallery" aria-selected="false" tabindex="-1">Galería{% if gallery %}<span class="tabs-count">{{ gallery|length }}</span>{% endif %}</button>
+  </div>
+
+  {% for tab_id, tab_label, tab_parts in tab_groups %}
+    <div id="detail-panel-{{ tab_id }}" role="tabpanel" aria-labelledby="detail-tab-{{ tab_id }}" data-detail-panel="{{ tab_id }}"{% if not forloop.first %} hidden{% endif %}>
+      {% if tab_parts %}
+        <div class="vehicle-spec-cards">
+          {% for part in tab_parts %}
+            <article class="vehicle-spec-card">
+              <span class="eyebrow">{{ part.get_part_code_display }}</span>
+              <h3>{{ part.title }}</h3>
+              {% if part.summary %}<p>{{ part.summary }}</p>{% endif %}
+              {% if part.description %}<p class="vehicle-spec-detail">{{ part.description }}</p>{% endif %}
+              {% if part.specs %}
+                <dl class="vehicle-spec-list">
+                  {% for key, value in part.specs.items %}<div><dt>{{ key }}</dt><dd>{{ value }}</dd></div>{% endfor %}
+                </dl>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="vehicle-panel-empty">Esta sección todavía no tiene información cargada para este vehículo.</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  <div id="detail-panel-gallery" role="tabpanel" aria-labelledby="detail-tab-gallery" data-detail-panel="gallery" hidden>
+    {% if gallery %}
+      <div class="vehicle-gallery-grid">
+        {% for media in gallery %}
+          <figure class="vehicle-gallery-item">
+            <img src="{{ media.resource.file.url }}" alt="{{ media.alt_text|default:vehicle }}" loading="lazy" decoding="async">
+            {% if media.title %}<figcaption>{{ media.title }}</figcaption>{% endif %}
+          </figure>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="vehicle-panel-empty">Este vehículo todavía no tiene fotografías cargadas.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% if related_vehicles %}
+  <section class="vehicle-related">
+    <div class="section-heading">
+      <span class="eyebrow">Similares</span>
+      <h2>También te puede interesar</h2>
+    </div>
+    <div class="vehicle-grid public-grid">
+      {% for item in related_vehicles %}
+        <article class="vehicle-card">
+          <div class="vehicle-image-wrap">
+            {% with hero=item.hero_media %}
+              {% if hero and hero.resource.file %}<img src="{{ hero.resource.file.url }}" alt="{{ hero.alt_text|default:item }}" loading="lazy" decoding="async">{% else %}<div class="vehicle-image-placeholder" data-asset-slot="vehicle-photo" role="img" aria-label="Fotografía de {{ item }}"></div>{% endif %}
+            {% endwith %}
+            <span class="status-badge status-{{ item.status }}">{{ item.get_status_display }}</span>
+          </div>
+          <div class="vehicle-card-body">
+            <span class="vehicle-brand-label">{{ item.brand.name }}</span>
+            <h3 class="vehicle-name">{{ item.year }} {{ item.model.name }}{% if item.version %} {{ item.version }}{% endif %}</h3>
+            <div class="vehicle-meta">
+              <span>{{ item.year }}</span>
+              {% if item.mileage %}<span>{{ item.mileage|floatformat:"0" }} km</span>{% endif %}
+            </div>
+            <div class="vehicle-card-bottom">
+              {% if item.price %}<div class="vehicle-price-row"><span class="vehicle-price"><small>Desde</small>${{ item.price|floatformat:"0" }}</span></div>{% endif %}
+              <a class="btn btn-light full" href="{% url 'vehicles:detail' item.public_slug %}">Ver detalle</a>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+{% endblock %}

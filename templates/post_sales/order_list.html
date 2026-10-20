@@ -1,0 +1,58 @@
+{# ES: Renderiza la interfaz templates/post_sales/order_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/post_sales/order_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Postventa | Vinova Pro{% endblock %}
+{% block page_title %}Postventa{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Órdenes de taller, responsables, estados y costos de la operación de postventa.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-primary" href="{% url 'post_sales:create' %}">Nueva orden</a>{% endblock %}
+{% block content %}
+<section class="metric-grid">
+  <article class="metric-card"><span>Órdenes</span><strong>{{ metrics.total }}</strong></article>
+  <article class="metric-card"><span>Abiertas</span><strong>{{ metrics.open }}</strong></article>
+  <article class="metric-card"><span>Completadas</span><strong>{{ metrics.completed }}</strong></article>
+  <article class="metric-card"><span>Costo</span><strong>${{ metrics.total_cost|default:'0.00' }}</strong><small>Acumulado en órdenes</small></article>
+</section>
+<section class="toolbar panel-card compact">
+  <form method="get" class="internal-filter-form dense-filter-form">
+    <label class="filter-field"><span>{{ search_form.q.label }}</span>{{ search_form.q }}</label>
+    <label class="filter-field"><span>{{ search_form.status.label }}</span>{{ search_form.status }}</label>
+    <div class="filter-actions"><button class="btn btn-primary">Filtrar</button>{% if search_form.data %}<a class="btn btn-light" href="{% url 'post_sales:list' %}">Limpiar</a>{% endif %}</div>
+  </form>
+</section>
+<section class="panel-card table-panel">
+  <div class="panel-header">
+    <div>
+      <h2>Órdenes de servicio</h2>
+      <p>{{ page_obj.paginator.count }} orden{{ page_obj.paginator.count|pluralize }} dentro de tu alcance.</p>
+    </div>
+  </div>
+  <div class="responsive-table">
+    <table class="data-table mobile-card-table">
+      <thead><tr><th>Orden</th><th>Sucursal</th><th>Cliente</th><th>Vehículo</th><th>Responsable</th><th>Estado</th><th class="num">Costo</th><th></th></tr></thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td data-label="Orden"><strong>{{ order.number }}</strong><span class="table-subtext">{{ order.created_at|date:'d/m/Y' }}</span></td>
+            <td data-label="Sucursal">{{ order.branch.name }}</td>
+            <td data-label="Cliente">{{ order.customer.display_name }}</td>
+            <td data-label="Vehículo">{{ order.vehicle }}</td>
+            <td data-label="Responsable">{{ order.responsible|default:'Sin asignar' }}</td>
+            <td data-label="Estado"><span class="state state-{{ order.status }}">{{ order.get_status_display }}</span></td>
+            <td data-label="Costo" class="num">${{ order.total_cost }}</td>
+            <td data-label="Acciones" class="table-actions-cell"><a class="btn btn-light btn-small" href="{% url 'post_sales:detail' order.pk %}">Gestionar</a></td>
+          </tr>
+        {% empty %}
+          <tr class="empty-table-row"><td colspan="8">No existen órdenes con estos filtros.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="pagination-bar">
+      {% if page_obj.has_previous %}<a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a class="btn btn-light" href="?page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

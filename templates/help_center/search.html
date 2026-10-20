@@ -1,0 +1,28 @@
+{# ES: Renderiza la interfaz templates/help_center/search; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/help_center/search interface; permissions and data are resolved server-side. #}
+{% extends "base/base.html" %}
+{% block title %}Buscar ayuda · Vinova Pro{% endblock %}
+{% block page_title %}Buscar en el Centro de ayuda{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Los resultados respetan tus permisos y roles actuales.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'help_center:home' %}">Volver al centro</a>{% endblock %}
+{% block content %}
+<section class="panel-card toolbar">
+  <form method="get" class="search-form help-search-form">
+    {{ form.q }}
+    <button class="btn btn-primary" type="submit">Buscar</button>
+  </form>
+</section>
+<section class="panel-card table-panel">
+  <div class="panel-header"><div><h2>{% if query %}Resultados para “{{ query }}”{% else %}Escribe una búsqueda{% endif %}</h2><p>{{ results|length }} resultado{{ results|length|pluralize }}</p></div></div>
+  <div class="help-search-results">
+    {% for article in results %}
+      <a href="{% url 'help_center:article' article.slug %}">
+        <div><span class="help-type">{{ article.category.name }}</span><h3>{{ article.title }}</h3><p>{{ article.summary }}</p></div>
+        <span aria-hidden="true">→</span>
+      </a>
+    {% empty %}
+      {% if query %}<div class="empty-state"><h3>No encontramos contenido autorizado</h3><p>Prueba con otra palabra, como “factura”, “backup”, “lead” o “inventario”.</p></div>{% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

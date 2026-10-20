@@ -1,0 +1,22 @@
+/* ES: Banner y panel accesibles de consentimiento opcional. */
+/* EN: Accessible banner and settings panel for optional consent. */
+
+.cookie-consent {
+  position: fixed; z-index: 1200; right: var(--space-20); bottom: var(--space-20);
+  width: min(620px, calc(100vw - 32px)); padding: var(--space-20);
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  background: var(--surface); color: var(--text); box-shadow: var(--shadow-xl);
+}
+.cookie-consent h2 { margin: 0 0 var(--space-8); font-size: var(--fs-20); }
+.cookie-consent p { margin: 0; color: var(--text-muted); }
+.cookie-consent-actions { display: flex; flex-wrap: wrap; gap: var(--space-8); margin-top: var(--space-16); }
+.cookie-settings-grid { display: grid; gap: var(--space-16); }
+.cookie-category { display: grid; grid-template-columns: auto 1fr; gap: var(--space-12); align-items: start; padding: var(--space-16); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.cookie-category input { margin-top: 4px; }
+.cookie-category strong, .cookie-category span { display: block; }
+.cookie-category span { margin-top: var(--space-4); color: var(--text-muted); }
+.cookie-category.is-required { background: var(--surface-subtle); }
+@media (max-width: 640px) {
+  .cookie-consent { right: 12px; bottom: 12px; width: calc(100vw - 24px); }
+  .cookie-consent-actions .btn { width: 100%; }
+}

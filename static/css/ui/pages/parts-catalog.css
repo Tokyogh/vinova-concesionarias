@@ -1,0 +1,82 @@
+/*
+ * ES: Presentación responsive del catálogo público de repuestos.
+ * EN: Responsive presentation for the public spare-parts catalog.
+ */
+
+.parts-catalog-page { background: var(--surface-2); min-height: 70vh; }
+.parts-catalog-hero { display: flex; justify-content: space-between; align-items: center; gap: 32px; padding: clamp(48px, 7vw, 88px) clamp(18px, 5vw, 72px); background: linear-gradient(135deg, var(--surface) 0%, var(--primary-soft) 100%); border-bottom: 1px solid var(--border); }
+.parts-catalog-hero > div:first-child { max-width: 760px; }
+.parts-catalog-hero h1 { margin: 8px 0 14px; font-size: clamp(2.2rem, 5vw, 4.4rem); letter-spacing: -.05em; color: var(--text); }
+.parts-catalog-hero p { max-width: 680px; margin: 0; color: var(--muted); font-size: 1.05rem; line-height: 1.7; }
+.parts-catalog-hero-mark { display: grid; place-items: center; width: clamp(120px, 18vw, 220px); aspect-ratio: 1; border-radius: 50%; color: var(--primary); background: color-mix(in srgb, var(--surface) 82%, transparent); box-shadow: var(--shadow-sm); }
+.parts-catalog-hero-mark svg { width: 58%; }
+
+/* ES: Los filtros conservan controles grandes y claros. EN: Filters keep large, clear controls. */
+.parts-filter-panel { display: grid; grid-template-columns: minmax(220px, 1.6fr) repeat(3, minmax(150px, 1fr)) auto; gap: 14px; align-items: end; margin: -24px clamp(18px, 5vw, 72px) 32px; padding: 20px; position: relative; z-index: 2; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); }
+.parts-filter-panel label { display: grid; gap: 7px; color: var(--text-2); font-size: .78rem; font-weight: 700; }
+.parts-filter-panel input, .parts-filter-panel select { width: 100%; min-height: 44px; }
+.parts-filter-actions { display: flex; gap: 8px; }
+.parts-filter-panel > .field-error { grid-column: 1 / -1; }
+
+/* ES: Rejilla y tarjetas derivadas de la experiencia LITE. EN: Grid and cards derived from the LITE experience. */
+.parts-results { padding: 0 clamp(18px, 5vw, 72px) 64px; }
+.parts-results > header { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin-bottom: 22px; }
+.parts-results h2 { margin: 6px 0 0; color: var(--text); }
+.parts-results > header > strong { color: var(--muted); }
+.parts-public-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.part-public-card { overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow-sm); transition: transform .18s ease, box-shadow .18s ease; }
+.part-public-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.part-public-image { position: relative; display: grid; place-items: center; min-height: 220px; background: linear-gradient(145deg, var(--surface-2), var(--primary-soft)); }
+.part-public-image img { width: 100%; height: 220px; object-fit: cover; }
+.part-public-image > span { color: var(--primary); width: 84px; }
+.part-public-image em { position: absolute; top: 14px; left: 14px; padding: 7px 11px; background: color-mix(in srgb, var(--surface) 92%, transparent); border-radius: 999px; color: var(--text); font-style: normal; font-size: .75rem; font-weight: 800; }
+.part-public-body { padding: 20px; }
+.part-public-body > small { color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.part-public-body h3 { margin: 7px 0 9px; color: var(--text); font-size: 1.22rem; }
+.part-public-body > p { min-height: 3.2em; margin: 0; color: var(--muted); line-height: 1.55; }
+.part-public-code { margin-top: 13px; color: var(--text-2); font-size: .82rem; font-weight: 700; }
+.part-public-availability { display: flex; align-items: center; gap: 8px; margin: 15px 0; font-size: .84rem; font-weight: 700; }
+.part-public-availability span { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+.part-public-availability.is-available { color: var(--success); }
+.part-public-availability.is-available span { background: var(--success); }
+.part-public-availability.is-unavailable { color: var(--muted); }
+.part-public-body footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--border); padding-top: 15px; }
+.part-public-body footer > strong { color: var(--primary); font-size: 1.15rem; }
+.parts-empty { grid-column: 1 / -1; padding: 54px 24px; text-align: center; background: var(--surface); border: 1px dashed var(--border); border-radius: 20px; }
+.parts-empty p { color: var(--muted); }
+
+/* ES: Diálogo accesible con cierre explícito y backdrop. EN: Accessible dialog with explicit close and backdrop. */
+.part-public-dialog { width: min(880px, calc(100vw - 32px)); padding: 0; border: 0; border-radius: 24px; color: var(--text); background: var(--surface); box-shadow: 0 28px 90px rgba(15, 23, 42, .28); }
+.part-public-dialog::backdrop { background: rgba(8, 20, 34, .62); backdrop-filter: blur(3px); }
+.part-dialog-close { position: absolute; z-index: 2; top: 12px; right: 12px; width: 38px; height: 38px; border: 0; border-radius: 50%; background: var(--surface); color: var(--text); font-size: 1.5rem; cursor: pointer; box-shadow: var(--shadow-sm); }
+.part-dialog-layout { display: grid; grid-template-columns: minmax(260px, .85fr) 1.15fr; }
+.part-dialog-layout > div:last-child { padding: 34px; }
+.part-dialog-media { display: grid; place-items: center; min-height: 440px; background: linear-gradient(145deg, var(--primary-soft), var(--surface-2)); color: var(--primary); font-weight: 900; letter-spacing: .12em; }
+.part-dialog-media img { width: 100%; height: 100%; min-height: 440px; object-fit: cover; }
+.part-public-dialog h2 { margin: 8px 0 12px; }
+.part-public-dialog p { color: var(--muted); line-height: 1.6; }
+.part-dialog-price { display: block; margin: 18px 0 22px; color: var(--primary); font-size: 1.35rem; }
+.part-public-dialog ul { display: grid; gap: 8px; padding: 0; list-style: none; }
+.part-public-dialog li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; background: var(--surface-2); border-radius: 10px; }
+.part-public-dialog li span { color: var(--muted); }
+.part-dialog-actions { display: flex; gap: 10px; margin-top: 22px; }
+
+@media (max-width: 1000px) {
+  .parts-filter-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .parts-filter-actions { grid-column: 1 / -1; }
+  .parts-public-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 680px) {
+  .parts-catalog-hero-mark { display: none; }
+  .parts-filter-panel { grid-template-columns: 1fr; margin-top: -18px; }
+  .parts-filter-actions { grid-column: auto; flex-wrap: wrap; }
+  .parts-public-grid { grid-template-columns: 1fr; }
+  .parts-results > header { align-items: start; flex-direction: column; }
+  .part-dialog-layout { grid-template-columns: 1fr; }
+  .part-dialog-media { min-height: 200px; max-height: 240px; }
+  .part-dialog-media img { min-height: 200px; max-height: 240px; }
+  .part-dialog-layout > div:last-child { padding: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) { .part-public-card { transition: none; } }

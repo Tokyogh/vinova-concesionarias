@@ -1,0 +1,87 @@
+{# ES: Renderiza la interfaz templates/invoices/internal/invoice_print; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/invoices/internal/invoice_print interface; permissions and data are resolved server-side. #}
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8"><title>{{ invoice.number }}</title>
+    <style nonce="{{ request.csp_nonce }}">body{font-family:Arial,sans-serif;color:#111827;margin:40px}.print-header{display:flex;justify-content:space-between;border-bottom:2px solid #123b63;padding-bottom:18px;margin-bottom:24px}.muted{color:#64748b}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border-bottom:1px solid #d9e2ec;padding:10px;text-align:left}th{background:#eef3f8}.totals{margin-left:auto;width:320px;margin-top:20px}.totals div{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #d9e2ec}.total{font-size:1.2rem;font-weight:bold}@media print{button{display:none}body{margin:18px}}</style>
+    <script defer src="{% static 'js/vinova.js' %}?v={{ vinova_product_version }}">
+    </script>
+  </head>
+  <body>
+    <button type="button" data-print-page>Imprimir</button>
+    {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+    {# EN: The following section groups content, empty states, and actions for the current flow. #}
+    <section class="print-header">
+      <div>
+        <h1>{{ invoice.company.commercial_name }}</h1>
+        <p class="muted">{{ invoice.company.legal_name }} · RUC {{ invoice.company.ruc }}</p>
+        <p>{{ invoice.branch.name }} · {{ invoice.branch.city }}</p>
+      </div>
+      <div>
+        <h2>{{ invoice.number }}</h2>
+        <p>{{ invoice.get_invoice_type_display }} · {{ invoice.get_status_display }}</p>
+        <p>Emisión: {{ invoice.issue_date|date:'d/m/Y' }}</p>
+      </div>
+    </section>
+    <section>
+      <h3>Cliente</h3>
+      <p>
+        <strong>{{ invoice.customer_name }}</strong><br>{{ invoice.customer_document|default:'Sin documento' }} · {{ invoice.customer_email|default:'Sin correo' }} · {{ invoice.customer_phone|default:'Sin teléfono' }}</p>
+    </section>
+    {# ES: La tabla siguiente presenta datos previamente filtrados por permisos y alcance. #}
+    {# EN: The following table renders data already filtered by permissions and scope. #}
+    <table>
+      <thead>
+        <tr>
+          <th>Descripción</th>
+          <th>Cant.</th>
+          <th>Precio</th>
+          <th>Desc.</th>
+          <th>IVA</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for line in invoice.lines.all %}
+          <tr>
+            <td>{{ line.description }}</td>
+            <td>{{ line.quantity }}</td>
+            <td>${{ line.unit_price }}</td>
+            <td>${{ line.discount_amount }}</td>
+            <td>${{ line.line_tax }}</td>
+            <td>${{ line.line_total }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="totals">
+      <div>
+        <span>Subtotal</span><strong>${{ invoice.subtotal }}</strong>
+      </div>
+      <div>
+        <span>Descuento</span><strong>${{ invoice.discount_total }}</strong>
+      </div>
+      <div>
+        <span>IVA</span><strong>${{ invoice.tax_total }}</strong>
+      </div>
+      <div class="total">
+        <span>Total</span><strong>${{ invoice.total }}</strong>
+      </div>
+      <div>
+        <span>Pagado</span><strong>${{ invoice.amount_paid }}</strong>
+      </div>
+      <div>
+        <span>Saldo</span><strong>${{ invoice.balance_due }}</strong>
+      </div>
+    </div>
+    {% if invoice.notes %}
+      <section>
+        <h3>Notas</h3>
+        <p>{{ invoice.notes|linebreaksbr }}</p>
+      </section>
+    {% endif %}
+    <p class="muted">Comprobante interno generado por Vinova Pro. La integración tributaria externa debe configurarse según la empresa.</p>
+  </body>
+</html>

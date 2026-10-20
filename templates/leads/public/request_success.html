@@ -1,0 +1,11 @@
+{# ES: Renderiza la interfaz templates/leads/public/request_success; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/leads/public/request_success interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}Solicitud recibida | Vinova Pro{% endblock %}
+{% block content %}
+<section class="public-success-card panel-card" data-testid="lead-request-success" aria-labelledby="lead-request-success-title">
+  <div class="success-mark">✓</div><span class="eyebrow">Solicitud registrada</span><h1 id="lead-request-success-title">Gracias por contactarnos</h1>
+  {% if lead %}<p>Tu referencia es <strong>{{ lead.code }}</strong>. Un asesor revisará la solicitud{% if lead.vehicle %} relacionada con {{ lead.vehicle }}{% endif %}.</p>{% else %}<p>La solicitud fue registrada correctamente.</p>{% endif %}
+  <div class="hero-actions"><a class="btn btn-primary" href="{% url 'vehicles:catalog' %}">Seguir explorando</a><a class="btn btn-light" href="{% url 'dashboard:home' %}">Volver al inicio</a></div>
+</section>
+{% endblock %}

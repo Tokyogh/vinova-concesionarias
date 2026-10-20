@@ -1,0 +1,28 @@
+/* ES: Define estilos de static/css/ui/pages/portal/services, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/pages/portal/services styles, including states and responsive behavior. */
+.portal-service-list { display: grid; }
+
+.portal-service-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border, #d8e0e8);
+  color: inherit;
+  text-decoration: none;
+}
+
+.portal-service-row > div { display: grid; gap: .3rem; }
+.portal-service-row > div:last-child { justify-items: end; text-align: right; }
+.portal-service-row span:not(.state),
+.portal-service-row small { color: var(--text-2, #52647a); }
+
+.portal-service-timeline { display: grid; gap: 1rem; margin: 0; padding-left: 1.25rem; }
+.portal-service-timeline li { padding-left: .4rem; }
+.portal-service-timeline li span { display: block; color: var(--text-2, #52647a); }
+.portal-service-timeline li p { margin: .3rem 0 0; }
+
+@media (max-width: 620px) {
+  .portal-service-row { flex-direction: column; }
+  .portal-service-row > div:last-child { justify-items: start; text-align: left; }
+}

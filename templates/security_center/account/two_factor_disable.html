@@ -1,0 +1,5 @@
+{# ES: Renderiza la interfaz templates/security_center/account/two_factor_disable; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/security_center/account/two_factor_disable interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}Desactivar 2FA | Vinova Pro{% endblock %}
+{% block content %}<section class="security-account-card panel-card"><h1>Desactivar autenticación en dos pasos</h1><p>Esta acción reduce la protección de tu cuenta y puede estar bloqueada por la política empresarial.</p><form method="post" class="form-grid compact-grid" novalidate>{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}<button class="btn btn-danger">Desactivar 2FA</button></form></section>{% endblock %}

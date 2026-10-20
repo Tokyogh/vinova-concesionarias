@@ -1,0 +1,11 @@
+{# ES: Renderiza la interfaz templates/help_center/_context_tip; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/help_center/_context_tip interface; permissions and data are resolved server-side. #}
+{% if help_training_mode and contextual_help_article %}
+<section class="training-tip" aria-label="Consejo de capacitación">
+  <div><span class="training-tip-icon">i</span><div><strong>Modo capacitación</strong><p>{{ contextual_help_article.summary }}</p></div></div>
+  <div class="training-tip-actions">
+    <a class="btn btn-secondary" href="{% url 'help_center:article' contextual_help_article.slug %}">Abrir guía</a>
+    <form method="post" action="{% url 'help_center:training_mode' %}">{% csrf_token %}<input type="hidden" name="enabled" value="0"><input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn btn-light" type="submit">Ocultar consejos</button></form>
+  </div>
+</section>
+{% endif %}

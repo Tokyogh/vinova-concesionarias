@@ -1,0 +1,90 @@
+{# ES: Renderiza la interfaz templates/reports/internal/home; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/reports/internal/home interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Reportes empresariales | Vinova Pro{% endblock %}
+{% block page_title %}Reportes empresariales{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Indicadores consolidados para dirección, auditoría y operación. Usa filtros por fecha y sucursal antes de exportar.</p>{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-secondary" href="{% url 'reports_internal:print' 'executive' %}?{{ request.GET.urlencode }}" target="_blank">Vista imprimible</a>
+  <a class="btn btn-light" href="{% url 'dashboard:auditor_home' %}">Dashboard auditoría</a>
+{% endblock %}
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="toolbar panel-card compact reports-toolbar">
+  {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+  {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+  <form method="get" class="internal-filter-form dense-filter-form reports-filter-form">
+    <label class="filter-field"><span>{{ filter_form.start_date.label }}</span>{{ filter_form.start_date }}</label>
+    <label class="filter-field"><span>{{ filter_form.end_date.label }}</span>{{ filter_form.end_date }}</label>
+    <label class="filter-field"><span>{{ filter_form.branch.label }}</span>{{ filter_form.branch }}</label>
+    <label class="filter-field"><span>{{ filter_form.seller.label }}</span>{{ filter_form.seller }}</label>
+    <label class="filter-field"><span>{{ filter_form.sale_status.label }}</span>{{ filter_form.sale_status }}</label>
+    <label class="filter-field"><span>{{ filter_form.vehicle.label }}</span>{{ filter_form.vehicle }}</label>
+    <label class="filter-field"><span>{{ filter_form.category.label }}</span>{{ filter_form.category }}</label>
+    <label class="filter-field"><span>{{ filter_form.q.label }}</span>{{ filter_form.q }}</label>
+    <div class="filter-actions">
+      <button class="btn btn-primary">Actualizar</button>
+      <a class="btn btn-light" href="{% url 'reports_internal:home' %}">Limpiar</a>
+    </div>
+  </form>
+</section>
+
+<section class="metric-grid reports-status-grid">
+  <a class="metric-card" href="{% url 'reports_internal:detail' 'sales' %}?{{ request.GET.urlencode }}&sale_status=sold"><span>Ventas cerradas</span><strong>{{ metrics.sales_count }}</strong><small>${{ metrics.sales_total }}</small></a>
+  <a class="metric-card" href="{% url 'reports_internal:detail' 'sales' %}?{{ request.GET.urlencode }}"><span>Pagos confirmados</span><strong>${{ metrics.payments_total }}</strong><small>Saldo pendiente: ${{ metrics.pending_balance }}</small></a>
+  <article class="metric-card"><span>Facturas en rango</span><strong>{{ metrics.invoices_count }}</strong><small>${{ metrics.invoices_total }}</small></article>
+  <a class="metric-card" href="{% url 'reports_internal:detail' 'vehicles' %}?{{ request.GET.urlencode }}"><span>Vehículos disponibles</span><strong>{{ metrics.available_vehicles }}</strong><small>Reservados: {{ metrics.reserved_vehicles }}</small></a>
+  <a class="metric-card" href="{% url 'reports_internal:detail' 'inventory' %}?{{ request.GET.urlencode }}"><span>Stock bajo</span><strong>{{ metrics.low_stock }}</strong><small>Requiere revisión</small></a>
+</section>
+
+<section class="panel-card table-panel">
+  <div class="panel-header"><div><h2>Rendimiento por vendedor</h2><p>Ventas cerradas, cobros y saldos según los filtros aplicados.</p></div></div>
+  <div class="responsive-table compact-table">
+    <table class="data-table mobile-card-table">
+      <thead><tr><th>Vendedor</th><th class="num">Ventas</th><th class="num">Total</th><th class="num">Cobrado</th><th class="num">Saldo</th></tr></thead>
+      <tbody>
+        {% for row in seller_summary %}
+          <tr><td data-label="Vendedor">{{ row.advisor__first_name }} {{ row.advisor__last_name }}<span class="table-subtext">{{ row.advisor__username }}</span></td><td class="num">{{ row.count }}</td><td class="num">${{ row.total|default:'0.00' }}</td><td class="num">${{ row.paid|default:'0.00' }}</td><td class="num">${{ row.balance|default:'0.00' }}</td></tr>
+        {% empty %}<tr class="empty-table-row"><td colspan="5">Sin ventas cerradas por vendedor en este rango.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="dashboard-module-grid reports-module-grid">
+  {% for card in module_cards %}
+    <a class="dashboard-module-card report-module-card" href="{% url 'reports_internal:detail' card.code %}?{{ request.GET.urlencode }}">
+      <strong>{{ card.title }}</strong>
+      <span>{{ card.description }}</span>
+    </a>
+  {% endfor %}
+</section>
+
+<section class="detail-grid two-columns reports-home-grid">
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Ventas por sucursal</h2><p>Resumen de rendimiento comercial.</p></div></div>
+    <div class="responsive-table compact-table">
+      <table class="data-table mobile-card-table">
+        <thead><tr><th>Sucursal</th><th class="num">Ventas</th><th class="num">Total</th></tr></thead>
+        <tbody>
+          {% for row in branch_summary %}
+            <tr><td data-label="Sucursal">{{ row.branch__name|default:'Sin sucursal' }}<span class="table-subtext">{{ row.branch__city }}</span></td><td class="num">{{ row.count }}</td><td class="num">${{ row.total|default:'0.00' }}</td></tr>
+          {% empty %}<tr class="empty-table-row"><td colspan="3">Sin ventas en este rango.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Comprobantes recientes</h2><p>Últimos movimientos de facturación.</p></div></div>
+    <div class="timeline-list">
+      {% for invoice in recent_invoices %}
+        <a class="timeline-item" href="{% url 'invoices_internal:detail' invoice.pk %}">
+          <strong>{{ invoice.number }} · {{ invoice.customer_name }}</strong>
+          <span class="table-subtext">{{ invoice.get_status_display }} · {{ invoice.branch.name }} · ${{ invoice.total }}</span>
+        </a>
+      {% empty %}<p class="empty-inline">No hay comprobantes recientes.</p>{% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,19 @@
+{# ES: Renderiza la interfaz templates/inventory/internal/transfer_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/inventory/internal/transfer_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ page_heading }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ page_heading }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Transfiere stock entre sucursales manteniendo trazabilidad de origen, destino, cantidades anteriores y cantidades finales.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'inventory_internal:list' %}">Volver</a>{% endblock %}
+{% block content %}
+<section class="panel-card form-panel-wide">
+  <form method="post" class="form-grid inventory-form-grid">
+    {% csrf_token %}
+    {% for field in form %}
+      <label class="form-field {% if field.name == 'reason' %}span-2{% endif %}"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>
+    {% endfor %}
+    {% for error in form.non_field_errors %}<small class="field-error span-2">{{ error }}</small>{% endfor %}
+    <div class="form-actions"><button class="btn btn-primary">Transferir</button><a class="btn btn-light" href="{% url 'inventory_internal:list' %}">Cancelar</a></div>
+  </form>
+</section>
+{% endblock %}

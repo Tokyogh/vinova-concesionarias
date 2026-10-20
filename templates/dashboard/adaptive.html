@@ -1,0 +1,117 @@
+{# ES: Renderiza la interfaz templates/dashboard/adaptive; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/adaptive interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% load ui_assets %}
+{% block body_class %}dashboard-page{% endblock %}
+{% block title %}{{ dashboard_heading }} | Vinova Pro{% endblock %}
+{% block page_title %}Mi dashboard{% endblock %}
+{% block content %}
+<div class="adaptive-dashboard" data-dashboard-profile="{{ dashboard_profile.code }}">
+  {% ui_final_asset "dashboard-welcome" as dashboard_welcome_asset %}{% ui_final_srcset "dashboard-welcome" as dashboard_welcome_srcset %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="dashboard-welcome{% if dashboard_welcome_asset %} has-final-asset{% endif %}" aria-labelledby="dashboard-welcome-title">
+    {% if dashboard_welcome_asset %}
+      <img class="dashboard-welcome__media" src="{{ dashboard_welcome_asset }}" srcset="{{ dashboard_welcome_srcset }}" sizes="(max-width: 900px) 100vw, calc(100vw - 280px)" alt="" aria-hidden="true" width="1669" height="942" loading="eager" fetchpriority="high" decoding="async">
+    {% endif %}
+    <div class="dashboard-welcome__content">
+      <span class="dashboard-welcome__eyebrow">{{ dashboard_heading }} · {{ dashboard_profile.name }}</span>
+      <h2 id="dashboard-welcome-title">Hola, {{ request.user.first_name|default:request.user.username }}</h2>
+      <p>{{ dashboard_profile.description }}</p>
+      <div class="dashboard-welcome__actions">
+        {% if dashboard_actions %}<a class="btn btn-primary" href="{{ dashboard_actions.0.url }}">{{ dashboard_actions.0.title }}</a>{% endif %}
+        {% if recommended_url != request.path %}<a class="btn btn-light" href="{{ recommended_url }}">Abrir vista del área</a>{% endif %}
+      </div>
+    </div>
+    {% if not dashboard_welcome_asset %}<div class="dashboard-welcome__brand" aria-hidden="true"><span>V</span><small>VINOVA PRO</small></div>{% endif %}
+  </section>
+
+  {% if dashboard_primary_widget %}
+  <section class="adaptive-dashboard__section adaptive-dashboard__section--primary" data-dashboard-widget="{{ dashboard_primary_widget.key }}" aria-labelledby="widget-{{ dashboard_primary_widget.key }}-title">
+    <div class="adaptive-dashboard__section-heading">
+      <div><span class="section-kicker">Resumen de tu alcance</span><h2 id="widget-{{ dashboard_primary_widget.key }}-title">{{ dashboard_primary_widget.title }}</h2><p>{{ dashboard_primary_widget.description }}</p></div>
+    </div>
+    <div class="adaptive-metrics">
+      {% for item in dashboard_primary_widget.items %}
+      <article class="adaptive-metric adaptive-metric--{{ item.tone }}">
+        <span>{{ item.label }}</span><strong>{{ item.value }}</strong>{% if item.hint %}<small>{{ item.hint }}</small>{% endif %}
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <div class="dashboard-priority-grid">
+    {% if dashboard_activity_widget %}
+    <section class="adaptive-widget adaptive-widget--activity" data-dashboard-widget="activity" aria-labelledby="dashboard-activity-title">
+      <div class="adaptive-dashboard__section-heading">
+        <div><span class="section-kicker">Seguimiento</span><h2 id="dashboard-activity-title">{{ dashboard_activity_widget.title }}</h2><p>{{ dashboard_activity_widget.description }}</p></div>
+      </div>
+      <div class="adaptive-list adaptive-list--activity">
+        {% for item in dashboard_activity_widget.items %}
+        <a href="{{ item.url }}" class="adaptive-list__item">
+          <span><small>{{ item.kind }}</small><strong>{{ item.title }}</strong><em>{{ item.detail }}</em></span>
+          <time datetime="{{ item.at|date:'c' }}">{{ item.at|timesince }}</time>
+        </a>
+        {% empty %}<p class="adaptive-empty">Aún no hay actividad visible.</p>{% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if dashboard_tasks_widget %}
+    <section class="adaptive-widget adaptive-widget--tasks" data-dashboard-widget="tasks" aria-labelledby="dashboard-tasks-title">
+      <div class="adaptive-dashboard__section-heading">
+        <div><span class="section-kicker">Hoy</span><h2 id="dashboard-tasks-title">{{ dashboard_tasks_widget.title }}</h2></div>
+      </div>
+      <div class="adaptive-list adaptive-list--tasks">
+        {% for item in dashboard_tasks_widget.items %}
+        <a href="{{ item.url }}" class="adaptive-list__item adaptive-list__item--{{ item.tone }}">
+          <span>{{ item.title }}</span><strong>{{ item.count }}</strong>
+        </a>
+        {% empty %}<p class="adaptive-empty">No hay pendientes en las áreas visibles.</p>{% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  </div>
+
+  {% if dashboard_actions %}
+  <section class="adaptive-widget adaptive-widget--actions" aria-labelledby="quick-actions-title">
+    <div class="adaptive-dashboard__section-heading">
+      <div><span class="section-kicker">Accesos autorizados</span><h2 id="quick-actions-title">Acciones rápidas</h2><p>Atajos disponibles según tus permisos actuales.</p></div>
+    </div>
+    <div class="dashboard-actions-grid">
+      {% for action in dashboard_actions %}
+      <a class="dashboard-action" href="{{ action.url }}" data-dashboard-action="{{ action.key }}">
+        <span class="dashboard-action__icon" aria-hidden="true">{% include 'dashboard/snippets/action_icon.html' %}</span>
+        <span><strong>{{ action.title }}</strong><small>{{ action.description }}</small></span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if dashboard_secondary_widgets %}
+  <section class="adaptive-dashboard__section adaptive-dashboard__section--secondary" aria-labelledby="secondary-insights-title">
+    <div class="adaptive-dashboard__section-heading">
+      <div><span class="section-kicker">Más información</span><h2 id="secondary-insights-title">Estado de otras áreas</h2><p>Indicadores adicionales habilitados para tu cuenta.</p></div>
+    </div>
+    <div class="dashboard-secondary-grid">
+      {% for widget in dashboard_secondary_widgets %}
+      <article class="adaptive-widget adaptive-widget--compact" data-dashboard-widget="{{ widget.key }}">
+        <header><h3>{{ widget.title }}</h3><p>{{ widget.description }}</p></header>
+        <div class="adaptive-metrics adaptive-metrics--compact">
+          {% for item in widget.items %}
+          <div class="adaptive-metric adaptive-metric--{{ item.tone }}"><span>{{ item.label }}</span><strong>{{ item.value }}</strong></div>
+          {% endfor %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if not dashboard_primary_widget and not dashboard_actions %}
+  <section class="adaptive-widget"><h2>Panel operativo</h2><p>No hay widgets disponibles para los permisos actuales.</p></section>
+  {% endif %}
+</div>
+{% endblock %}

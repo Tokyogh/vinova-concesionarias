@@ -1,0 +1,73 @@
+{# ES: Renderiza la interfaz templates/audit/internal/alert_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/audit/internal/alert_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Alertas de seguridad | Vinova Pro{% endblock %}
+{% block page_title %}Alertas de seguridad{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">Eventos de alto riesgo que requieren revisión, documentación o cierre controlado.</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'audit_internal:list' %}">Registro de auditoría</a>{% endblock %}
+{% block content %}
+  <section class="panel-card">
+    <form method="get" class="form-grid audit-alert-filter-grid">
+      {% for field in filter_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}</label>{% endfor %}
+      <div class="form-actions">
+        <button class="btn btn-primary">Filtrar</button><a class="btn btn-light" href="{% url 'audit_internal:alerts' %}">Limpiar</a>
+      </div>
+    </form>
+  </section>
+  <section class="panel-card table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Alertas registradas</h2>
+        <p>{{ page_obj.paginator.count }} alerta(s).</p>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Alerta</th>
+            <th>Usuario</th>
+            <th>Sucursal</th>
+            <th>Severidad</th>
+            <th>Estado</th>
+            <th>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alert in alerts %}
+            <tr>
+              <td>{{ alert.created_at|date:'d/m/Y H:i:s' }}</td>
+              <td>
+                <strong>{{ alert.title }}</strong><span class="table-subtext"><code>{{ alert.code }}</code></span>
+              </td>
+              <td>{{ alert.user|default:'No identificado' }}</td>
+              <td>{{ alert.branch.name|default:'Global / N/D' }}</td>
+              <td>
+                <span class="audit-badge audit-severity-{{ alert.severity }}">{{ alert.get_severity_display }}</span>
+              </td>
+              <td>
+                <span class="audit-badge alert-status-{{ alert.status }}">{{ alert.get_status_display }}</span>
+              </td>
+              <td>
+                <a class="btn btn-light btn-small" href="{% url 'audit_internal:alert_detail' alert.alert_id %}">Revisar</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7">No existen alertas con estos filtros.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="pagination-bar">
+        {% if page_obj.has_previous %}<a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}<span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a class="btn btn-light" href="?page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+      </nav>
+    {% endif %}
+  </section>
+{% endblock %}

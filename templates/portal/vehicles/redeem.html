@@ -1,0 +1,17 @@
+{# ES: Renderiza la interfaz templates/portal/vehicles/redeem; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/vehicles/redeem interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}Agregar vehículo{% endblock %}
+{% block portal_heading %}Agregar un vehículo{% endblock %}
+{% block portal_lead %}Canjea el código privado VNV entregado por tu asesor. Una cédula, placa o VIN no sustituyen este código.{% endblock %}
+{% block portal_content %}
+<section class="panel-card portal-redeem-card">
+  <div class="panel-header"><div><h2>Código de vinculación</h2><p>El canje es de un solo uso y queda registrado de forma segura.</p></div></div>
+  <form method="post" class="form-stack" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% if field.help_text %}<small id="vnv-code-help">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}
+    <div class="form-actions"><button class="btn btn-primary">Vincular vehículo</button><a class="btn btn-light" href="{% url 'portal:vehicle_list' %}">Cancelar</a></div>
+  </form>
+</section>
+{% endblock %}

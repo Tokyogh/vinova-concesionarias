@@ -1,0 +1,22 @@
+{# ES: Renderiza la interfaz templates/documents/internal/catalog_data; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/documents/internal/catalog_data interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Categorías documentales | Vinova Pro{% endblock %}
+{% block page_title %}Catálogo documental{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Configuración de categorías para clasificar expedientes y recursos.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'documents_internal:list' %}">Volver a documentos</a>{% endblock %}
+{% block content %}
+<section class="detail-grid two-columns">
+  <article class="panel-card">
+    <h2>Nueva categoría</h2>
+    <form method="post" class="stacked-form">{% csrf_token %}
+      {% for field in category_form %}<label class="form-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}
+      <button class="btn btn-primary">Crear categoría</button>
+    </form>
+  </article>
+  <article class="panel-card table-panel">
+    <h2>Categorías existentes</h2>
+    <div class="responsive-table"><table class="data-table compact-table"><thead><tr><th>Nombre</th><th>Ámbito</th><th>Estado</th></tr></thead><tbody>{% for category in categories %}<tr><td><strong>{{ category.name }}</strong><span class="table-subtext">{{ category.description|default:'Sin descripción' }}</span></td><td>{{ category.get_scope_display }}</td><td>{% if category.is_active %}Activa{% else %}Inactiva{% endif %}</td></tr>{% empty %}<tr><td colspan="3">Sin categorías.</td></tr>{% endfor %}</tbody></table></div>
+  </article>
+</section>
+{% endblock %}

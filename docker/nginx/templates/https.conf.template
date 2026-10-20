@@ -1,0 +1,103 @@
+# ES: Configura el borde Nginx de docker/nginx/templates/https.conf.template, incluidos proxy, límites y cabeceras.
+# EN: Configures the docker/nginx/templates/https.conf.template Nginx edge, including proxying, limits, and headers.
+# Native-TLS edge template with security headers, limits and reverse proxying.
+log_format vinova_json escape=json '{"time":"$time_iso8601","remote":"$remote_addr","request_id":"$request_id","method":"$request_method","uri":"$uri","status":$status,"bytes":$body_bytes_sent,"duration":$request_time,"upstream":"$upstream_addr","upstream_time":"$upstream_response_time"}';
+access_log /var/log/nginx/access.log vinova_json;
+proxy_headers_hash_max_size 1024;
+proxy_headers_hash_bucket_size 128;
+
+limit_req_zone $binary_remote_addr zone=vinova_login:10m rate=${NGINX_LOGIN_RATE};
+limit_req_zone $binary_remote_addr zone=vinova_api:10m rate=30r/s;
+
+upstream vinova_web {
+    server web:8000;
+    keepalive 32;
+}
+
+# ES: El bloque siguiente aplica proxy, cabeceras y límites de petición en el borde Nginx.
+# EN: The following block applies proxying, headers, and request limits at the Nginx edge.
+server {
+    listen 8080;
+    server_name ${NGINX_SERVER_NAME};
+
+    location = /nginx-health {
+        access_log off;
+        add_header Content-Type text/plain;
+        return 200 'ok';
+    }
+
+    location / {
+        return 301 https://${NGINX_SERVER_NAME}$request_uri;
+    }
+}
+
+server {
+    listen 8443 ssl;
+    http2 on;
+    server_name ${NGINX_SERVER_NAME};
+    client_max_body_size ${NGINX_CLIENT_MAX_BODY_SIZE};
+
+    location = /nginx-health {
+        access_log off;
+        add_header Content-Type text/plain;
+        return 200 'ok';
+    }
+
+    ssl_certificate ${NGINX_SSL_CERTIFICATE};
+    ssl_certificate_key ${NGINX_SSL_CERTIFICATE_KEY};
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    location /static/ {
+        alias /app/staticfiles/;
+        access_log off;
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800, immutable";
+    }
+
+    location /media/ {
+        alias /app/media/;
+        expires 1h;
+        add_header X-Content-Type-Options nosniff always;
+    }
+
+    location ^~ /private/ { return 404; }
+    location ~ /\. { deny all; }
+
+    location = /accounts/login/ {
+        limit_req zone=vinova_login burst=${NGINX_LOGIN_BURST} nodelay;
+        limit_req_status 429;
+        proxy_pass http://vinova_web;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Request-ID $request_id;
+    }
+
+    location /api/ {
+        limit_req zone=vinova_api burst=60 nodelay;
+        proxy_pass http://vinova_web;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Request-ID $request_id;
+        proxy_read_timeout ${NGINX_PROXY_READ_TIMEOUT};
+    }
+
+    location / {
+        proxy_pass http://vinova_web;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Request-ID $request_id;
+        proxy_read_timeout ${NGINX_PROXY_READ_TIMEOUT};
+        proxy_send_timeout ${NGINX_PROXY_READ_TIMEOUT};
+    }
+}

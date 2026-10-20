@@ -1,0 +1,68 @@
+{# ES: Renderiza la interfaz templates/sales/internal/sale_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/sales/internal/sale_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% load filter_ui %}
+{% block title %}Ventas | Vinova Pro{% endblock %}
+{% block page_title %}Ventas y cotizaciones{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Operación comercial interna: cotizaciones, reservas, pagos, ventas confirmadas y trazabilidad por sucursal.</p>{% endblock %}
+{% block topbar_actions %}
+  {% if request.user.can_manage_quotes %}<a class="btn btn-primary" href="{% url 'sales_internal:create' %}">Nueva operación</a>{% endif %}
+  <a class="btn btn-light" href="{% url 'sales_internal:attention' %}">Requieren atención</a>
+{% endblock %}
+{% block content %}
+<section class="metric-grid sales-status-grid">
+  <article class="metric-card"><span>Operaciones abiertas</span><strong>{{ metrics.open }}</strong></article>
+  <article class="metric-card"><span>Cotizaciones</span><strong>{{ metrics.quoted }}</strong></article>
+  <article class="metric-card"><span>Reservas</span><strong>{{ metrics.reserved }}</strong></article>
+  <article class="metric-card"><span>Ventas del mes</span><strong>{{ metrics.sold_month }}</strong><small>${{ metrics.revenue_month }}</small></article>
+</section>
+
+{% url 'sales_internal:list' as filter_clear_url %}
+{% vinova_filter_panel search_form filter_clear_url 'sales' common='q,status,sort' advanced='kind,branch' %}
+
+{% if attention_sales %}
+<section class="panel-card sales-attention-card">
+  <div class="panel-header"><div><h2>Atención comercial</h2><p>Cotizaciones vencidas o reservas con fecha expirada.</p></div><a class="btn btn-secondary" href="{% url 'sales_internal:attention' %}">Ver todo</a></div>
+  <div class="timeline-list sales-attention-list">
+    {% for sale in attention_sales %}
+      <a class="timeline-item" href="{% url 'sales_internal:detail' sale.pk %}">
+        <strong>{{ sale.number }} · {{ sale.customer.display_name }}</strong>
+        <span class="table-subtext">{{ sale.get_status_display }} · {{ sale.branch.name }}{% if sale.vehicle %} · {{ sale.vehicle }}{% endif %}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="panel-card table-panel">
+  <div class="panel-header"><div><h2>Pipeline comercial</h2><p>{{ page_obj.paginator.count }} resultado(s). El cliente común no ve esta área.</p></div></div>
+  <div class="responsive-table">
+    <table class="data-table mobile-card-table">
+      <thead><tr><th>Número</th><th>Cliente</th><th>Vehículo</th><th>Sucursal / asesor</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        {% for sale in sales %}
+          <tr>
+            <td data-label="Número"><strong>{{ sale.number }}</strong><span class="table-subtext">{{ sale.get_kind_display }} · {{ sale.created_at|date:'d/m/Y H:i' }}</span></td>
+            <td data-label="Cliente">{{ sale.customer.display_name }}<span class="table-subtext">{{ sale.customer.primary_contact }}</span></td>
+            <td data-label="Vehículo">{% if sale.vehicle %}{{ sale.vehicle }}<span class="table-subtext">{{ sale.vehicle.internal_code }}{% if sale.vehicle.vin %} · VIN {{ sale.vehicle.vin }}{% endif %}</span>{% else %}<span class="muted">Sin vehículo</span>{% endif %}</td>
+            <td data-label="Sucursal / asesor">{{ sale.branch.name }}{% if sale.advisor %}<span class="table-subtext">{{ sale.advisor.get_full_name|default:sale.advisor.username }}</span>{% endif %}</td>
+            <td data-label="Total"><strong>${{ sale.total }}</strong><span class="table-subtext">Saldo: ${{ sale.balance_due }}</span></td>
+            <td data-label="Estado"><span class="state state-sale-{{ sale.status }}">{{ sale.get_status_display }}</span></td>
+            <td class="table-actions-cell" data-label="Acciones"><a class="btn btn-light btn-small" href="{% url 'sales_internal:detail' sale.pk %}">Gestionar</a></td>
+          </tr>
+        {% empty %}
+          <tr class="empty-table-row"><td colspan="7">No hay operaciones comerciales con estos filtros.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.previous_page_number %}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.next_page_number %}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

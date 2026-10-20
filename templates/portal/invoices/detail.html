@@ -1,0 +1,40 @@
+{# ES: Renderiza la interfaz templates/portal/invoices/detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/invoices/detail interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}{{ invoice.number }}{% endblock %}
+{% block portal_heading %}Comprobante {{ invoice.number }}{% endblock %}
+{% block portal_lead %}{{ invoice.get_invoice_type_display }} · {{ invoice.get_status_display }}{% endblock %}
+{% block portal_content %}
+<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="{% url 'portal:invoice_list' %}">Facturas</a><span aria-hidden="true">/</span><span aria-current="page">{{ invoice.number }}</span></nav>
+<section class="portal-grid">
+  <article class="panel-card">
+    <span class="eyebrow">{{ invoice.get_invoice_type_display }}</span>
+    <h2>{{ invoice.number }}</h2>
+    <p>{{ invoice.notes|default:'Sin observaciones adicionales.'|linebreaksbr }}</p>
+    <a class="btn btn-primary" href="{% url 'portal:invoice_download' invoice.pk %}">Descargar PDF protegido</a>
+    <p class="muted">El archivo es privado, reproducible y se entrega mediante una ruta autenticada.</p>
+  </article>
+  <article class="panel-card">
+    <h2>Resumen</h2>
+    <dl class="data-list">
+      <div><dt>Fecha de emisión</dt><dd>{{ invoice.issue_date|date:'d/m/Y' }}</dd></div>
+      <div><dt>Vencimiento</dt><dd>{{ invoice.due_date|date:'d/m/Y'|default:'No aplica' }}</dd></div>
+      <div><dt>Estado</dt><dd>{{ invoice.get_status_display }}</dd></div>
+      <div><dt>Subtotal</dt><dd>{{ invoice.currency }} {{ invoice.subtotal }}</dd></div>
+      <div><dt>Descuento</dt><dd>{{ invoice.currency }} {{ invoice.discount_total }}</dd></div>
+      <div><dt>Impuestos</dt><dd>{{ invoice.currency }} {{ invoice.tax_total }}</dd></div>
+      <div><dt>Total</dt><dd><strong>{{ invoice.currency }} {{ invoice.total }}</strong></dd></div>
+      <div><dt>Pagado</dt><dd>{{ invoice.currency }} {{ invoice.amount_paid }}</dd></div>
+      <div><dt>Saldo</dt><dd>{{ invoice.currency }} {{ invoice.balance_due }}</dd></div>
+    </dl>
+  </article>
+</section>
+<section class="panel-card">
+  <h2>Detalle</h2>
+  <div class="table-responsive"><table class="data-table"><thead><tr><th>Descripción</th><th>Cantidad</th><th>Precio</th><th>Total</th></tr></thead><tbody>
+    {% for line in invoice.lines.all %}<tr><td>{{ line.description }}</td><td>{{ line.quantity }}</td><td>{{ invoice.currency }} {{ line.unit_price }}</td><td>{{ invoice.currency }} {{ line.line_total }}</td></tr>
+    {% empty %}<tr><td colspan="4">Sin líneas publicadas.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+<p class="muted">VINOVA PRO no ejecuta autorización tributaria SRI en este flujo.</p>
+{% endblock %}

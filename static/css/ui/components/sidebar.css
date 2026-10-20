@@ -1,0 +1,97 @@
+/* ES: Define estilos de static/css/ui/components/sidebar, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/components/sidebar styles, including states and responsive behavior. */
+/*
+   Barra lateral del shell staff: navy profundo, marca y pie. */
+
+.sidebar {
+  background: var(--navy);
+  background-image: linear-gradient(180deg, #0b1f3a 0%, #0a1a2e 60%, #081527 100%);
+  color: #c6d6e6;
+  padding: var(--space-20) var(--space-12);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid #16304c;
+}
+
+.sidebar .brand-block {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  margin: 0 var(--space-8) var(--space-24);
+}
+
+.sidebar-brand-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  border-radius: var(--radius);
+  color: #fff;
+}
+
+.sidebar-brand-link:hover .sidebar-brand-copy strong { color: #d7ecff; }
+
+.sidebar-brand-link:focus-visible {
+  outline: 2px solid #6eb9f4;
+  outline-offset: 3px;
+}
+
+/* ES: Las reglas de «.sidebar-brand-copy» definen estado visual y adaptación sin alterar semántica. */
+/* EN: The «.sidebar-brand-copy» rules define visual state and adaptation without changing semantics. */
+.sidebar-brand-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.sidebar .brand-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 var(--space-40);
+  width: var(--space-40);
+  height: var(--space-40);
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: #fff;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-18);
+}
+
+.sidebar .sidebar-brand-copy strong {
+  display: block;
+  color: #fff;
+  font-size: var(--fs-15);
+  line-height: 1.2;
+}
+
+.sidebar .sidebar-brand-copy > span {
+  display: block;
+  color: #8fa8bc;
+  font-size: var(--fs-12);
+  line-height: 1.2;
+}
+
+.sidebar-footer {
+  flex: 0 0 auto;
+  margin-top: var(--space-16);
+  padding: var(--space-12) var(--space-10) 0;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  color: #7d93a8;
+  font-size: var(--fs-12);
+}
+
+.sidebar-footer span {
+  display: block;
+  color: #c0cfdd;
+  font-weight: var(--fw-semibold);
+  margin-bottom: var(--space-4);
+}

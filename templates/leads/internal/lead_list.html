@@ -1,0 +1,114 @@
+{# ES: Renderiza la interfaz templates/leads/internal/lead_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/leads/internal/lead_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% load filter_ui %}
+{% block title %}CRM y leads | Vinova Pro{% endblock %}
+{% block page_title %}CRM y leads{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">Solicitudes del catálogo, seguimiento, asignación comercial y conversión en clientes, cotizaciones y ventas.</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'leads_internal:pipeline' %}">Ver pipeline</a>{% if request.user.can_view_analytics %}<a class="btn btn-light" href="{% url 'analytics_internal:home' %}">Analítica</a>{% endif %}
+  {% if request.user.can_export_leads %}<a class="btn btn-secondary" href="{% url 'leads_internal:export' %}?format=xlsx{% if filter_query %}&{{ filter_query }}{% endif %}">Exportar Excel</a>{% endif %}
+  {% if request.user.can_manage_leads %}<a class="btn btn-primary" href="{% url 'leads_internal:create' %}">Nuevo lead</a>{% endif %}
+{% endblock %}
+{% block content %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="metric-grid crm-metric-grid">
+    <article class="metric-card">
+      <span>Total</span><strong>{{ metrics.total }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Nuevos</span><strong>{{ metrics.new }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Abiertos</span><strong>{{ metrics.open }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Ganados</span><strong>{{ metrics.won }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Seguimientos vencidos</span><strong>{{ metrics.overdue }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Sin asignar</span><strong>{{ metrics.unassigned }}</strong>
+    </article>
+  </section>
+  <section class="panel-card">
+    <div class="panel-header">
+      <div>
+        <h2>Filtros del CRM</h2>
+        <p>Busca por contacto, vehículo, origen, prioridad, sucursal y responsable.</p>
+      </div>
+    </div>
+    {% url 'leads_internal:list' as filter_clear_url %}
+    {% vinova_filter_panel filter_form filter_clear_url 'leads' common='q,status,sort' advanced='priority,source,request_type,branch,advisor,overdue' %}
+  </section>
+  <section class="panel-card table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Leads encontrados</h2>
+        <p>{{ page_obj.paginator.count }} registro(s) dentro de tu alcance.</p>
+      </div>
+    </div>
+    <div class="table-scroll">
+      {# ES: La tabla siguiente presenta datos previamente filtrados por permisos y alcance. #}
+      {# EN: The following table renders data already filtered by permissions and scope. #}
+      <table class="data-table mobile-card-table">
+        <thead>
+          <tr>
+            <th>Lead</th>
+            <th>Solicitud</th>
+            <th>Interés</th>
+            <th>Ubicación</th>
+            <th>Asignación</th>
+            <th>Seguimiento</th>
+            <th>Estado</th>
+            <th>Puntaje</th>
+            <th>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in leads %}
+            <tr>
+              <td data-label="Lead">
+                <strong>{{ lead.full_name }}</strong><span class="table-subtext">{{ lead.code }} · {{ lead.contact_value }}</span>
+              </td>
+              <td data-label="Solicitud">{{ lead.get_request_type_display }}<span class="table-subtext">{{ lead.get_source_display }}</span>
+              </td>
+              <td data-label="Interés">{{ lead.vehicle_interest_label|truncatechars:45 }}</td>
+              <td data-label="Ubicación">{{ lead.city|default:'N/D' }}<span class="table-subtext">{{ lead.province }}</span>
+              </td>
+              <td data-label="Asignación">
+                {% if lead.assigned_advisor %}{{ lead.assigned_advisor.get_full_name|default:lead.assigned_advisor.username }}{% else %}<span class="state state-warning">Sin asesor</span>{% endif %}<span class="table-subtext">{{ lead.branch.name|default:'Sin sucursal' }}</span>
+              </td>
+              <td data-label="Seguimiento">
+                {% if lead.next_follow_up_at %}{{ lead.next_follow_up_at|date:'d/m/Y H:i' }}{% if lead.next_follow_up_at < now %}<span class="table-subtext field-error">Vencido</span>{% endif %}
+                  {% else %}Sin programar{% endif %}
+              </td>
+              <td data-label="Estado">
+                <span class="crm-badge crm-status-{{ lead.status }}">{{ lead.get_status_display }}</span><span class="table-subtext">{{ lead.get_priority_display }}</span>
+              </td>
+              <td data-label="Puntaje">
+                <strong>{{ lead.score }}/100</strong>
+              </td>
+              <td data-label="Acciones" class="table-actions-cell">
+                <a class="btn btn-light btn-small" href="{% url 'leads_internal:detail' lead.pk %}">Gestionar</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr class="empty-table-row">
+              <td colspan="9">No existen leads con estos filtros.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="pagination-bar">
+        {% if page_obj.has_previous %}<a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}{% if filter_query %}&{{ filter_query }}{% endif %}">Anterior</a>{% endif %}<span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a class="btn btn-light" href="?page={{ page_obj.next_page_number }}{% if filter_query %}&{{ filter_query }}{% endif %}">Siguiente</a>{% endif %}
+      </nav>
+    {% endif %}
+  </section>
+{% endblock %}

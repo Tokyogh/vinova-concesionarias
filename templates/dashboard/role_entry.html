@@ -1,0 +1,20 @@
+{# ES: Renderiza la interfaz templates/dashboard/role_entry; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/role_entry interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Mi dashboard | Vinova Pro{% endblock %}
+{% block page_title %}Mi dashboard{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Entrada interna segura. Vinova Pro muestra solo las áreas que tu rol puede usar.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-primary" href="{{ recommended_url }}">Abrir panel recomendado</a>{% endblock %}
+{% block content %}
+{% include 'dashboard/snippets/executive_summary.html' %}
+<section class="role-dashboard-hero worker-hero"><div><span>Experiencia asignada</span><h2>{{ dashboard_profile.name }}</h2><p>{{ dashboard_profile.description }}</p></div><div class="role-dashboard-actions"><a class="btn btn-primary" href="{{ recommended_url }}">Continuar</a>{% if is_client_profile %}<a class="btn btn-secondary" href="{% url 'vehicles:catalog' %}">Ver catálogo</a>{% endif %}</div></section>
+<section class="dashboard-module-grid">
+  {% if request.user.can_manage_users %}<a class="dashboard-module-card" href="{% url 'dashboard:admin_home' %}"><strong>Administración general</strong><span>Usuarios, roles, empresa y control global.</span></a>{% endif %}
+  {% if request.user.can_manage_branches %}<a class="dashboard-module-card" href="{% url 'dashboard:branch_home' %}"><strong>Sucursal</strong><span>Vista operativa por concesionaria o bodega.</span></a>{% endif %}
+  {% if request.user.can_access_sales %}<a class="dashboard-module-card" href="{% url 'dashboard:seller_home' %}"><strong>Comercial</strong><span>Clientes, cotizaciones, reservas y ventas.</span></a>{% endif %}
+  {% if request.user.can_view_inventory %}<a class="dashboard-module-card" href="{% url 'dashboard:inventory_home' %}"><strong>Inventario</strong><span>Stock, movimientos y alertas.</span></a>{% endif %}
+  {% if request.user.can_view_invoices %}<a class="dashboard-module-card" href="{% url 'dashboard:billing_home' %}"><strong>Facturación</strong><span>Comprobantes, pagos y documentos.</span></a>{% endif %}
+  {% if request.user.can_view_notifications %}<a class="dashboard-module-card" href="{% url 'dashboard:support_home' %}"><strong>Atención</strong><span>Clientes, comunicaciones y seguimiento.</span></a>{% endif %}
+  {% if request.user.can_view_reports or request.user.can_view_audit %}<a class="dashboard-module-card" href="{% url 'dashboard:auditor_home' %}"><strong>Auditoría</strong><span>Lectura, control y trazabilidad.</span></a>{% endif %}
+</section>
+{% endblock %}

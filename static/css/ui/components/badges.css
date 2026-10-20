@@ -1,0 +1,44 @@
+/* ES: Define estilos de static/css/ui/components/badges, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/components/badges styles, including states and responsive behavior. */
+/*
+   Badges y estados.
+   Depende de core/tokens.css. */
+
+/* --- Badges/States --- */
+.state, .status-badge, .crm-badge, .audit-badge, .role-badge {
+  display: inline-flex; align-items: center; white-space: nowrap;
+  border-radius: var(--radius-pill); padding: var(--space-4) var(--space-10);
+  font-size: var(--fs-12); font-weight: var(--fw-semibold); line-height: 1.3;
+}
+.state::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: .8; }
+.state-success, .state-ok, .state-approved, .state-passed, .state-verified, .state-completed,
+.state-active, .state-sale-sold, .state-customer-active, .state-interest-closed,
+.state-inventory-active, .state-document-active, .state-invoice-paid, .state-recipient-read,
+.state-import-completed, .crm-status-won, .audit-result-success,
+.state-movement-in, .state-movement-return {
+  background: var(--success-bg); color: var(--success);
+}
+.state-warning, .state-pending, .state-planned, .state-running, .state-processing, .state-in_progress,
+.state-scheduled, .state-sale-approved, .state-customer-vip, .state-interest-quoted, .state-vehicle-reserved,
+.state-document-pending_review, .state-invoice-partial, .state-notification-high,
+.state-import-uploaded, .state-import-processing, .crm-status-negotiation,
+.audit-severity-medium, .audit-result-warning {
+  background: var(--warning-bg); color: var(--warning);
+}
+.state-danger, .state-failed, .state-rejected, .state-cancelled, .state-sale-cancelled, .state-sale-void,
+.state-sale-expired, .state-invoice-void, .state-invoice-cancelled, .state-notification-urgent,
+.state-import-failed, .state-import-cancelled, .state-import-row-invalid, .state-import-row-failed,
+.audit-severity-high, .audit-severity-critical, .audit-result-denied, .audit-result-failed {
+  background: var(--danger-bg); color: var(--danger);
+}
+.state-info, .state-sale-quoted, .state-sale-draft, .state-customer-prospect, .state-interest-open,
+.state-draft, .state-vehicle-available, .state-document-confidential, .state-invoice-draft, .state-invoice-issued,
+.state-recipient-unread, .state-notification-normal, .crm-status-new, .crm-status-contacted,
+.crm-status-interested, .crm-status-test_drive, .crm-status-quoted, .crm-status-lost,
+.state-vehicle-maintenance, .state-vehicle-hidden, .state-vehicle-sold,
+.state-inventory-inactive, .state-inventory-archived,
+.state-movement-adjust, .state-movement-transfer, .state-movement-sale,
+.audit-severity-info, .audit-severity-low, .audit-alert-status-open {
+  background: var(--info-bg); color: var(--info);
+}
+[data-theme="dark"] .crm-status-quoted { background: var(--info-bg); color: var(--info); }

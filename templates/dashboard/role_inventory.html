@@ -1,0 +1,20 @@
+{# ES: Renderiza la interfaz templates/dashboard/role_inventory; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/role_inventory interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Dashboard inventario | Vinova Pro{% endblock %}
+{% block page_title %}Dashboard inventario{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Panel para bodega, jefe de inventario y control de stock por sucursal.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-primary" href="{% url 'inventory_internal:movement_create' %}">Registrar movimiento</a>{% endblock %}
+{% block content %}
+<section class="role-dashboard-hero inventory-hero"><div><span>Inventario y bodega</span><h2>Control de stock operativo</h2><p>Entradas, salidas, transferencias, mínimos y movimientos trazables.</p></div></section>
+<section class="metric-grid role-metric-grid">
+  <article class="metric-card"><span>Artículos</span><strong>{{ metrics.items }}</strong></article>
+  <article class="metric-card"><span>Stock bajo</span><strong>{{ metrics.low_stock }}</strong></article>
+  <article class="metric-card"><span>Movimientos</span><strong>{{ metrics.movements }}</strong></article>
+  <article class="metric-card"><span>Publicables</span><strong>{{ metrics.public_items }}</strong></article>
+</section>
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Alertas de stock bajo</h2><div class="compact-row-list">{% for stock in low_stock_records %}<a class="compact-row" href="{% url 'inventory_internal:detail' stock.item.pk %}"><strong>{{ stock.item.sku }} · {{ stock.item.name }}</strong><span>{{ stock.branch.name }} · {{ stock.quantity }} / mínimo {{ stock.minimum_stock }}</span></a>{% empty %}<p class="muted">No hay alertas de stock bajo.</p>{% endfor %}</div></article>
+  <article class="panel-card"><h2>Movimientos recientes</h2>{% include 'dashboard/snippets/movement_rows.html' with movements=recent_movements empty_text='Sin movimientos recientes.' %}</article>
+</section>
+{% endblock %}

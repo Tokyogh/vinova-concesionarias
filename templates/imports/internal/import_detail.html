@@ -1,0 +1,97 @@
+{# ES: Renderiza la interfaz templates/imports/internal/import_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/imports/internal/import_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Detalle importación | Vinova Pro{% endblock %}
+{% block page_title %}Detalle de importación{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Revisa la validación por fila antes de confirmar cambios en producción.</p>{% endblock %}
+{% block topbar_actions %}
+  {% if batch.import_type == 'vehicles' %}<a class="btn btn-secondary" href="{% url 'vehicles_internal:list' %}">Ver vehículos</a>{% endif %}
+  <a class="btn btn-light" href="{% url 'imports_internal:home' %}">Volver</a>
+{% endblock %}
+{% block content %}
+{% include 'imports/internal/_nav.html' %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="metric-grid imports-status-grid">
+  <article class="metric-card"><span>Estado</span><strong>{{ batch.get_status_display }}</strong><small>{{ batch.original_filename }}</small></article>
+  <article class="metric-card"><span>Filas</span><strong>{{ batch.total_rows }}</strong><small>válidas {{ batch.valid_rows }} / errores {{ batch.invalid_rows }}</small></article>
+  <article class="metric-card"><span>Creados</span><strong>{{ batch.created_count }}</strong><small>Actualizados {{ batch.updated_count }}</small></article>
+  <article class="metric-card"><span>Fallos</span><strong>{{ batch.error_count }}</strong><small>Hash: {{ batch.file_hash|slice:':12' }}</small></article>
+</section>
+
+<section class="detail-grid two-columns imports-detail-grid">
+  <article class="panel-card">
+    <div class="panel-header">
+      <div><h2>Resumen del lote</h2><p>Archivo, responsable y acciones disponibles.</p></div>
+    </div>
+    <div class="detail-list">
+      <div><span>Tipo</span><strong>{{ batch.get_import_type_display }}</strong></div>
+      <div><span>Archivo</span><strong>{{ batch.original_filename }}</strong></div>
+      <div><span>Responsable</span><strong>{{ batch.uploaded_by.get_username|default:'Sistema' }}</strong></div>
+      <div><span>Sucursal por defecto</span><strong>{{ batch.default_branch.name|default:'No aplicada' }}</strong></div>
+      <div><span>Exige sucursal vehículo</span><strong>{% if batch.require_vehicle_branch %}Sí{% else %}No{% endif %}</strong></div>
+      <div><span>Subido</span><strong>{{ batch.created_at|date:'d/m/Y H:i' }}</strong></div>
+      <div><span>Validado</span><strong>{{ batch.validated_at|date:'d/m/Y H:i'|default:'Pendiente' }}</strong></div>
+      <div><span>Confirmado</span><strong>{{ batch.confirmed_at|date:'d/m/Y H:i'|default:'Pendiente' }}</strong></div>
+    </div>
+    <div class="form-actions">
+      {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+      {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+      <form method="post" action="{% url 'imports_internal:revalidate' batch.pk %}">{% csrf_token %}<button class="btn btn-light">Revalidar</button></form>
+      {% if batch.can_confirm %}
+        <form method="post" action="{% url 'imports_internal:confirm' batch.pk %}" data-confirm="¿Confirmar importación? Esto aplicará cambios reales.">{% csrf_token %}<button class="btn btn-primary">Confirmar importación</button></form>
+      {% else %}
+        <button class="btn btn-light" disabled>Confirmación no disponible</button>
+      {% endif %}
+      {% if batch.status == 'completed' and batch.import_type == 'vehicles' %}
+        <a class="btn btn-secondary" href="{% url 'vehicles_internal:list' %}">Abrir inventario vehicular</a>
+      {% endif %}
+    </div>
+  </article>
+  <aside class="panel-card">
+    <div class="panel-header"><div><h2>Errores principales</h2><p>Corrige el archivo y vuelve a subirlo si hay errores.</p></div></div>
+    <div class="compact-row-list">
+      {% for error in batch.errors|slice:':12' %}
+        <div class="compact-row"><strong>Fila {{ error.row }}</strong><span>{{ error.errors|join:', ' }}</span></div>
+      {% empty %}<p class="empty-inline">No hay errores de validación registrados.</p>{% endfor %}
+    </div>
+  </aside>
+</section>
+
+<section class="panel-card">
+  <div class="panel-header"><div><h2>Vista previa y filas</h2><p>Se muestran hasta 80 filas para revisión rápida.</p></div></div>
+  <div class="responsive-table">
+    <table class="data-table compact-table">
+      <thead><tr><th>Fila</th><th>Estado</th><th>Acción</th><th>Datos normalizados</th><th>Errores</th><th></th></tr></thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            <td>{{ row.row_number }}</td>
+            <td><span class="state state-import-row-{{ row.status }}">{{ row.get_status_display }}</span></td>
+            <td>{{ row.action|default:'-' }}</td>
+            <td>
+              {% if batch.import_type == 'vehicles' %}
+                <div class="imported-vehicle-summary">
+                  <strong>{{ row.normalized_payload.year }} {{ row.normalized_payload.brand }} {{ row.normalized_payload.model }}</strong>
+                  <span>Código interno: {{ row.normalized_payload.internal_code|default:'Se generará al confirmar' }}</span>
+                  <span>VIN real: {{ row.normalized_payload.vin|default:'No registrado' }}</span>
+                  <span>Estado: {{ row.normalized_payload.status|default:'-' }} · Sucursal: {{ row.normalized_payload.branch_source|default:'-' }}</span>
+                  <span>Catálogo: {% if row.normalized_payload.publish_catalog %}Sí{% else %}No{% endif %} · Destacado: {% if row.normalized_payload.is_featured %}Sí{% else %}No{% endif %}</span>
+                </div>
+              {% else %}
+                <code class="json-snippet">{{ row.normalized_payload }}</code>
+              {% endif %}
+            </td>
+            <td>{% if row.errors %}<span class="table-subtext danger-text">{{ row.errors|join:', ' }}</span>{% else %}<span class="table-subtext">Sin errores</span>{% endif %}</td>
+            <td>
+              {% if batch.import_type == 'vehicles' and row.object_id %}
+                <a class="btn btn-light" href="{% url 'vehicles_internal:detail' row.object_id %}">Abrir vehículo</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}<tr><td colspan="6">No hay filas leídas.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

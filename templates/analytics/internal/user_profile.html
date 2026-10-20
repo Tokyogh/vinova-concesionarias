@@ -1,0 +1,111 @@
+{# ES: Renderiza la interfaz templates/analytics/internal/user_profile; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/analytics/internal/user_profile interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Rendimiento de {{ advisor.get_full_name|default:advisor.username }} | Vinova Pro{% endblock %}
+{% block page_title %}Perfil comercial del asesor{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">Carga de leads, pipeline, conversión, cotizaciones y ventas del usuario.</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'analytics_internal:home' %}">Volver a analítica</a>{% if request.user.can_manage_users %}<a class="btn btn-light" href="{% url 'accounts:user_detail' advisor.pk %}">Administrar usuario</a>{% endif %}
+{% endblock %}
+{% block content %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="profile-executive-hero panel-card">
+    <div class="customer-avatar">{{ advisor.username|first|upper }}</div>
+    <div>
+      <span class="eyebrow">Asesor comercial</span>
+      <h2>{{ advisor.get_full_name|default:advisor.username }}</h2>
+      <p>{{ advisor.email }} · {{ advisor.branch|default:'Sin sucursal principal' }}</p>
+    </div>
+  </section>
+  <section class="metric-grid executive-metric-grid">
+    <article class="metric-card">
+      <span>Leads</span><strong>{{ metrics.leads }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Abiertos</span><strong>{{ metrics.open }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Ganados</span><strong>{{ metrics.won }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Conversión</span><strong>{{ metrics.conversion }}%</strong>
+    </article>
+    <article class="metric-card">
+      <span>Cotizaciones</span><strong>{{ metrics.quotes }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Ventas</span><strong>{{ metrics.sales }}</strong><small>${{ metrics.sales_total }}</small>
+    </article>
+  </section>
+  <section class="detail-grid two-columns">
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Pipeline personal</h2>
+        </div>
+      </div>
+      <div class="advisor-pipeline">
+        {% for row in pipeline %}
+          <div>
+            <span class="crm-badge crm-status-{{ row.code }}">{{ row.label }}</span><strong>{{ row.count }}</strong>
+          </div>
+        {% endfor %}
+      </div>
+    </article>
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Leads recientes</h2>
+        </div>
+      </div>
+      <div class="timeline-list">
+        {% for lead in leads %}<a class="timeline-item" href="{% url 'leads_internal:detail' lead.pk %}"><strong>{{ lead.full_name }} · {{ lead.get_status_display }}</strong><span>{{ lead.code }} · {{ lead.vehicle_interest_label }}</span></a>{% empty %}
+          <p class="muted">Sin leads asignados.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+  <section class="panel-card">
+    <div class="panel-header">
+      <div>
+        <h2>Operaciones recientes</h2>
+      </div>
+    </div>
+    <div class="table-scroll">
+      {# ES: La tabla siguiente presenta datos previamente filtrados por permisos y alcance. #}
+      {# EN: The following table renders data already filtered by permissions and scope. #}
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Cliente</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Total</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sale in sales %}
+            <tr>
+              <td>
+                <a href="{% url 'sales_internal:detail' sale.pk %}">{{ sale.number }}</a>
+              </td>
+              <td>{{ sale.customer.display_name }}</td>
+              <td>{{ sale.get_kind_display }}</td>
+              <td>{{ sale.get_status_display }}</td>
+              <td>${{ sale.total }}</td>
+              <td>{{ sale.created_at|date:'d/m/Y' }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">Sin operaciones.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

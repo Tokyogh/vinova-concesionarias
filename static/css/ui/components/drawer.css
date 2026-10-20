@@ -1,0 +1,64 @@
+/* ES: Define estilos de static/css/ui/components/drawer, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/components/drawer styles, including states and responsive behavior. */
+/*
+   Drawer off-canvas para móvil (staff sidebar y navegación pública).
+   En desktop el drawer público se despliega como contenido inline
+   (display: contents) para no duplicar estructura. */
+
+.drawer-menu-button,
+.drawer-close-button {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  min-height: var(--control-h);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-14);
+  cursor: pointer;
+}
+
+.drawer-menu-button { padding: 0 var(--space-12); }
+.drawer-close-button { width: var(--control-h); padding: 0; }
+.drawer-menu-button svg,
+.drawer-close-button svg { width: 20px; height: 20px; }
+
+.drawer-overlay {
+  display: none;
+  border: 0;
+  padding: 0;
+  background: var(--overlay);
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+}
+
+body.drawer-open { overflow: hidden; }
+
+.public-nav-drawer { display: contents; }
+.public-drawer-head { display: none; }
+
+/* --- Barra móvil del staff --- */
+.staff-mobile-bar { display: none; }
+
+.staff-mobile-brand { display: flex; align-items: center; gap: var(--space-12); color: var(--text); }
+
+.staff-mobile-brand .brand-mark {
+  display: grid;
+  place-items: center;
+  width: var(--space-40);
+  height: var(--space-40);
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: #fff;
+  font-weight: var(--fw-bold);
+}
+
+.staff-mobile-brand strong,
+.staff-mobile-brand small { display: block; line-height: 1.15; }
+.staff-mobile-brand small { color: var(--text-muted); font-size: var(--fs-12); margin-top: var(--space-4); }
+.staff-mobile-actions { display: flex; align-items: center; gap: var(--space-8); }

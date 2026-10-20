@@ -1,0 +1,50 @@
+/* ES: Define estilos de static/css/ui/core/base, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/core/base styles, including states and responsive behavior. */
+/*
+   Elementos base del documento: body, enlaces, foco, listas, media. */
+
+body {
+  font-family: var(--font);
+  font-size: var(--fs-15);
+  line-height: var(--lh-normal);
+  color: var(--text);
+  background: var(--bg);
+}
+
+a {
+  color: var(--primary);
+  transition: color var(--t-fast) var(--ease-out);
+}
+
+a:hover { color: var(--primary-hover); }
+
+strong { font-weight: var(--fw-semibold); }
+
+small { font-size: var(--fs-13); }
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: var(--space-24) 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+img { object-fit: cover; object-position: center; }
+
+::placeholder { color: var(--text-muted); opacity: 1; }
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+:where(button, a, input, select, textarea) {
+  transition: background-color var(--t-fast) var(--ease-out),
+              border-color var(--t-fast) var(--ease-out),
+              color var(--t-fast) var(--ease-out),
+              box-shadow var(--t-fast) var(--ease-out),
+              transform var(--t-fast) var(--ease-out);
+}

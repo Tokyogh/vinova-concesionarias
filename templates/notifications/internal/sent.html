@@ -1,0 +1,68 @@
+{# ES: Renderiza la interfaz templates/notifications/internal/sent; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/notifications/internal/sent interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Notificaciones enviadas | Vinova Pro{% endblock %}
+{% block page_title %}Notificaciones enviadas{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">Historial de mensajes enviados a usuarios internos y clientes, con destinatarios y lectura trazable.</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'notifications_internal:inbox' %}">Bandeja</a>{% if can_view_campaigns %}<a class="btn btn-light" href="{% url 'notifications_internal:campaign_list' %}">Campañas</a>{% endif %}
+  {% if request.user.can_send_notifications %}<a class="btn btn-primary" href="{% url 'notifications_internal:compose' %}">Enviar</a>{% endif %}
+{% endblock %}
+{% block content %}
+  <section class="toolbar panel-card compact">
+    <form method="get" class="search-form internal-filter-form notifications-filter-form">{{ search_form.q }}{{ search_form.message_type }}{{ search_form.priority }}{{ search_form.branch }}<button class="btn btn-primary">Filtrar</button><a class="btn btn-light" href="{% url 'notifications_internal:sent' %}">Limpiar</a>
+    </form>
+  </section>
+  <section class="panel-card table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Mensajes enviados</h2>
+        <p>{{ page_obj.paginator.count }} resultado(s).</p>
+      </div>
+    </div>
+    <div class="responsive-table">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Mensaje</th>
+            <th>Relación</th>
+            <th>Destinatarios</th>
+            <th>Prioridad</th>
+            <th>Fecha</th>
+            <th>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for notification in notifications %}
+            <tr>
+              <td>
+                <strong>{{ notification.title }}</strong><span class="table-subtext">{{ notification.body|truncatechars:110 }}</span>
+              </td>
+              <td>{{ notification.branch.name|default:'Sin sucursal' }}<span class="table-subtext">{% if notification.related_customer %}{{ notification.related_customer.display_name }}{% elif notification.related_sale %}{{ notification.related_sale.number }}{% elif notification.related_vehicle %}{{ notification.related_vehicle }}{% else %}Sin relación específica{% endif %}</span>
+              </td>
+              <td>{{ notification.total_recipients|default:notification.recipient_count }}</td>
+              <td>
+                <span class="state state-notification-{{ notification.priority }}">{{ notification.get_priority_display }}</span>
+              </td>
+              <td>{{ notification.sent_at|date:'d/m/Y H:i' }}</td>
+              <td class="table-actions-cell">
+                <a class="btn btn-light btn-small" href="{% url 'notifications_internal:detail' notification.pk %}">Ver</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">No hay notificaciones enviadas.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="pagination-bar">
+      {% if page_obj.has_previous %}<a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}<span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a class="btn btn-light" href="?page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+    </nav>
+  {% endif %}
+{% endblock %}

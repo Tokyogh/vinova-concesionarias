@@ -1,0 +1,312 @@
+{# ES: Renderiza la interfaz templates/analytics/internal/commercial_dashboard; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/analytics/internal/commercial_dashboard interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Analítica comercial | Vinova Pro{% endblock %}
+{% block page_title %}Analítica comercial{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">Embudo, demanda, origen, rendimiento por asesor e interacciones del catálogo, con datasets preparados para BI.</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'leads_internal:list' %}">CRM</a>{% if request.user.can_export_analytics %}<a class="btn btn-secondary" href="{% url 'analytics_internal:export' %}?{{ filter_query }}">Descargar dataset BI</a>{% endif %}
+{% endblock %}
+{% block content %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="panel-card compact analytics-toolbar">
+    {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+    {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+    <form method="get" class="internal-filter-form dense-filter-form analytics-filter-form">
+      <label class="filter-field"><span>{{ filter_form.start_date.label }}</span>{{ filter_form.start_date }}</label>
+      <label class="filter-field"><span>{{ filter_form.end_date.label }}</span>{{ filter_form.end_date }}</label>
+      <label class="filter-field"><span>{{ filter_form.branch.label }}</span>{{ filter_form.branch }}</label>
+      <label class="filter-field"><span>{{ filter_form.advisor.label }}</span>{{ filter_form.advisor }}</label>
+      <label class="filter-field"><span>{{ filter_form.source.label }}</span>{{ filter_form.source }}</label>
+      <div class="filter-actions"><button class="btn btn-primary">Actualizar</button><a class="btn btn-light" href="{% url 'analytics_internal:home' %}">Limpiar</a></div>
+    </form>
+  </section>
+  <section class="metric-grid analytics-metric-grid">
+    <article class="metric-card">
+      <span>Leads</span><strong>{{ metrics.total }}</strong><small>Abiertos: {{ metrics.open }}</small>
+    </article>
+    <article class="metric-card">
+      <span>Ganados</span><strong>{{ metrics.won }}</strong><small>Perdidos: {{ metrics.lost }}</small>
+    </article>
+    <article class="metric-card">
+      <span>Conversión total</span><strong>{{ metrics.conversion }}%</strong><small>Cierre decidido: {{ metrics.close_rate }}%</small>
+    </article>
+    <article class="metric-card">
+      <span>Cotizaciones</span><strong>{{ metrics.quotes }}</strong><small>Test drives: {{ metrics.test_drives }}</small>
+    </article>
+    <article class="metric-card">
+      <span>Interacciones web</span><strong>{{ metrics.interactions }}</strong><small>Fichas y solicitudes</small>
+    </article>
+    <article class="metric-card">
+      <span>Seguimientos vencidos</span><strong>{{ metrics.overdue }}</strong><small>Requieren atención</small>
+    </article>
+  </section>
+  <section class="metric-grid analytics-metric-grid">
+    <article class="metric-card">
+      <span>Ventas cerradas</span><strong>{{ metrics.sales_count }}</strong><small>${{ metrics.sales_total }} ·
+        {% if metrics.sales_change != None %}{{ metrics.sales_change }}% vs. período anterior{% else %}Sin base anterior{% endif %}</small>
+    </article>
+    <article class="metric-card">
+      <span>Pagos confirmados</span><strong>${{ metrics.payments_total }}</strong><small>Saldo: ${{ metrics.balance_total }}</small>
+    </article>
+    <article class="metric-card">
+      <span>Clientes nuevos</span><strong>{{ metrics.customers }}</strong><small>En el período</small>
+    </article>
+    <article class="metric-card">
+      <span>Inventario</span><strong>{{ metrics.stock_units }}</strong><small>Stock bajo: {{ metrics.low_stock }}</small>
+    </article>
+  </section>
+  <section class="detail-grid two-columns">
+    <article class="panel-card">
+      <h2>Tendencia de ventas</h2>
+      <div class="responsive-table">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Ventas</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in sales_trend %}
+              <tr>
+                <td>{{ row.day }}</td>
+                <td>{{ row.count }}</td>
+                <td>${{ row.total }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="3">Sin ventas.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+    <article class="panel-card">
+      <h2>Rendimiento por sucursal</h2>
+      <div class="responsive-table">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Sucursal</th>
+              <th>Ventas</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in branch_performance %}
+              <tr>
+                <td>{{ row.branch__name }}</td>
+                <td>{{ row.sales }}</td>
+                <td>${{ row.total }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="3">Sin ventas.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+  <section class="detail-grid two-columns analytics-main-grid">
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Embudo comercial</h2>
+          <p>Volumen actual por etapa del pipeline.</p>
+        </div>
+      </div>
+      <div class="funnel-list">
+        {% for row in funnel %}
+          <div class="funnel-row">
+            <span>{{ row.label }}</span>
+            <div class="funnel-track">
+              <i style="width:{{ row.percent }}%"></i>
+            </div>
+            <strong>{{ row.count }}</strong>
+          </div>
+        {% endfor %}
+      </div>
+    </article>
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Origen de los leads</h2>
+          <p>Calidad y conversión por canal.</p>
+        </div>
+      </div>
+      <div class="responsive-table compact-table">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Origen</th>
+              <th>Leads</th>
+              <th>Ganados</th>
+              <th>Conversión</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in sources %}
+              <tr>
+                <td>{{ row.label }}</td>
+                <td>{{ row.leads }}</td>
+                <td>{{ row.won }}</td>
+                <td>{{ row.conversion }}%</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4">Sin datos.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+  <section class="panel-card table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Vehículos con mayor interés</h2>
+        <p>Combina leads, clics/vistas y conversiones.</p>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Vehículo</th>
+            <th>Código</th>
+            <th>Leads</th>
+            <th>Interacciones</th>
+            <th>Ganados</th>
+            <th>Conversión</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in vehicles %}
+            <tr>
+              <td>{{ row.vehicle__year }} {{ row.vehicle__brand__name }} {{ row.vehicle__model__name }}</td>
+              <td>
+                <code>{{ row.vehicle__internal_code }}</code>
+              </td>
+              <td>{{ row.leads }}</td>
+              <td>{{ row.clicks }}</td>
+              <td>{{ row.won }}</td>
+              <td>{{ row.conversion }}%</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">Todavía no hay interés asociado a vehículos.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="detail-grid two-columns analytics-secondary-grid">
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Demanda por ciudad</h2>
+          <p>Útil para campañas, asignación y expansión de sucursales.</p>
+        </div>
+      </div>
+      <div class="responsive-table compact-table">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Ciudad</th>
+              <th>Provincia</th>
+              <th>Leads</th>
+              <th>Ganados</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in cities %}
+              <tr>
+                <td>{{ row.city }}</td>
+                <td>{{ row.province|default:'N/D' }}</td>
+                <td>{{ row.leads }}</td>
+                <td>{{ row.won }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4">Sin ciudades registradas.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Rendimiento por asesor</h2>
+          <p>Leads asignados, cotizaciones y conversión.</p>
+        </div>
+      </div>
+      <div class="responsive-table compact-table">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Asesor</th>
+              <th>Leads</th>
+              <th>Cot.</th>
+              <th>Ganados</th>
+              <th>Conv.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in advisors %}
+              <tr>
+                <td>
+                  <a href="{% url 'analytics_user_profile' row.assigned_advisor_id %}">{{ row.display }}</a>
+                </td>
+                <td>{{ row.leads }}</td>
+                <td>{{ row.quotes }}</td>
+                <td>{{ row.won }}</td>
+                <td>{{ row.conversion }}%</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5">Sin asesores asignados.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+  <section class="panel-card">
+    <div class="panel-header">
+      <div>
+        <h2>Leads recientes</h2>
+        <p>Actividad más reciente dentro de los filtros seleccionados.</p>
+      </div>
+    </div>
+    <div class="timeline-list">
+      {% for lead in recent_leads %}<a class="timeline-item" href="{% url 'leads_internal:detail' lead.pk %}"><strong>{{ lead.full_name }} · {{ lead.get_status_display }}</strong><span class="table-subtext">{{ lead.code }} · {{ lead.get_source_display }} · {{ lead.city|default:'Sin ciudad' }}</span></a>{% empty %}
+        <p class="muted">No hay leads en el rango.</p>
+      {% endfor %}
+    </div>
+  </section>
+  <section class="panel-card">
+    <div class="panel-header">
+      <div>
+        <h2>Historial comercial reciente</h2>
+        <p>Últimas actividades registradas en los leads permitidos.</p>
+      </div>
+    </div>
+    <div class="timeline-list">
+      {% for event in recent_activity %}<a class="timeline-item" href="{% url 'leads_internal:detail' event.lead_id %}"><strong>{{ event.title }}</strong><span class="table-subtext">{{ event.lead.full_name }} · {{ event.created_at }} · {{ event.created_by|default:'Sistema' }}</span></a>{% empty %}
+        <p class="muted">No hay actividad en el período.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

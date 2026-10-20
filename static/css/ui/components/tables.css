@@ -1,0 +1,65 @@
+/* ES: Define estilos de static/css/ui/components/tables, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/components/tables styles, including states and responsive behavior. */
+/*
+   Tablas de datos del área interna (listados staff).
+   Densidad empresarial: encabezado compacto, filas de ~44px, meta en 2º línea.
+   Depende de core/tokens.css. */
+
+/* --- Contenedores --- */
+.table-panel { overflow: hidden; }
+.responsive-table, .table-scroll {
+  display: block; width: 100%; max-width: 100%;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+
+/* --- Tabla --- */
+.data-table {
+  width: 100%; border-collapse: collapse;
+  font-size: var(--fs-13); color: var(--text);
+}
+.data-table th {
+  position: sticky; top: 0; z-index: 1;
+  text-align: left; white-space: nowrap;
+  padding: var(--space-10) var(--space-14);
+  background: var(--surface-2); color: var(--text-muted);
+  font-size: var(--fs-11); font-weight: var(--fw-semibold);
+  text-transform: uppercase; letter-spacing: var(--tracking-caps);
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: var(--space-10) var(--space-14);
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: middle;
+}
+.data-table tbody tr { transition: background var(--t-fast); }
+.data-table tbody tr:hover { background: var(--surface-2); }
+.data-table tbody tr:last-child td { border-bottom: 0; }
+
+/* Cifras alineadas a la derecha con tabulación numérica. */
+.data-table .num, .data-table td.num, .data-table th.num {
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+
+/* Metadatos de la celda en segunda línea. */
+.table-subtext {
+  display: block; color: var(--text-muted);
+  font-size: var(--fs-12); line-height: 1.45;
+}
+
+/* Acciones por fila: una sola acción visible, siempre a la derecha. */
+.table-actions {
+  display: inline-flex; align-items: center; justify-content: flex-end;
+  gap: var(--space-8); text-align: right; white-space: nowrap;
+}
+.data-table td.table-actions-cell { text-align: right; white-space: nowrap; }
+
+/* Variante densa para tablas auxiliares (movimientos, adjuntos, líneas). */
+.data-table.compact-table th,
+.compact-table .data-table th { padding: var(--space-8) var(--space-12); }
+.compact-table .data-table td { padding: var(--space-8) var(--space-12); }
+
+/* Fila sin resultados. */
+.empty-table-row td {
+  padding: var(--space-24); text-align: center;
+  color: var(--text-muted); font-size: var(--fs-13);
+}

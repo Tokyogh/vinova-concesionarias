@@ -1,0 +1,99 @@
+{# ES: Renderiza la interfaz templates/analytics/internal/customer_profile; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/analytics/internal/customer_profile interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Perfil ejecutivo de {{ customer.display_name }} | Vinova Pro{% endblock %}
+{% block page_title %}Perfil ejecutivo del cliente{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">Vista consolidada de intereses, leads, cotizaciones, ventas y seguimiento relevante.</p>
+{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'customers_internal:detail' customer.pk %}">Ficha operativa</a><a class="btn btn-light" href="{% url 'leads_internal:list' %}?q={{ customer.display_name|urlencode }}">Buscar en CRM</a>{% endblock %}
+{% block content %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="profile-executive-hero panel-card">
+    <div class="customer-avatar">{{ customer.display_name|first|upper }}</div>
+    <div>
+      <span class="eyebrow">{{ customer.get_customer_type_display }}</span>
+      <h2>{{ customer.display_name }}</h2>
+      <p>{{ customer.primary_contact }} · {{ customer.city|default:'Ciudad N/D' }} · {{ customer.get_status_display }}</p>
+    </div>
+  </section>
+  <section class="metric-grid executive-metric-grid">
+    <article class="metric-card">
+      <span>Leads</span><strong>{{ metrics.leads }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Leads activos</span><strong>{{ metrics.active_leads }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Cotizaciones</span><strong>{{ metrics.quotes }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Ventas</span><strong>{{ metrics.sales }}</strong>
+    </article>
+    <article class="metric-card">
+      <span>Total comprado</span><strong>${{ metrics.purchased_total }}</strong>
+    </article>
+  </section>
+  <section class="detail-grid two-columns">
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Leads relacionados</h2>
+        </div>
+      </div>
+      <div class="timeline-list">
+        {% for lead in leads %}<a class="timeline-item" href="{% url 'leads_internal:detail' lead.pk %}"><strong>{{ lead.code }} · {{ lead.get_status_display }}</strong><span>{{ lead.vehicle_interest_label }} · {{ lead.created_at|date:'d/m/Y' }}</span></a>{% empty %}
+          <p class="muted">Sin leads relacionados.</p>
+        {% endfor %}
+      </div>
+    </article>
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Operaciones comerciales</h2>
+        </div>
+      </div>
+      <div class="timeline-list">
+        {% for sale in sales %}<a class="timeline-item" href="{% url 'sales_internal:detail' sale.pk %}"><strong>{{ sale.number }} · {{ sale.get_status_display }}</strong><span>{{ sale.get_kind_display }} · ${{ sale.total }} · {{ sale.created_at|date:'d/m/Y' }}</span></a>{% empty %}
+          <p class="muted">Sin operaciones.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+  <section class="detail-grid two-columns">
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Intereses vehiculares</h2>
+        </div>
+      </div>
+      <div class="timeline-list">
+        {% for item in interests %}
+          <div class="timeline-item">
+            <strong>{% if item.vehicle %}{{ item.vehicle }}{% else %}{{ item.brand }} {{ item.model_name }}{% endif %}</strong><span>{{ item.get_status_display }} · {{ item.created_at|date:'d/m/Y' }}</span>
+          </div>
+          {% empty %}
+          <p class="muted">Sin intereses.</p>
+        {% endfor %}
+      </div>
+    </article>
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Notas recientes</h2>
+        </div>
+      </div>
+      <div class="timeline-list">
+        {% for note in notes %}
+          <div class="timeline-item">
+            <strong>{{ note.title|default:note.get_note_type_display }}</strong><span>{{ note.created_at|date:'d/m/Y H:i' }}</span>
+            <p>{{ note.body }}</p>
+          </div>
+          {% empty %}
+          <p class="muted">Sin notas.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+{% endblock %}

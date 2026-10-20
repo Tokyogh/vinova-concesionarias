@@ -1,0 +1,150 @@
+{# ES: Renderiza la interfaz templates/vehicles/catalog; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/vehicles/catalog interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% load ui_assets %}
+{% block title %}Vehículos disponibles | Vinova Pro{% endblock %}
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="catalog-hero">
+  <div class="catalog-hero-inner">
+    <div class="catalog-hero-text">
+      <h1>Vehículos disponibles</h1>
+      <p>Explora los modelos publicados por la concesionaria y filtra por marca, modelo, precio o año.</p>
+    </div>
+    <div class="catalog-hero-media" aria-hidden="true">
+      {% ui_final_asset "vehicle-catalog-blue" as catalog_blue %}{% ui_final_srcset "vehicle-catalog-blue" as catalog_blue_srcset %}
+      {% ui_final_asset "vehicle-catalog-silver" as catalog_silver %}{% ui_final_srcset "vehicle-catalog-silver" as catalog_silver_srcset %}
+      {% ui_final_asset "vehicle-catalog-dark" as catalog_dark %}{% ui_final_srcset "vehicle-catalog-dark" as catalog_dark_srcset %}
+      {% if catalog_blue %}<img class="catalog-editorial catalog-editorial--blue" src="{{ catalog_blue }}" srcset="{{ catalog_blue_srcset }}" sizes="(max-width: 760px) 42vw, 18vw" width="1671" height="941" alt="" loading="lazy" decoding="async">{% endif %}
+      {% if catalog_silver %}<img class="catalog-editorial catalog-editorial--silver" src="{{ catalog_silver }}" srcset="{{ catalog_silver_srcset }}" sizes="(max-width: 760px) 42vw, 18vw" width="1672" height="941" alt="" loading="lazy" decoding="async">{% endif %}
+      {% if catalog_dark %}<img class="catalog-editorial catalog-editorial--dark" src="{{ catalog_dark }}" srcset="{{ catalog_dark_srcset }}" sizes="(max-width: 760px) 42vw, 18vw" width="1670" height="941" alt="" loading="lazy" decoding="async">{% endif %}
+    </div>
+  </div>
+</section>
+
+{# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+{# EN: The following form renders server errors; browser checks do not replace server validation. #}
+<form method="get" id="catalog-filters" class="catalog-filters" data-catalog-filters>
+  <div class="catalog-filter-grid">
+    <label class="filter-field">
+      <span>Marca</span>
+      <select name="marca" data-filter-rel="modelo">
+        <option value="">Todas</option>
+        {% for item in brands %}<option value="{{ item.brand_id }}"{% if selected.marca == item.brand_id|stringformat:'s' %} selected{% endif %}>{{ item.brand__name }} ({{ item.total }})</option>{% endfor %}
+      </select>
+    </label>
+    <label class="filter-field">
+      <span>Modelo</span>
+      <select name="modelo">
+        <option value="">Todos</option>
+        {% for item in models %}{% if not selected.marca or item.brand_id|stringformat:'s' == selected.marca %}<option value="{{ item.model_id }}"{% if selected.modelo == item.model_id|stringformat:'s' %} selected{% endif %}>{{ item.model__name }}</option>{% endif %}{% endfor %}
+      </select>
+    </label>
+    <label class="filter-field">
+      <span>Tipo</span>
+      <select name="tipo">
+        <option value="">Todos</option>
+        {% for item in segments %}<option value="{{ item.model__segment }}"{% if selected.tipo == item.model__segment %} selected{% endif %}>{{ item.model__segment }} ({{ item.total }})</option>{% endfor %}
+      </select>
+    </label>
+    <div class="filter-field filter-field-range">
+      <span>Precio</span>
+      <div class="filter-range">
+        <input type="number" name="precio_min" min="0" step="any" inputmode="numeric" placeholder="Mín." value="{{ selected.precio_min }}" aria-label="Precio mínimo">
+        <span class="filter-range-sep" aria-hidden="true">–</span>
+        <input type="number" name="precio_max" min="0" step="any" inputmode="numeric" placeholder="Máx." value="{{ selected.precio_max }}" aria-label="Precio máximo">
+      </div>
+    </div>
+    <div class="filter-field filter-field-range">
+      <span>Año</span>
+      <div class="filter-range">
+        <input type="number" name="anio_min" min="1900" max="2100" step="1" inputmode="numeric" placeholder="{{ year_bounds.0|default:'Mín.' }}" value="{{ selected.anio_min }}" aria-label="Año mínimo">
+        <span class="filter-range-sep" aria-hidden="true">–</span>
+        <input type="number" name="anio_max" min="1900" max="2100" step="1" inputmode="numeric" placeholder="{{ year_bounds.1|default:'Máx.' }}" value="{{ selected.anio_max }}" aria-label="Año máximo">
+      </div>
+    </div>
+    <label class="filter-field filter-field-search">
+      <span>Búsqueda</span>
+      <input type="search" name="q" value="{{ query }}" placeholder="Marca, modelo, versión o color">
+    </label>
+    <div class="catalog-filter-actions">
+      <button class="btn btn-primary" type="submit">Aplicar filtros</button>
+      {% if query or selected.marca or selected.modelo or selected.tipo or selected.precio_min or selected.precio_max or selected.anio_min or selected.anio_max %}<a class="btn btn-light" href="{% url 'vehicles:catalog' %}">Limpiar</a>{% endif %}
+    </div>
+  </div>
+</form>
+
+<div class="catalog-layout">
+  <aside class="catalog-sidebar" aria-label="Categorías de vehículos">
+    <h2 class="catalog-sidebar-title">Categorías</h2>
+    <nav class="catalog-categories">
+      <a href="?{% if query %}q={{ query }}&amp;{% endif %}"{% if not selected.tipo %} class="is-active" aria-current="page"{% endif %}>Todos los vehículos</a>
+      {% for item in segments %}
+        <a href="?tipo={{ item.model__segment|urlencode }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}{% if selected.marca %}&amp;marca={{ selected.marca|urlencode }}{% endif %}{% if selected.modelo %}&amp;modelo={{ selected.modelo|urlencode }}{% endif %}{% if selected.precio_min %}&amp;precio_min={{ selected.precio_min|urlencode }}{% endif %}{% if selected.precio_max %}&amp;precio_max={{ selected.precio_max|urlencode }}{% endif %}{% if selected.anio_min %}&amp;anio_min={{ selected.anio_min|urlencode }}{% endif %}{% if selected.anio_max %}&amp;anio_max={{ selected.anio_max|urlencode }}{% endif %}"
+          {% if selected.tipo == item.model__segment %} class="is-active" aria-current="page"{% endif %}>{{ item.model__segment }}<span>{{ item.total }}</span></a>
+      {% endfor %}
+    </nav>
+    <a class="btn btn-light catalog-sidebar-cta" href="{% url 'leads:public_request' %}">¿Necesitas asesoría?</a>
+  </aside>
+
+  <div class="catalog-results">
+    <div class="catalog-toolbar">
+      <p class="catalog-count"><strong>{{ total_results }}</strong> {% if total_results == 1 %}vehículo encontrado{% else %}vehículos encontrados{% endif %}</p>
+      <label class="catalog-order">
+        <span>Ordenar por</span>
+        <select name="orden" form="catalog-filters" data-auto-submit>
+          {% for value, label in ordering_choices %}<option value="{{ value }}"{% if ordering == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+    </div>
+
+    <section class="vehicle-grid public-grid">
+      {% for vehicle in page.object_list %}
+        <article class="vehicle-card" data-vehicle="{{ vehicle.pk }}">
+          <div class="vehicle-image-wrap">
+            {% with hero=vehicle.hero_media %}
+              {% if hero and hero.resource.file %}<img src="{{ hero.resource.file.url }}" alt="{{ hero.alt_text|default:vehicle }}" loading="lazy" decoding="async">{% else %}<div class="vehicle-image-placeholder" data-asset-slot="vehicle-photo" role="img" aria-label="Fotografía de {{ vehicle }}"></div>{% endif %}
+            {% endwith %}
+            <span class="status-badge status-{{ vehicle.status }}">{{ vehicle.get_status_display }}</span>
+            <button class="vehicle-favorite" type="button" data-favorite data-favorite-key="{{ vehicle.pk }}" aria-pressed="false" aria-label="Guardar {{ vehicle }} en favoritos">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 1 0-7.1 7.1l8.8 8.8 8.8-8.8a5 5 0 0 0 0-7.1Z"/></svg>
+            </button>
+          </div>
+          <div class="vehicle-card-body">
+            <span class="vehicle-brand-label">{{ vehicle.brand.name }}{% if vehicle.model.segment %} · {{ vehicle.model.segment }}{% endif %}</span>
+            <h2 class="vehicle-name">{{ vehicle.year }} {{ vehicle.model.name }}{% if vehicle.version %} {{ vehicle.version }}{% endif %}</h2>
+            <div class="vehicle-meta">
+              <span>{{ vehicle.year }}</span>
+              {% if vehicle.mileage %}<span>{{ vehicle.mileage|floatformat:"0" }} km</span>{% endif %}
+              {% if vehicle.color %}<span>{{ vehicle.color }}</span>{% endif %}
+              {% if vehicle.branch %}<span>{{ vehicle.branch.city|default:vehicle.branch.name }}</span>{% endif %}
+            </div>
+            <div class="vehicle-card-bottom">
+              {% if vehicle.price %}
+                <div class="vehicle-price-row"><span class="vehicle-price"><small>Desde</small>${{ vehicle.price|floatformat:"0" }}</span><a class="vehicle-details-link" href="{% url 'vehicles:detail' vehicle.public_slug %}">Ver detalle →</a></div>
+              {% endif %}
+              <button class="btn btn-secondary full" hx-get="{% url 'vehicles:detail_modal' vehicle.pk %}" hx-target="#modal-root" hx-swap="innerHTML">Ver ficha</button>
+              <a class="btn btn-light full" href="{% url 'leads:public_vehicle_request' vehicle.pk %}">Solicitar información</a>
+            </div>
+          </div>
+        </article>
+      {% empty %}
+        <article class="panel-card catalog-empty">
+          <strong>No hay vehículos que coincidan con tu búsqueda.</strong>
+          <p>Prueba con otros filtros o escríbenos para buscar por marca, modelo o versión.</p>
+          <a class="btn btn-primary" href="{% url 'leads:public_request' %}">Solicitar búsqueda personalizada</a>
+        </article>
+      {% endfor %}
+    </section>
+
+    {% if page.paginator.num_pages > 1 %}
+      <nav class="pagination-bar public-pagination" aria-label="Paginación del catálogo">
+        {% if page.has_previous %}<a class="btn btn-light" href="?page={{ page.previous_page_number }}&amp;orden={{ ordering }}">Anterior</a>{% endif %}
+        <span>Página {{ page.number }} de {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}<a class="btn btn-light" href="?page={{ page.next_page_number }}&amp;orden={{ ordering }}">Siguiente</a>{% endif %}
+      </nav>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

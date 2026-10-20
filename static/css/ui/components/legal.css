@@ -1,0 +1,20 @@
+/* ES: Presentación accesible de borradores legales, identidad y navegación relacionada. */
+/* EN: Accessible presentation for legal drafts, identity details, and related navigation. */
+
+.legal-document { display: grid; gap: var(--space-20); }
+.legal-draft-notice { display: grid; gap: var(--space-4); }
+.legal-document-nav { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+.legal-document-nav a { padding: var(--space-8) var(--space-12); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+.legal-document-body { display: grid; gap: var(--space-12); }
+.legal-document-body h2 { margin: var(--space-12) 0 0; font-size: var(--fs-20); }
+.legal-document-body p, .legal-document-body li { color: var(--text-muted); line-height: 1.65; }
+.legal-document-meta { padding-bottom: var(--space-12); border-bottom: 1px solid var(--border); }
+.legal-identity { display: grid; gap: var(--space-8); margin: 0; }
+.legal-identity div { display: grid; grid-template-columns: minmax(130px, 0.35fr) 1fr; gap: var(--space-12); }
+.legal-identity dt { font-weight: 700; }
+.legal-identity dd { margin: 0; overflow-wrap: anywhere; }
+.legal-document-actions { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+@media (max-width: 640px) {
+  .legal-identity div { grid-template-columns: 1fr; gap: var(--space-4); }
+  .legal-document-actions .btn { width: 100%; }
+}

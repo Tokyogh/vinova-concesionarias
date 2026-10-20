@@ -1,0 +1,16 @@
+{# ES: Previsualiza borradores y publicaciones sin alterar su visibilidad pública interna. #}
+{# EN: Previews drafts and publications without changing their internal visibility. #}
+{% extends "base/base.html" %}
+{% block title %}Vista previa · {{ article.title }}{% endblock %}
+{% block page_title %}Vista previa: {{ article.title }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">{{ article.summary }}</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'help_center:manage_articles' %}">Artículos</a><a class="btn btn-secondary" href="{% url 'help_center:manage_edit' article.pk %}">Editar</a><a class="btn btn-light" href="{% url 'help_center:manage_history' article.pk %}">Versiones</a>{% endblock %}
+{% block content %}
+<section class="panel-card help-article-body">
+  <div class="article-meta"><span class="help-type">{{ article.get_article_type_display }}</span><span>{{ article.category.name }}</span><span>{% if article.is_published %}Publicado{% else %}Borrador{% endif %}</span><span>Actualizado {{ article.updated_at|date:'d/m/Y H:i' }}</span></div>
+  <div class="article-content">{{ article.content|linebreaks }}</div>
+  <div class="action-row wrap">
+    {% if article.is_published %}<form method="post" action="{% url 'help_center:manage_publication' article.pk 'unpublish' %}" data-confirm="Despublicar este artículo?">{% csrf_token %}<button class="btn btn-light" type="submit">Despublicar</button></form>{% else %}<form method="post" action="{% url 'help_center:manage_publication' article.pk 'publish' %}">{% csrf_token %}<button class="btn btn-primary" type="submit">Publicar</button></form>{% endif %}
+  </div>
+</section>
+{% endblock %}

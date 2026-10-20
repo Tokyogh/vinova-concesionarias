@@ -1,0 +1,42 @@
+# ES: Declara la topología de servicios y aislamiento operativo de docker-compose.staging.yml.
+# EN: Declares the service topology and operational isolation for docker-compose.staging.yml.
+# Override de staging. Usar junto con docker-compose.prod.yml:
+# docker compose --env-file .env.staging -f docker-compose.prod.yml -f docker-compose.staging.yml up -d --build
+services:
+  app_init:
+    environment:
+      VINOVA_ENVIRONMENT: staging
+      SENTRY_ENVIRONMENT: staging
+      SECURE_HSTS_SECONDS: "${SECURE_HSTS_SECONDS:-3600}"
+      SECURE_HSTS_INCLUDE_SUBDOMAINS: "${SECURE_HSTS_INCLUDE_SUBDOMAINS:-False}"
+      SECURE_HSTS_PRELOAD: "${SECURE_HSTS_PRELOAD:-False}"
+      VINOVA_API_DOCS_PUBLIC: "False"
+
+  web:
+    environment:
+      VINOVA_ENVIRONMENT: staging
+      SENTRY_ENVIRONMENT: staging
+      SECURE_HSTS_SECONDS: "${SECURE_HSTS_SECONDS:-3600}"
+      SECURE_HSTS_INCLUDE_SUBDOMAINS: "${SECURE_HSTS_INCLUDE_SUBDOMAINS:-False}"
+      SECURE_HSTS_PRELOAD: "${SECURE_HSTS_PRELOAD:-False}"
+      VINOVA_API_DOCS_PUBLIC: "False"
+
+  celery_worker:
+    environment:
+      VINOVA_ENVIRONMENT: staging
+      SENTRY_ENVIRONMENT: staging
+
+  celery_beat:
+    environment:
+      VINOVA_ENVIRONMENT: staging
+      SENTRY_ENVIRONMENT: staging
+
+  nginx:
+    environment:
+      NGINX_TLS_ENABLED: "${NGINX_TLS_ENABLED:-True}"
+      NGINX_SERVER_NAME: "${NGINX_SERVER_NAME:?Configure NGINX_SERVER_NAME}"
+      NGINX_LOGIN_RATE: "${NGINX_STAGING_LOGIN_RATE:-120r/m}"
+      NGINX_LOGIN_BURST: "${NGINX_STAGING_LOGIN_BURST:-60}"
+    ports:
+      - "80:8080"
+      - "443:8443"

@@ -1,0 +1,22 @@
+{# ES: Renderiza la interfaz templates/dashboard/staff_dashboard; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/staff_dashboard interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Dashboard interno | Vinova Pro{% endblock %}
+{% block page_title %}Dashboard interno legado{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Esta vista queda como compatibilidad. La entrada principal /dashboard/ ahora redirige al dashboard correcto por rol.</p>{% endblock %}
+{% block content %}
+<section class="metric-grid">
+  <article class="metric-card"><span>Empresas activas</span><strong>{{ metrics.active_companies }}</strong></article>
+  <article class="metric-card"><span>Sucursales activas</span><strong>{{ metrics.active_branches }}</strong></article>
+  <article class="metric-card"><span>Usuarios activos</span><strong>{{ metrics.active_users }}</strong></article>
+  <article class="metric-card"><span>Vehículos disponibles</span><strong>{{ metrics.available_vehicles }}</strong></article>
+</section>
+<section class="panel-card">
+  <h2>Accesos disponibles</h2>
+  <div class="dashboard-module-grid">
+    {% for module in available_modules %}
+      {% if module.visible %}<a class="dashboard-module-card" href="{% url module.url %}"><strong>{{ module.label }}</strong><span>Abrir módulo</span></a>{% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

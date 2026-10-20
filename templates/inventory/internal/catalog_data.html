@@ -1,0 +1,34 @@
+{# ES: Renderiza la interfaz templates/inventory/internal/catalog_data; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/inventory/internal/catalog_data interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Categorías de inventario | Vinova Pro{% endblock %}
+{% block page_title %}Categorías de inventario{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Datos base para clasificar aceites, filtros, repuestos, accesorios, servicios y productos de mantenimiento.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'inventory_internal:list' %}">Volver</a>{% endblock %}
+{% block content %}
+<section class="detail-grid two-columns inventory-activity-grid">
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Nueva categoría</h2><p>Usa categorías claras para reportes y filtros futuros.</p></div></div>
+    <form method="post" action="{% url 'inventory_internal:category_create' %}" class="stacked-form">
+      {% csrf_token %}
+      {% for field in category_form %}
+        <label class="form-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>
+      {% endfor %}
+      <button class="btn btn-primary">Guardar categoría</button>
+    </form>
+  </article>
+  <article class="panel-card table-panel">
+    <div class="panel-header"><div><h2>Categorías activas</h2><p>Catálogo base del módulo de inventario.</p></div></div>
+    <div class="responsive-table">
+      <table class="data-table">
+        <thead><tr><th>Categoría</th><th>Slug</th><th>Padre</th><th>Estado</th></tr></thead>
+        <tbody>
+          {% for category in categories %}
+            <tr><td><strong>{{ category.name }}</strong><span class="table-subtext">{{ category.description|truncatechars:80 }}</span></td><td>{{ category.slug }}</td><td>{{ category.parent.name|default:'N/D' }}</td><td>{% if category.is_active %}<span class="state state-ok">Activa</span>{% else %}<span class="state state-warning">Inactiva</span>{% endif %}</td></tr>
+          {% empty %}<tr><td colspan="4">No hay categorías registradas.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+{% endblock %}

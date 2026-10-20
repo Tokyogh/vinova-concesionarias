@@ -1,0 +1,50 @@
+/* ES: Define estilos de static/css/ui/layouts/containers, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/layouts/containers styles, including states and responsive behavior. */
+/*
+   Contenedores y anchos de contenido por shell. */
+
+.public-body { background: var(--bg); }
+
+/* Contenedor público: 1200px con gutter lateral de 24px.
+   Nota: sin width:100% para que los márgenes inline del contenedor
+   resuelvan el ancho disponible y nunca generen overflow horizontal. */
+.public-shell,
+.public-container,
+.vehicle-grid.public-grid,
+.public-section,
+.public-hero-inner,
+.public-toolbar,
+.public-pagination,
+.branch-public-grid,
+.services-grid,
+.services-hero-inner,
+.about-grid,
+.about-stats,
+.contact-layout,
+.contact-form-panel,
+.login-card,
+.staff-container {
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--container-gutter);
+}
+
+.public-nav-drawer > .public-nav,
+.public-header > .public-nav,
+.public-header > .public-nav-actions {
+  /* El header público usa el ancho completo con gutter, no container */
+  max-width: none;
+}
+
+.public-hero { width: 100%; }
+
+.public-message-wrap {
+  max-width: var(--container);
+  margin: var(--space-16) auto 0;
+  padding-inline: var(--container-gutter);
+}
+
+/* Staff: contenido pegado al shell, padding del main-content */
+.main-content { padding: var(--space-24) var(--space-28); min-width: 0; }
+
+.narrow { max-width: var(--container-narrow); }

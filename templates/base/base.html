@@ -1,0 +1,128 @@
+{# ES: Renderiza la interfaz templates/base/base; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/base/base interface; permissions and data are resolved server-side. #}
+{% load static ui_assets %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f2f4d'/%3E%3Ctext x='16' y='23' font-family='Inter,Arial,sans-serif' font-size='20' font-weight='800' text-anchor='middle' fill='%23ffffff'%3EV%3C/text%3E%3C/svg%3E">
+<title>{% block title %}Vinova Pro{% endblock %}</title>
+  {% include 'components/head_assets.html' %}
+  <script defer src="{% static 'vendor/htmx/htmx.min.js' %}?v=2.0.10"></script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+  <div class="app-shell">
+    {% include 'components/sidebar.html' %}
+    <button class="drawer-overlay" type="button" data-drawer-overlay="staff-sidebar" aria-label="Cerrar navegación" tabindex="-1"></button>
+    <main class="main-content" id="main-content" tabindex="-1">
+      <div class="staff-mobile-bar">
+        <a class="staff-mobile-brand" href="{% url 'dashboard:staff_home' %}" aria-label="Ir al dashboard">
+          {% ui_final_asset "brand-logo" as brand_logo %}<span class="brand-mark">{% if brand_logo %}<img class="brand-mark-image" src="{{ brand_logo }}" alt="" aria-hidden="true" decoding="async">{% else %}V{% endif %}</span>
+          <span><strong>Vinova Pro</strong><small>Área interna</small></span>
+        </a>
+        <div class="staff-mobile-actions">
+          <button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar a modo oscuro" title="Cambiar a modo oscuro">
+            <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+          <button class="drawer-menu-button" type="button" data-drawer-open="staff-sidebar" aria-controls="staff-sidebar" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+            <span>Menú</span>
+          </button>
+        </div>
+      </div>
+      <header class="topbar">
+        <div class="topbar-heading">
+          <span class="eyebrow">Vinova Pro Enterprise</span>
+          <h1>{% block page_title %}Panel empresarial{% endblock %}</h1>
+          {% block page_subtitle %}{% endblock %}
+        </div>
+        <div class="topbar-actions">
+          {% block topbar_actions %}{% endblock %}
+          {% if request.user.is_authenticated %}
+            {% if request.user.can_view_internal_vehicles %}
+              {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+              {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+              <form class="topbar-search" method="get" action="{% url 'vehicles_internal:list' %}" role="search">
+                <label class="sr-only" for="staff-quick-search">Buscar en vehículos</label>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input id="staff-quick-search" type="search" name="q" placeholder="Buscar vehículo, VIN o placa" autocomplete="off">
+              </form>
+            {% elif request.user.can_view_customers %}
+              <form class="topbar-search" method="get" action="{% url 'customers_internal:list' %}" role="search">
+                <label class="sr-only" for="staff-quick-search">Buscar en clientes</label>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input id="staff-quick-search" type="search" name="q" placeholder="Buscar cliente, cédula o RUC" autocomplete="off">
+              </form>
+            {% endif %}
+            {% if staff_nav_json %}
+              <button class="command-palette-trigger" type="button" aria-haspopup="dialog" aria-controls="command-palette" aria-expanded="false" aria-label="Buscar o preguntar a VINOVA" data-command-palette-trigger>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <span>Buscar o preguntar a VINOVA...</span>
+                <kbd>Ctrl&nbsp;K</kbd>
+              </button>
+            {% endif %}
+            <span class="topbar-branch" title="Sucursal asignada a tu usuario">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>{% if staff_branch_label %}{{ staff_branch_label }}{% else %}Todas las sucursales{% endif %}</span>
+            </span>
+            {% if request.user.can_view_notifications %}
+              <a class="topbar-icon-button" href="{% url 'notifications_internal:inbox' %}" aria-label="Notificaciones{% if staff_unread_notifications %}: {{ staff_unread_notifications }} sin leer{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                {% if staff_unread_notifications %}<span class="topbar-icon-badge">{{ staff_unread_notifications }}</span>{% endif %}
+              </a>
+            {% endif %}
+          {% endif %}
+          <button class="theme-toggle topbar-theme-toggle" data-theme-toggle type="button" aria-label="Cambiar a modo oscuro" title="Cambiar a modo oscuro">
+            <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+          {% if request.user.is_authenticated and request.user.can_view_help %}
+            {% if contextual_help_article %}
+              <a class="btn btn-light topbar-help" href="{% url 'help_center:article' contextual_help_article.slug %}">Ayuda</a>
+            {% else %}
+              <a class="btn btn-light topbar-help" href="{% url 'help_center:home' %}">Ayuda</a>
+            {% endif %}
+          {% endif %}
+          {% if request.user.is_authenticated %}
+            <a class="user-pill" href="{% url 'accounts:profile' %}">{% include 'components/avatar.html' with avatar_user=request.user avatar_size='avatar-sm' %}<span>{{ request.user.get_full_name|default:request.user.username }}</span></a>
+            <form action="{% url 'accounts:logout' %}" method="post">{% csrf_token %}<button class="btn btn-light" type="submit">Salir</button></form>
+          {% endif %}
+        </div>
+      </header>
+      {% if staff_nav_crumbs %}
+        {# ES: La navegación siguiente muestra destinos ya autorizados por el contexto de backend. #}
+        {# EN: The following navigation shows destinations already authorized by backend context. #}
+        <nav class="staff-breadcrumbs" aria-label="Ruta de navegación">
+          <ol>
+            {% for crumb in staff_nav_crumbs %}
+              <li>
+                {% if crumb.url and not forloop.last %}
+                  <a href="{{ crumb.url }}">{{ crumb.title }}</a>
+                {% else %}
+                  <span{% if forloop.last %} aria-current="page"{% endif %}>{{ crumb.title }}</span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ol>
+        </nav>
+      {% endif %}
+      {% if messages %}
+        <section class="message-stack" aria-label="Mensajes del sistema" aria-live="polite">
+          {% for message in messages %}<div class="message message-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}
+        </section>
+      {% endif %}
+      {% include 'help_center/_context_tip.html' %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <div id="modal-root" aria-live="polite"></div>
+  {% if staff_nav_json %}
+    {{ staff_nav_json|json_script:"staff-nav-data" }}
+    {% include 'components/command_palette.html' %}
+  {% endif %}
+  {% include 'components/cookie_consent.html' %}
+</body>
+</html>

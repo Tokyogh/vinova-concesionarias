@@ -1,0 +1,221 @@
+/* ES: Define estilos de static/css/ui/responsive/tablet, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/responsive/tablet styles, including states and responsive behavior. */
+/*
+   Tablet 1200-761px: recomposición de grids, sidebar a drawer y layouts internos. */
+
+@media (max-width: 1200px) {
+  .role-metric-grid, .audit-metric-grid, .analytics-metric-grid, .executive-metric-grid { grid-template-columns: repeat(3, 1fr); }
+  .crm-detail-metrics { grid-template-columns: repeat(3, 1fr); }
+  .crm-filter-grid, .audit-filter-grid { grid-template-columns: repeat(2, 1fr); }
+  .crm-metric-grid { grid-template-columns: repeat(3, 1fr); }
+  .catalog-filter-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .catalog-filter-grid .filter-field-search { grid-column: 1 / -1; }
+}
+
+/* ES: La navegación pública pasa a drawer antes de que enlaces y acciones colisionen. */
+/* EN: Public navigation becomes a drawer before links and actions collide. */
+@media (max-width: 1180px) {
+  .public-header { flex-direction: row; min-height: var(--header-h); padding-block: 8px; }
+  .public-menu-toggle { display: inline-flex; margin-left: auto; }
+  .public-nav-drawer {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 110;
+    display: flex;
+    flex-direction: column;
+    width: min(340px, calc(100vw - 40px));
+    height: 100dvh;
+    padding: 18px;
+    overflow-y: auto;
+    border-left: 1px solid var(--border);
+    visibility: hidden;
+    opacity: 0;
+    background: var(--surface);
+    box-shadow: -18px 0 48px rgba(5, 14, 25, .28);
+    pointer-events: none;
+    transition: opacity var(--t), visibility var(--t);
+  }
+  .public-nav-drawer.is-open { visibility: visible; opacity: 1; pointer-events: auto; }
+  .drawer-overlay[data-drawer-overlay="public-nav-drawer"].is-active { display: block; }
+  .public-drawer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .public-drawer-close { display: inline-flex; }
+  .public-nav { display: grid; align-items: stretch; justify-content: stretch; gap: 4px; margin: 18px 0; }
+  .public-nav a { display: flex; align-items: center; min-height: 44px; padding: 10px 12px; font-size: .95rem; }
+  .public-nav-actions { display: grid; align-items: stretch; justify-content: stretch; gap: 10px; margin-top: auto; padding-top: 18px; border-top: 1px solid var(--border); }
+  .public-nav-actions .theme-toggle { justify-self: start; }
+  .public-nav-actions .nav-login,
+  .public-nav-actions .nav-staff,
+  .public-nav-actions .public-nav-link,
+  .public-logout-form button { width: 100%; justify-content: center; text-align: center; }
+}
+
+@media (max-width: 1050px) {
+  .help-card-grid { grid-template-columns: repeat(2, 1fr); }
+  .help-article-layout { grid-template-columns: 1fr; }
+  .help-article-aside { position: static; }
+  .help-search-hero { grid-template-columns: 1fr; }
+  .vehicle-import-steps { grid-template-columns: 1fr; }
+  .reports-branch-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 1000px) {
+  .vehicle-grid { grid-template-columns: repeat(2, 1fr); }
+  .dashboard-module-grid, .enterprise-module-grid, .reports-module-grid, .imports-module-grid { grid-template-columns: repeat(2, 1fr); }
+  .role-dashboard-hero, .profile-public-hero { display: block; }
+  .role-dashboard-actions { justify-content: flex-start; margin-top: 14px; }
+  .crm-pipeline { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+}
+
+@media (max-width: 900px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed; inset: 0 auto 0 0; z-index: 110;
+    width: min(320px, calc(100vw - 48px)); max-width: none; height: 100dvh;
+    overflow: hidden; border-right: 1px solid rgba(255,255,255,.08);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity var(--t), visibility var(--t);
+    box-shadow: 18px 0 48px rgba(5,14,25,.28);
+  }
+  .sidebar.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+  .sidebar .brand-block { margin-right: 0; }
+  .sidebar-close { display: inline-flex; margin-left: auto; flex: 0 0 auto; }
+  [data-theme="dark"] .sidebar-close { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); color: #fff; }
+  .drawer-overlay.is-active { display: block; position: fixed; inset: 0; z-index: 100; }
+  .main-content { padding: 18px; }
+  .staff-mobile-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    position: sticky; top: 0; z-index: 35; margin: -18px -18px 18px; padding: 10px 14px;
+    min-height: 62px; background: color-mix(in srgb, var(--surface) 94%, transparent);
+    border-bottom: 1px solid var(--border); backdrop-filter: blur(12px);
+  }
+  .staff-mobile-bar .drawer-menu-button { display: inline-flex; }
+  .topbar-theme-toggle { display: none; }
+  .topbar { flex-direction: column; align-items: stretch; }
+  .topbar-actions { justify-content: flex-start; }
+  .topbar-search { width: 100%; }
+  .topbar-actions .topbar-help { display: none; }
+  .internal-filter-form.dense-filter-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .public-hero { display: grid; min-height: auto; }
+  .public-hero-content { grid-row: 1; width: 100%; min-height: 0; }
+  .hero-media { position: relative; grid-row: 2; min-height: clamp(280px, 42vw, 420px); height: auto; }
+  .hero-image.asset-slot {
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, .72) 18%, #000 34%, #000 100%);
+    mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, .72) 18%, #000 34%, #000 100%);
+  }
+  .hero-image-fallback::before { width: min(70vw, 320px); height: 140px; }
+  .public-hero-content { padding-block: var(--space-48) var(--space-24); padding-inline: var(--container-gutter); }
+  .hero-benefits { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-24); padding-block: var(--space-40) var(--space-48); }
+  .catalog-filter-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .catalog-filter-grid .filter-field-search { grid-column: 1 / -1; }
+  .catalog-layout { grid-template-columns: 1fr; gap: var(--space-24); }
+
+/* Detalle de vehiculo */
+.vehicle-detail { grid-template-columns: 1fr; gap: var(--space-24); }
+.vehicle-gallery { grid-template-columns: minmax(0, 1fr); }
+.vehicle-gallery-thumbs { grid-column: 1; grid-row: 1; flex-direction: row; overflow-x: auto; padding-bottom: var(--space-4); }
+.vehicle-thumb { width: 84px; flex: 0 0 auto; }
+.vehicle-stage { grid-column: 1; grid-row: 2; }
+.vehicle-spec-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.vehicle-gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.vehicle-summary { order: 3; }
+  .catalog-sidebar { position: static; }
+  .catalog-categories { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  .about-grid { grid-template-columns: 1fr; }
+  .about-stats { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .public-contact-layout { grid-template-columns: minmax(0, 34fr) minmax(0, 66fr); }
+  .contact-aside { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  .contact-photo { min-height: 260px; }
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+  .service-hero { min-height: 360px; }
+  .service-hero-content { max-width: 560px; }
+  .vehicle-modal-split { grid-template-columns: 1fr; }
+  .vehicle-modal-aside { position: static; }
+  .process-grid { grid-template-columns: 1fr; }
+  .public-lead-layout { grid-template-columns: 1fr; }
+  .public-lead-summary { position: static; }
+  .split-login { grid-template-columns: 1fr; }
+  .login-visual { min-height: 320px; padding: var(--space-32); }
+  .login-visual-body { margin-block: 0; padding-block: var(--space-24); }
+  .login-brand { margin-bottom: var(--space-16); }
+  .login-visual-foot { padding-top: var(--space-16); }
+  .login-points { display: none; }
+  .auth-cover-label { display: none; }
+  .login-form-panel { padding: var(--space-40) var(--space-32); border-left: 0; border-top: 1px solid var(--border-soft); }
+  .vehicle-grid { grid-template-columns: 1fr; }
+  .metric-grid { grid-template-columns: repeat(2, 1fr); }
+  .executive-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .executive-panels { grid-template-columns: 1fr; }
+  .executive-summary-head { flex-direction: column; align-items: flex-start; }
+  .executive-summary-note { text-align: left; }
+  .gallery-layout { grid-template-columns: 1fr; }
+  .gallery-thumbs { grid-template-columns: repeat(4, 1fr); }
+  .public-footer { flex-direction: column; gap: 16px; }
+  .help-card-grid, .help-checklist-grid, .help-category-stack { grid-template-columns: 1fr; }
+  .crm-actions-grid, .audit-action-grid { grid-template-columns: repeat(2, 1fr); }
+  .qa-action-grid { grid-template-columns: 1fr; }
+}
+
+/* ES: Limita identidades y acciones Staff para conservar el ancho del documento. */
+/* EN: Constrains Staff identities and actions to preserve document width. */
+@media (min-width: 901px) and (max-width: 1200px) {
+  .topbar { align-items: flex-start; }
+  .topbar-heading { flex: 0 1 240px; }
+  .topbar-actions { min-width: 0; max-width: calc(100% - 220px); }
+  .topbar-actions .user-pill { max-width: 180px; }
+}
+
+/* ES: Las reglas de «@media (max-width:1100px)» definen estado visual y adaptación sin alterar semántica. */
+/* EN: The «@media (max-width:1100px)» rules define visual state and adaptation without changing semantics. */
+@media (max-width:1100px) {
+  .metric-grid { grid-template-columns:repeat(2,1fr) }
+  .gallery-layout { grid-template-columns:1fr }
+  .audit-metric-grid { grid-template-columns:repeat(3,minmax(0,1fr)) }
+  .audit-filter-grid { grid-template-columns:repeat(2,minmax(0,1fr)) }
+  .audit-alert-filter-grid { grid-template-columns:repeat(2,minmax(0,1fr)) }
+}
+
+@media (max-width:1120px) {
+  .public-footer div:last-child { text-align:left;margin-top:16px }
+  .asset-grid { grid-template-columns:repeat(2,minmax(0,1fr)) }
+  .vehicle-media-grid { grid-template-columns:repeat(2,minmax(0,1fr)) }
+}
+
+@media (max-width:800px) {
+  .crm-metric-grid, .analytics-metric-grid, .executive-metric-grid, .crm-detail-metrics, .crm-filter-grid, .crm-lead-form, .lead-public-form { grid-template-columns:1fr }
+  .analytics-filter-form input, .analytics-filter-form select { width:100% }
+}
+
+@media (max-width:900px) {
+  .detail-grid, .detail-grid.two-columns { grid-template-columns:1fr }
+  .sidebar-footer { position:static }
+  .internal-filter-form select { width:100% }
+  .customer-filter-form select { width:100%;min-width:0 }
+  .customer-detail-grid, .customer-activity-grid { grid-template-columns:1fr }
+  .inventory-filter-form select { width:100% }
+  .inventory-detail-grid, .inventory-activity-grid { grid-template-columns:1fr }
+  .sales-filter-form select { width:100% }
+  .sales-detail-grid, .sales-lines-grid, .sales-payments-grid { grid-template-columns:1fr }
+  .mini-action-form { width:100% }
+  .notifications-filter-form select { width:100% }
+  .notifications-detail-grid { grid-template-columns:1fr }
+  .profile-public-hero .btn { margin-top:18px }
+  .public-profile-grid, .invoices-form-layout, .invoices-detail-grid, .invoices-lines-grid, .invoices-payments-grid { grid-template-columns:1fr }
+  .invoices-filter-form select { width:100% }
+  .role-row .state { margin-top:8px }
+  .sidebar .side-nav { max-height:none;overflow-y:auto }
+  .imports-filter-form select, .imports-filter-form input { width:100% }
+  .imports-form-layout, .imports-detail-grid { grid-template-columns:1fr }
+  .qa-inline-filters { grid-template-columns:1fr }
+  .qa-inline-filters select { width:100% }
+  .app-shell { width:100%;max-width:100% }
+  .app-shell>* { min-width:0;max-width:100% }
+  .main-content { width:100%;max-width:100%;overflow-x:hidden }
+  .topbar { min-width:0;max-width:100% }
+  .topbar>*, .topbar-actions { min-width:0;max-width:100% }
+  .topbar-actions { width:100% }
+  .topbar-actions>.btn, .topbar-actions>form, .topbar-actions .btn, .topbar-actions .user-pill { max-width:100%;white-space:normal;overflow-wrap:anywhere }
+  .toolbar, .panel-card, .table-panel, .responsive-table, .metric-grid { min-width:0;max-width:100% }
+  .internal-filter-form, .inventory-filter-form { grid-template-columns:minmax(0,1fr);width:100% }
+  .internal-filter-form input, .internal-filter-form .searchable-select-wrap, .internal-filter-form .btn, .inventory-filter-form>* { box-sizing:border-box;width:100%;min-width:0;max-width:100% }
+  .internal-filter-form select { box-sizing:border-box;width:100%;max-width:100% }
+}

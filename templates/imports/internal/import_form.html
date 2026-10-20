@@ -1,0 +1,103 @@
+{# ES: Renderiza la interfaz templates/imports/internal/import_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/imports/internal/import_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{% if vehicle_import_mode %}Importar vehículos{% else %}Nueva importación{% endif %} | Vinova Pro{% endblock %}
+{% block page_title %}{% if vehicle_import_mode %}Importar vehículos{% else %}Nueva importación masiva{% endif %}{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">
+    {% if vehicle_import_mode %}
+      Carga vehículos desde Excel o CSV, revisa cada fila y confirma antes de crear o actualizar registros reales.
+    {% else %}
+      Sube un CSV o Excel. El sistema validará todas las filas antes de guardar cambios reales.
+    {% endif %}
+  </p>
+{% endblock %}
+{% block topbar_actions %}
+  {% if vehicle_import_mode %}
+    <a class="btn btn-light" href="{% url 'imports_internal:template' 'vehicles' %}">Plantilla CSV</a>
+    <a class="btn btn-secondary" href="{% url 'imports_internal:template' 'vehicles' %}?format=xlsx">Descargar plantilla Excel</a>
+  {% endif %}
+{% endblock %}
+{% block content %}
+{% include 'imports/internal/_nav.html' %}
+
+{% if vehicle_import_mode %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="vehicle-import-steps" aria-label="Pasos para importar vehículos">
+  <article class="vehicle-import-step"><span>1</span><div><strong>Descarga la plantilla</strong><p>Usa preferiblemente Excel: incluye instrucciones, valores permitidos y códigos de sucursal.</p></div></article>
+  <article class="vehicle-import-step"><span>2</span><div><strong>Completa los datos</strong><p>Marca, modelo y año son obligatorios. El código interno se genera automáticamente; el VIN real del fabricante es opcional.</p></div></article>
+  <article class="vehicle-import-step"><span>3</span><div><strong>Valida y confirma</strong><p>La carga no modifica la base hasta que revises la vista previa y presiones “Confirmar importación”.</p></div></article>
+</section>
+{% endif %}
+
+<section class="detail-grid two-columns imports-form-layout">
+  <article class="panel-card">
+    <div class="panel-header">
+      <div>
+        <h2>{% if vehicle_import_mode %}Subir archivo de vehículos{% else %}Subir archivo{% endif %}</h2>
+        <p>Usa plantillas para evitar errores de columnas. La sucursal por defecto puede completar filas sin sucursal.</p>
+      </div>
+    </div>
+    {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+    {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+    <form method="post" enctype="multipart/form-data" class="form-grid enterprise-form-grid" id="import-batch-form">
+      {% csrf_token %}
+      {% for field in form %}
+        <label class="form-field {% if field.name == 'notes' %}span-2{% endif %} {% if field.name == 'require_vehicle_branch' %}vehicle-only-field{% endif %}">
+          <span>{{ field.label }}</span>
+          {{ field }}
+          {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+          {% for error in field.errors %}<strong class="form-error">{{ error }}</strong>{% endfor %}
+        </label>
+      {% endfor %}
+      {% for error in form.non_field_errors %}<strong class="form-error span-2">{{ error }}</strong>{% endfor %}
+      <div class="form-actions span-2">
+        <button class="btn btn-primary">Validar archivo</button>
+        <a class="btn btn-light" href="{% url 'imports_internal:home' %}">Cancelar</a>
+      </div>
+    </form>
+  </article>
+  <aside class="panel-card imports-help-card">
+    <div class="panel-header">
+      <div>
+        <h2>{% if vehicle_import_mode %}Qué se importa{% else %}Plantillas rápidas{% endif %}</h2>
+        <p>{% if vehicle_import_mode %}Datos estructurados del vehículo y del catálogo.{% else %}Descarga ejemplos con encabezados aceptados.{% endif %}</p>
+      </div>
+    </div>
+
+    {% if vehicle_import_mode %}
+      <div class="compact-row-list vehicle-import-field-list">
+        <div class="compact-row"><strong>Identificación</strong><span>Marca, modelo, año, código interno automático, VIN real opcional, placa y versión.</span></div>
+        <div class="compact-row"><strong>Operación</strong><span>Estado, sucursal, kilometraje, color y precio.</span></div>
+        <div class="compact-row"><strong>Catálogo</strong><span>Publicación, destacado, resumen, descripción y especificaciones comerciales.</span></div>
+        <div class="compact-row"><strong>Actualización</strong><span>Para actualizar, usa el código interno generado o el VIN real. Si ambos están vacíos, se crea un vehículo nuevo con código automático.</span></div>
+      </div>
+      <div class="template-download-card">
+        <strong>Plantilla recomendada</strong>
+        <p>El archivo Excel tiene encabezados protegidos visualmente, listas desplegables, ejemplos, instrucciones y sucursales activas.</p>
+        <a class="btn btn-primary" href="{% url 'imports_internal:template' 'vehicles' %}?format=xlsx">Descargar Excel de vehículos</a>
+      </div>
+    {% else %}
+      <div class="compact-row-list">
+        {% for value,label in import_types %}
+          <div class="compact-row import-template-row">
+            <strong>{{ label }}</strong>
+            <span>Plantillas para {{ label|lower }}. Excel incluye instrucciones, valores válidos y sucursales.</span>
+            <span class="template-actions">
+              <a href="{% url 'imports_internal:template' value %}">CSV</a>
+              <a href="{% url 'imports_internal:template' value %}?format=xlsx">Excel</a>
+            </span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="sri-warning-card imports-warning-card">
+      <strong>Flujo seguro</strong>
+      <p>Ningún dato se aplica hasta que el archivo esté validado y un usuario autorizado confirme la importación. La multimedia de vehículos se carga después desde la ficha del vehículo.</p>
+    </div>
+  </aside>
+</section>
+
+{% endblock %}

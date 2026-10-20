@@ -1,0 +1,13 @@
+{# ES: Historial inmutable con restauración explícita bajo help.manage. #}
+{# EN: Immutable history with explicit restoration under help.manage. #}
+{% extends "base/base.html" %}
+{% block title %}Versiones · {{ article.title }}{% endblock %}
+{% block page_title %}Versiones de {{ article.title }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Restaurar crea una versión nueva y conserva todas las anteriores.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'help_center:manage_preview' article.pk %}">Volver a vista previa</a><a class="btn btn-secondary" href="{% url 'help_center:manage_edit' article.pk %}">Editar</a>{% endblock %}
+{% block content %}
+<section class="panel-card table-panel"><div class="responsive-table"><table class="data-table mobile-card-table">
+  <thead><tr><th>Versión</th><th>Motivo</th><th>Autor</th><th>Fecha</th><th>Estado</th><th>Acción</th></tr></thead>
+  <tbody>{% for version in versions %}<tr><td data-label="Versión">v{{ version.version }}</td><td data-label="Motivo">{{ version.change_note|default:'Sin nota' }}</td><td data-label="Autor">{% if version.created_by %}{{ version.created_by.get_full_name|default:version.created_by.username }}{% else %}Sistema{% endif %}</td><td data-label="Fecha">{{ version.created_at|date:'d/m/Y H:i' }}</td><td data-label="Estado">{% if version.is_published %}Publicado{% else %}Borrador{% endif %}</td><td data-label="Acción"><form method="post" action="{% url 'help_center:manage_restore' article.pk version.pk %}" data-confirm="Restaurar la versión {{ version.version }} como una versión nueva?">{% csrf_token %}<button class="btn btn-light btn-sm" type="submit">Restaurar</button></form></td></tr>{% empty %}<tr class="empty-table-row"><td colspan="6">Este artículo no tiene versiones registradas.</td></tr>{% endfor %}</tbody>
+</table></div></section>
+{% endblock %}

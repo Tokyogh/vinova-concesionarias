@@ -1,0 +1,32 @@
+/* ES: Define estilos de static/css/ui/components/cards, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/components/cards styles, including states and responsive behavior. */
+/*
+   Tarjetas (cards / panels / metric).
+   Depende de core/tokens.css. */
+
+/* --- Cards --- */
+.metric-card, .panel-card, .vehicle-card, .part-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-xs);
+}
+.metric-card, .panel-card { padding: var(--space-20); }
+.metric-card {
+  position: relative; overflow: hidden;
+  display: grid; gap: var(--space-4); align-content: start;
+  padding-left: calc(var(--space-20) + 2px);
+}
+.metric-card::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 3px;
+  background: var(--primary);
+}
+.metric-card span {
+  color: var(--text-muted); display: block; margin-bottom: var(--space-4);
+  font-size: var(--fs-12); font-weight: var(--fw-semibold);
+  text-transform: uppercase; letter-spacing: var(--tracking-caps);
+}
+.metric-card strong { font-size: var(--fs-30); color: var(--text); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); line-height: 1.1; }
+.metric-card small { display: block; color: var(--text-muted); font-weight: var(--fw-medium); font-size: var(--fs-12); line-height: 1.45; }
+.panel-card.compact { padding: var(--space-16); }
+.panel-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-16); margin-bottom: var(--space-16); padding-bottom: var(--space-16); border-bottom: 1px solid var(--border); }
+.panel-header h2, .panel-header h3 { margin: 0; }
+.panel-header.no-pad { padding-bottom: 0; border-bottom: 0; }

@@ -1,0 +1,53 @@
+{# ES: Renderiza la interfaz templates/accounts/user_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/accounts/user_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Usuarios y roles | Vinova Pro{% endblock %}
+{% block page_title %}Usuarios y roles{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Administra usuarios internos, estado de acceso, sucursal principal y roles activos.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-primary" href="{% url 'accounts:user_create' %}">Crear usuario</a>{% endblock %}
+{% block content %}
+<section class="panel-card compact toolbar">
+  <form method="get" class="internal-filter-form dense-filter-form">
+    <label class="filter-field"><span>{{ search_form.q.label }}</span>{{ search_form.q }}</label>
+    <div class="filter-actions">
+      <button class="btn btn-primary">Buscar</button>
+      {% if query %}<a class="btn btn-light" href="{% url 'accounts:user_list' %}">Limpiar</a>{% endif %}
+    </div>
+  </form>
+</section>
+<section class="panel-card table-panel">
+  <div class="panel-header">
+    <div><h2>Directorio interno</h2><p>{{ total_users }} usuario{{ total_users|pluralize }} encontrados</p></div>
+  </div>
+  <div class="responsive-table">
+    <table class="data-table mobile-card-table">
+      <thead><tr><th>Usuario</th><th>Contacto</th><th>Sucursal</th><th>Roles activos</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td data-label="Usuario"><strong>{{ user.get_full_name|default:user.username }}</strong><span class="table-subtext">@{{ user.username }}</span></td>
+            <td data-label="Contacto">{{ user.email }}{% if user.phone %}<span class="table-subtext">{{ user.phone }}</span>{% endif %}</td>
+            <td data-label="Sucursal">{% if user.branch %}{{ user.branch.name }}{% else %}<span class="muted">Sin sucursal</span>{% endif %}</td>
+            <td data-label="Roles activos">
+              <div class="role-badge-wrap">
+                {% for user_role in user.active_user_roles %}<span class="role-badge">{{ user_role.role.name }}</span>{% empty %}<span class="muted">Sin roles</span>{% endfor %}
+              </div>
+            </td>
+            <td data-label="Estado">{% if user.is_active %}<span class="state state-ok">Activo</span>{% else %}<span class="state state-danger">Inactivo</span>{% endif %}</td>
+            <td class="table-actions-cell" data-label="Acciones"><a class="btn btn-light btn-small" href="{% url 'accounts:user_detail' user.pk %}">Gestionar</a></td>
+          </tr>
+        {% empty %}
+          <tr class="empty-table-row"><td colspan="6">No hay usuarios para mostrar.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if is_paginated %}
+    <nav class="pagination-bar">
+      {% if page_obj.has_previous %}<a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Anterior</a>{% endif %}
+      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a class="btn btn-light" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Siguiente</a>{% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,19 @@
+{# ES: Renderiza la interfaz templates/audit/internal/integrity; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/audit/internal/integrity interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Integridad de auditoría | Vinova Pro{% endblock %}
+{% block page_title %}Integridad de auditoría{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Verificación de la cadena SHA-256 para detectar alteraciones en eventos registrados.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'audit_internal:list' %}">Volver</a>{% endblock %}
+{% block content %}
+<section class="panel-card integrity-status {% if integrity.valid %}integrity-valid{% else %}integrity-invalid{% endif %}">
+  <span class="eyebrow">Resultado de verificación</span>
+  <h2>{% if integrity.valid %}Cadena íntegra{% else %}Se detectaron inconsistencias{% endif %}</h2>
+  <p>Se revisaron {{ integrity.checked }} eventos dentro de tu alcance de auditoría.</p>
+  <dl class="data-list"><div><dt>Último hash</dt><dd><code class="break-word">{{ integrity.last_hash|default:'Sin registros' }}</code></dd></div></dl>
+</section>
+{% if integrity.issues %}
+<section class="panel-card table-panel"><h2>Eventos con inconsistencias</h2><div class="table-scroll"><table class="data-table"><thead><tr><th>Evento</th><th>Acción</th><th>Fecha</th></tr></thead><tbody>{% for issue in integrity.issues %}<tr><td>{{ issue.event_id }}</td><td>{{ issue.action }}</td><td>{{ issue.occurred_at }}</td></tr>{% endfor %}</tbody></table></div></section>
+{% endif %}
+<section class="panel-card"><h2>Qué comprueba esta pantalla</h2><p>Cada evento contiene el hash del evento anterior. Si se modifica, elimina o intercala un registro fuera del flujo normal, la cadena deja de coincidir. Esta verificación complementa los backups, permisos de base de datos y monitoreo; no los reemplaza.</p></section>
+{% endblock %}

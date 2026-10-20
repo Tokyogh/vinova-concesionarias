@@ -1,0 +1,35 @@
+{# ES: Renderiza la interfaz templates/documents/internal/asset_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/documents/internal/asset_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ asset.title }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ asset.title }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Detalle de recurso reutilizable.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'documents_internal:assets' %}">Volver</a>{% if request.user.can_manage_documents %}<a class="btn btn-primary" href="{% url 'documents_internal:asset_update' asset.pk %}">Editar</a>{% endif %}{% endblock %}
+{% block content %}
+<section class="detail-grid two-columns documents-detail-grid">
+  <article class="panel-card documents-summary-card">
+    <div class="asset-preview large">
+      {% if asset.asset_type == 'image' or asset.asset_type == 'vehicle_image' or asset.asset_type == 'brand_logo' %}<img src="{{ asset.file.url }}" alt="{{ asset.alt_text|default:asset.title }}">{% else %}<span>{{ asset.extension|default:'file' }}</span>{% endif %}
+    </div>
+    <span class="eyebrow">{{ asset.get_asset_type_display }} · {{ asset.get_visibility_display }}</span>
+    <h2>{{ asset.title }}</h2>
+    <p>{{ asset.description|linebreaksbr|default:'Sin descripción.' }}</p>
+    {% if asset.file %}<a class="btn btn-secondary" href="{{ asset.file.url }}" target="_blank" rel="noopener">Abrir recurso</a>{% endif %}
+  </article>
+  <article class="panel-card">
+    <h2>Metadatos</h2>
+    <dl class="data-list">
+      <div><dt>Archivo</dt><dd>{{ asset.original_name|default:'N/D' }}</dd></div>
+      <div><dt>Tamaño</dt><dd>{{ asset.size_bytes|filesizeformat }}</dd></div>
+      <div><dt>MIME</dt><dd>{{ asset.mime_type|default:'N/D' }}</dd></div>
+      <div><dt>Hash SHA-256</dt><dd class="hash-text">{{ asset.file_hash|default:'N/D' }}</dd></div>
+      <div><dt>Sucursal</dt><dd>{{ asset.branch.name|default:'Global' }}</dd></div>
+      <div><dt>Modelo</dt><dd>{{ asset.vehicle_model|default:'No aplica' }}</dd></div>
+      <div><dt>Año</dt><dd>{{ asset.vehicle_year|default:'Todos los años' }}</dd></div>
+      <div><dt>Activo</dt><dd>{% if asset.is_active %}Sí{% else %}No{% endif %}</dd></div>
+      <div><dt>Subido por</dt><dd>{{ asset.uploaded_by.get_full_name|default:asset.uploaded_by.username|default:'Sistema' }}</dd></div>
+    </dl>
+    {% if request.user.can_manage_documents %}<form method="post" action="{% url 'documents_internal:asset_archive' asset.pk %}" class="action-row wrap">{% csrf_token %}<button class="btn btn-danger">Archivar recurso</button></form>{% endif %}
+  </article>
+</section>
+{% endblock %}

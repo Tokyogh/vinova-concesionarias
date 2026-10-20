@@ -1,0 +1,40 @@
+{# ES: Renderiza la interfaz templates/branches/branch_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/branches/branch_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Sucursales | Vinova Pro{% endblock %}
+{% block page_title %}Sucursales, concesionarias y centros{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Sedes operativas para ventas, facturación, atención y stock.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'institutions:list' %}" target="_blank" rel="noopener">Directorio público</a><a class="btn btn-primary" href="{% url 'branches:create' %}">Nueva sucursal</a>{% endblock %}
+{% block content %}
+<section class="toolbar panel-card compact">
+  <form method="get" class="search-form">
+    {{ search_form.q }}
+    {{ search_form.branch_type }}
+    <button class="btn btn-primary">Filtrar</button>
+  </form>
+</section>
+<section class="panel-card table-panel">
+  <div class="panel-header">
+    <div><h2>Sedes registradas</h2><p>{{ page_obj.paginator.count }} resultado(s)</p></div>
+  </div>
+  <div class="responsive-table">
+    <table class="data-table">
+      <thead><tr><th>Sucursal</th><th>Empresa</th><th>Tipo</th><th>Operación</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        {% for branch in branches %}
+          <tr>
+            <td><strong>{{ branch.name }}</strong><span class="table-subtext">{{ branch.code }} · {{ branch.city }}</span></td>
+            <td>{{ branch.company.commercial_name }}</td>
+            <td>{{ branch.get_branch_type_display }}</td>
+            <td><span class="table-subtext">Usuarios: {{ branch.user_count }}</span><span class="table-subtext">Vehículos: {{ branch.vehicle_count }}</span></td>
+            <td>{% if branch.is_active %}<span class="state state-ok">Activa</span>{% else %}<span class="state state-danger">Inactiva</span>{% endif %}</td>
+            <td class="table-actions-cell"><a class="btn btn-light btn-small" href="{% url 'branches:detail' branch.pk %}">Gestionar</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">No hay sucursales registradas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

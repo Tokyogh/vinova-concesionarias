@@ -1,0 +1,8 @@
+/* ES: Define estilos de static/css/ui/layouts/grids, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/layouts/grids styles, including states and responsive behavior. */
+/*
+   Grillas compartidas por páginas públicas y módulos internos. */
+
+.two-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-16); }
+.compact-grid { display: grid; gap: var(--space-12); }
+.section-grid { display: grid; gap: var(--space-16); }

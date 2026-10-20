@@ -1,0 +1,13 @@
+{# ES: Renderiza la interfaz templates/accounts/client_invitation_invalid; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/accounts/client_invitation_invalid interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}Enlace no disponible | Vinova Pro{% endblock %}
+{% block main_class %}auth-public-page{% endblock %}
+{% block content %}
+<section class="auth-public-card">
+  <span class="eyebrow">Acceso privado</span>
+  <h1>Este enlace no está disponible</h1>
+  <p>{{ error }}</p>
+  <a class="btn btn-primary" href="{% url 'accounts:login' %}">Ir al inicio de sesión</a>
+</section>
+{% endblock %}

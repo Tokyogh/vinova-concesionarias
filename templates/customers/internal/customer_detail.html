@@ -1,0 +1,147 @@
+{# ES: Renderiza la interfaz templates/customers/internal/customer_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/customers/internal/customer_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ customer.display_name }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ customer.display_name }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Ficha interna de cliente con contacto, asignación, intereses vehiculares y seguimiento comercial.</p>{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-light" href="{% url 'customers_internal:list' %}">Volver</a>
+  {% if request.user.can_manage_customers %}<a class="btn btn-primary" href="{% url 'customers_internal:update' customer.pk %}">Editar</a>{% endif %}
+{% endblock %}
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="detail-grid two-columns customer-detail-grid">
+  <article class="panel-card customer-summary-card">
+    <div class="customer-avatar">{{ customer.display_name|first|upper }}</div>
+    <span class="eyebrow">{{ customer.get_customer_type_display }}</span>
+    <h2>{{ customer.display_name }}</h2>
+    <p>{{ customer.internal_notes|default:'Sin observaciones internas registradas.'|linebreaksbr }}</p>
+    <div class="vehicle-detail-meta customer-detail-meta">
+      <span><strong>Estado</strong><em class="state state-customer-{{ customer.status }}">{{ customer.get_status_display }}</em></span>
+      <span><strong>Contacto principal</strong>{{ customer.primary_contact }}</span>
+      <span><strong>Ciudad</strong>{{ customer.city|default:'N/D' }}</span>
+      <span><strong>Origen</strong>{{ customer.source|default:'N/D' }}</span>
+    </div>
+  </article>
+
+  <article class="panel-card">
+    <div class="panel-header">
+      <div><h2>Datos comerciales</h2><p>Información para gestión interna, seguimiento y futuras ventas.</p></div>
+    </div>
+    <dl class="data-list">
+      <div><dt>Identificación</dt><dd>{{ customer.identification_number|default:'No registrada' }}{% if customer.identification_type %} · {{ customer.get_identification_type_display }}{% endif %}</dd></div>
+      <div><dt>Correo</dt><dd>{{ customer.email|default:'No registrado' }}</dd></div>
+      <div><dt>Teléfono</dt><dd>{{ customer.phone|default:'No registrado' }}</dd></div>
+      <div><dt>WhatsApp</dt><dd>{{ customer.whatsapp|default:'No registrado' }}</dd></div>
+      <div><dt>Canal preferido</dt><dd>{{ customer.get_preferred_contact_method_display }}</dd></div>
+      <div><dt>Sucursal</dt><dd>{% if customer.assigned_branch %}{{ customer.assigned_branch.name }} · {{ customer.assigned_branch.city|default:customer.assigned_branch.company.commercial_name }}{% else %}Sin asignar{% endif %}</dd></div>
+      <div><dt>Asesor</dt><dd>{% if customer.assigned_advisor %}{{ customer.assigned_advisor.get_full_name|default:customer.assigned_advisor.username }}{% else %}Sin asignar{% endif %}</dd></div>
+      <div><dt>Dirección</dt><dd>{{ customer.address|default:'No registrada' }}</dd></div>
+    </dl>
+    {% if request.user.can_manage_customers %}
+      <div class="action-row wrap">
+        {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+        {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+        <form method="post" action="{% url 'customers_internal:status_action' customer.pk 'activate' %}">{% csrf_token %}<button class="btn btn-secondary">Activar</button></form>
+        <form method="post" action="{% url 'customers_internal:status_action' customer.pk 'archive' %}">{% csrf_token %}<button class="btn btn-danger">Archivar</button></form>
+      </div>
+    {% endif %}
+  </article>
+</section>
+
+<section class="detail-grid two-columns customer-activity-grid">
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Intereses vehiculares</h2><p>Base para cotizaciones, reservas y ventas futuras.</p></div></div>
+    <div class="timeline-list">
+      {% for interest in interests %}
+        <div class="timeline-item">
+          <strong>{% if interest.vehicle %}{{ interest.vehicle }}{% else %}{{ interest.brand }} {{ interest.model_name }}{% endif %}</strong>
+          <span class="state state-interest-{{ interest.status }}">{{ interest.get_status_display }}</span>
+          <p>{% if interest.budget_min or interest.budget_max %}Presupuesto: {% if interest.budget_min %}${{ interest.budget_min }}{% endif %}{% if interest.budget_max %} - ${{ interest.budget_max }}{% endif %}.{% endif %} {{ interest.notes|default:'' }}</p>
+          <small>{{ interest.created_at|date:'d/m/Y H:i' }}{% if interest.created_by %} · {{ interest.created_by.get_full_name|default:interest.created_by.username }}{% endif %}</small>
+        </div>
+      {% empty %}<p class="muted">Sin intereses vehiculares registrados.</p>{% endfor %}
+    </div>
+    {% if request.user.can_manage_customers %}
+      <form method="post" action="{% url 'customers_internal:add_interest' customer.pk %}" class="stacked-form customer-inline-form">
+        {% csrf_token %}
+        <h3>Agregar interés</h3>
+        {% for field in interest_form %}
+          <label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>
+        {% endfor %}
+        <button class="btn btn-primary">Guardar interés</button>
+      </form>
+    {% endif %}
+  </article>
+
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Notas y seguimiento</h2><p>Llamadas, visitas, WhatsApp, acuerdos y alertas internas.</p></div></div>
+    <div class="timeline-list">
+      {% for note in notes %}
+        <div class="timeline-item {% if note.is_important %}timeline-important{% endif %}">
+          <strong>{{ note.title|default:note.get_note_type_display }}</strong>
+          <span class="table-subtext">{{ note.get_note_type_display }} · {{ note.created_at|date:'d/m/Y H:i' }}{% if note.created_by %} · {{ note.created_by.get_full_name|default:note.created_by.username }}{% endif %}</span>
+          <p>{{ note.body|linebreaksbr }}</p>
+        </div>
+      {% empty %}<p class="muted">Sin notas registradas.</p>{% endfor %}
+    </div>
+    {% if request.user.can_manage_customers %}
+      <form method="post" action="{% url 'customers_internal:add_note' customer.pk %}" class="stacked-form customer-inline-form">
+        {% csrf_token %}
+        <h3>Agregar nota</h3>
+        {% for field in note_form %}
+          <label class="form-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>
+        {% endfor %}
+        <button class="btn btn-primary">Guardar nota</button>
+      </form>
+    {% endif %}
+  </article>
+</section>
+
+<section class="detail-grid two-columns customer-garage-grid">
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Garaje digital</h2><p>Vehículos vinculados al expediente. El historial se conserva aunque cambie el titular o se desvincule.</p></div></div>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead><tr><th>Vehículo</th><th>Rol</th><th>Vinculado</th><th>Estado</th></tr></thead>
+        <tbody>
+          {% for link in garage %}
+            <tr>
+              <td>{{ link.vehicle }}</td>
+              <td>{{ link.get_role_type_display }}</td>
+              <td>{{ link.linked_at|date:'d/m/Y H:i' }}</td>
+              <td>{% if link.is_active %}<span class="state state-vehicle-active">Activo</span>{% else %}<span class="state state-vehicle-archived">{% if link.unlinked_reason %}{{ link.unlinked_reason|truncatechars:40 }}{% else %}Archivado{% endif %}</span>{% endif %}</td>
+            </tr>
+          {% empty %}<p class="muted">Este cliente aún no tiene vehículos en su garaje.</p>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>Cuenta de acceso</h2><p>Permite que el usuario entre al garaje digital y futuro portal desde su cuenta Vinova.</p></div></div>
+    <dl class="data-list">
+      <div><dt>Cuenta vinculada</dt><dd>{% if customer.account %}{{ customer.account.get_full_name|default:customer.account.username }} · {{ customer.account.email }}{% else %}Sin cuenta vinculada{% endif %}</dd></div>
+    </dl>
+    {% if request.user.can_manage_customers %}
+      {% if not customer.account %}
+        <form method="post" action="{% url 'customers_internal:invite_account' customer.pk %}" class="stacked-form">
+          {% csrf_token %}
+          <p class="muted">Envía una invitación de un solo uso al correo registrado en este expediente.</p>
+          <button class="btn btn-secondary">Enviar invitación al portal</button>
+        </form>
+      {% endif %}
+      <form method="post" action="{% url 'customers_internal:link_account' customer.pk %}" class="stacked-form">
+        {% csrf_token %}
+        {% for field in account_link_form %}
+          <label class="form-field"><span>{{ field.label }}</span>{{ field }}{% if field.help_text %}<small class="muted">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>
+        {% endfor %}
+        <button class="btn btn-primary">Guardar vinculación</button>
+      </form>
+    {% else %}
+      <p>No tienes permiso para gestionar cuentas de acceso.</p>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,32 @@
+{# ES: Renderiza la interfaz templates/privacy/public/request_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/privacy/public/request_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}Solicitud de datos personales | Vinova Pro{% endblock %}
+{% block content %}
+  <section class="public-lead-layout">
+    <article class="panel-card">
+      <span class="eyebrow">Protección de datos</span>
+      <h1>Solicitud del titular</h1>
+      <p>Usa este formulario para solicitar acceso, corrección, exportación, oposición, revocación o anonimización. La empresa verificará tu identidad antes de entregar o modificar información.</p>
+      <form method="post" class="form-grid lead-public-form">
+        {% csrf_token %}
+        {% for field in form %}
+          {% if not field.is_hidden %}<label class="form-field"><span>{% if field.name == 'privacy_acknowledgement' %}Confirmo que los datos son míos y acepto ser contactado para verificar mi identidad. He leído la <a href="{% url 'privacy_public:privacy_policy' %}" target="_blank" rel="noopener">política de privacidad</a>.{% else %}{{ field.label }}{% if field.field.required %} <b aria-hidden="true">*</b><span class="sr-only"> (obligatorio)</span>{% endif %}{% endif %}</span>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% else %}{{ field }}{% endif %}
+        {% endfor %}
+        <div class="form-actions span-2">
+          <button class="btn btn-primary">Enviar solicitud</button>
+        </div>
+      </form>
+    </article>
+    <aside class="panel-card public-lead-summary">
+      <h2>Antes de enviar</h2>
+      <ul>
+        <li>No adjuntes contraseñas ni información bancaria.</li>
+        <li>La identidad se verifica por un canal seguro.</li>
+        <li>Algunos documentos fiscales o contractuales pueden tener obligación de conservación.</li>
+        <li>La solicitud queda registrada y auditada.</li>
+      </ul>
+      <a class="btn btn-light" href="/">Volver al inicio</a>
+    </aside>
+  </section>
+{% endblock %}

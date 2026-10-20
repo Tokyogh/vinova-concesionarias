@@ -1,0 +1,35 @@
+{# ES: Renderiza la interfaz templates/dashboard/role_admin; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/role_admin interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Dashboard administrador | Vinova Pro{% endblock %}
+{% block page_title %}Dashboard administrador{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Centro de control para administración general. Aquí sí aparecen módulos globales, staff, sucursales y operación completa.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'leads_internal:list' %}">CRM</a><a class="btn btn-light" href="{% url 'analytics_internal:home' %}">Analítica</a><a class="btn btn-primary" href="{% url 'accounts:user_list' %}">Gestionar staff</a>{% endblock %}
+{% block content %}
+{% include 'dashboard/snippets/executive_summary.html' %}
+<section class="role-dashboard-hero admin-hero">
+  <div><span>Administración general</span><h2>Control empresarial completo</h2><p>Resumen global de operación, equipos, sucursales, documentos y actividad comercial.</p></div>
+  <div class="role-dashboard-actions">
+    {% if request.user.can_manage_companies %}<a class="btn btn-secondary" href="{% url 'companies:list' %}">Empresas</a>{% endif %}
+    {% if request.user.can_manage_branches %}<a class="btn btn-secondary" href="{% url 'branches:list' %}">Sucursales</a>{% endif %}
+  </div>
+</section>
+<section class="metric-grid role-metric-grid">
+  <article class="metric-card"><span>Empresas activas</span><strong>{{ metrics.active_companies }}</strong></article>
+  <article class="metric-card"><span>Sucursales activas</span><strong>{{ metrics.active_branches }}</strong></article>
+  <article class="metric-card"><span>Usuarios activos</span><strong>{{ metrics.active_users }}</strong></article>
+  <article class="metric-card"><span>Ventas registradas</span><strong>{{ metrics.sales_total }}</strong></article>
+</section>
+<section class="metric-grid role-metric-grid">
+  <article class="metric-card"><span>Vehículos disponibles</span><strong>{{ metrics.available_vehicles }}</strong></article>
+  <article class="metric-card"><span>Clientes registrados</span><strong>{{ metrics.customers_total }}</strong></article>
+  <article class="metric-card"><span>Documentos privados</span><strong>{{ metrics.documents_total }}</strong></article>
+  <article class="metric-card"><span>Notificaciones</span><strong>{{ metrics.notifications_sent }}</strong></article>
+  <article class="metric-card"><span>Leads abiertos</span><strong>{{ metrics.leads_open }}</strong></article>
+  <article class="metric-card"><span>Interacciones catálogo</span><strong>{{ metrics.catalog_interactions }}</strong></article>
+</section>
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Operaciones recientes</h2>{% include 'dashboard/snippets/sales_rows.html' with sales=recent_sales empty_text='Sin ventas recientes.' %}</article>
+  <article class="panel-card"><h2>Documentos recientes</h2>{% include 'dashboard/snippets/document_rows.html' with documents=recent_documents empty_text='Sin documentos recientes.' %}</article>
+</section>
+{% endblock %}

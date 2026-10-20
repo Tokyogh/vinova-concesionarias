@@ -1,0 +1,24 @@
+{# ES: Renderiza la interfaz templates/documents/internal/document_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/documents/internal/document_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ page_heading }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ page_heading }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Carga protegida con validación de extensión/tamaño, metadatos de archivo, hash y auditoría.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'documents_internal:list' %}">Volver a documentos</a>{% endblock %}
+{% block content %}
+<section class="panel-card form-panel-wide">
+  <form method="post" enctype="multipart/form-data" class="form-grid documents-form-grid">
+    {% csrf_token %}
+    {% for field in form %}
+      <label class="form-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %} {% if field.name == 'notes' %}span-2{% endif %}">
+        <span>{{ field.label }}</span>
+        {{ field }}
+        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+      </label>
+    {% endfor %}
+    {% if form.non_field_errors %}<div class="field-error span-2">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-actions span-2"><button class="btn btn-primary">Guardar documento</button><a class="btn btn-light" href="{% url 'documents_internal:list' %}">Cancelar</a></div>
+  </form>
+</section>
+{% endblock %}

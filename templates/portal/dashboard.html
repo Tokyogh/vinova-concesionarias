@@ -1,0 +1,88 @@
+{# ES: Renderiza la interfaz templates/portal/dashboard; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/dashboard interface; permissions and data are resolved server-side. #}
+{% extends 'portal/base.html' %}
+{% block portal_title %}Inicio{% endblock %}
+{% block portal_heading %}Panel principal{% endblock %}
+{% block portal_lead %}Todo lo importante sobre tus vehículos, servicios y documentos en un solo lugar.{% endblock %}
+{% block portal_content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="portal-metrics" aria-label="Resumen de la cuenta">
+  <article class="portal-metric-card portal-metric-blue">
+    <span class="portal-metric-icon" aria-hidden="true">▰</span>
+    <div><span>Mis vehículos</span><strong>{{ vehicle_count }}</strong><small>Vinculados a tu cuenta</small></div>
+  </article>
+  <article class="portal-metric-card portal-metric-green">
+    <span class="portal-metric-icon" aria-hidden="true">⌁</span>
+    <div><span>Próximo mantenimiento</span><strong>{% if next_service_order.next_service_mileage %}{{ next_service_order.next_service_mileage }} km{% elif next_service_order.scheduled_at %}{{ next_service_order.scheduled_at|date:'d/m/Y' }}{% else %}Al día{% endif %}</strong><small>{% if next_service_order %}{{ next_service_order.vehicle }}{% else %}Sin servicios pendientes{% endif %}</small></div>
+  </article>
+  <article class="portal-metric-card portal-metric-violet">
+    <span class="portal-metric-icon" aria-hidden="true">↺</span>
+    <div><span>Último servicio</span><strong>{% if last_service_order.completed_at %}{{ last_service_order.completed_at|date:'d/m/Y' }}{% else %}—{% endif %}</strong><small>{% if last_service_order %}{{ last_service_order.description|truncatechars:34 }}{% else %}Aún no registrado{% endif %}</small></div>
+  </article>
+  <article class="portal-metric-card portal-metric-orange">
+    <span class="portal-metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span>
+    <div><span>Alertas</span><strong>{{ unread_notification_count }}</strong><small>Notificaciones sin leer</small></div>
+  </article>
+</section>
+
+<section class="portal-home-grid">
+  <article class="panel-card portal-home-panel portal-garage-panel">
+    <div class="panel-header">
+      <div><h2>Mis vehículos</h2><p>Tu garaje digital</p></div>
+      <a href="{% url 'portal:vehicle_list' %}">Ver todos <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="portal-dashboard-vehicles">
+      {% for link in recent_vehicles %}
+        <a class="portal-dashboard-vehicle" href="{% url 'portal:vehicle_detail' link.pk %}" data-portal-modal>
+          <div class="portal-dashboard-vehicle-image">
+            {% with hero=link.vehicle.hero_media %}{% if hero and hero.resource.file %}<img src="{{ hero.resource.file.url }}" alt="{{ hero.alt_text|default:link.vehicle }}" loading="lazy" decoding="async">{% else %}<span aria-hidden="true">▰</span>{% endif %}{% endwith %}
+          </div>
+          <div><strong>{{ link.vehicle.brand.name }} {{ link.vehicle.model.name }}</strong><span>{{ link.vehicle.year }}{% if link.vehicle.plate %} · {{ link.vehicle.plate }}{% endif %}</span></div>
+          <span class="state state-ok">Activo</span>
+        </a>
+      {% empty %}
+        <div class="empty-state"><h3>Aún no hay vehículos</h3><p>Agrega tu unidad con el código privado entregado por la concesionaria.</p><a class="btn btn-primary" href="{% url 'portal:vehicle_redeem' %}">Agregar vehículo</a></div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="panel-card portal-home-panel portal-upcoming-panel">
+    <div class="panel-header">
+      <div><h2>Próximos servicios</h2><p>Atenciones programadas</p></div>
+      {% if portal_modules.post_sales %}<a href="{% url 'portal:service_list' %}?view=upcoming">Ver todos <span aria-hidden="true">→</span></a>{% endif %}
+    </div>
+    <div class="portal-upcoming-list">
+      {% for order in upcoming_service_orders %}
+        <a href="{% url 'portal:service_detail' order.pk %}">
+          <time datetime="{{ order.scheduled_at|date:'c' }}"><strong>{% if order.scheduled_at %}{{ order.scheduled_at|date:'d' }}{% else %}—{% endif %}</strong><span>{% if order.scheduled_at %}{{ order.scheduled_at|date:'M' }}{% else %}Por definir{% endif %}</span></time>
+          <span><strong>{{ order.description|truncatechars:48 }}</strong><small>{{ order.vehicle }}{% if order.next_service_mileage %} · {{ order.next_service_mileage }} km{% endif %}</small></span>
+          <b class="state state-{{ order.status }}">{{ order.get_status_display }}</b>
+        </a>
+      {% empty %}
+        <div class="empty-state"><h3>Sin servicios próximos</h3><p>No tienes atenciones pendientes registradas.</p></div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="panel-card portal-home-panel portal-chart-panel">
+    <div class="panel-header"><div><h2>Historial de servicios</h2><p>Servicios completados en los últimos 6 meses</p></div></div>
+    <div class="portal-service-chart" role="img" aria-label="Gráfica de servicios completados por mes">
+      {% for point in service_chart %}
+        <div class="portal-chart-column"><span class="portal-chart-value">{{ point.value }}</span><i style="--chart-height:{{ point.height }}%"></i><small>{{ point.label }}</small></div>
+      {% empty %}<div class="empty-state"><p>No hay información de servicios para graficar.</p></div>{% endfor %}
+    </div>
+  </article>
+
+  <article class="panel-card portal-home-panel portal-activity">
+    <div class="panel-header"><div><h2>Actividad reciente</h2><p>Últimos movimientos de tu cuenta</p></div></div>
+    <ol class="portal-activity-list">
+      {% for activity in recent_activity %}
+        <li><a href="{{ activity.url }}"><span class="portal-activity-dot" aria-hidden="true"></span><span><small>{{ activity.label }}</small><strong>{{ activity.activity_title }}</strong></span><time datetime="{{ activity.activity_at|date:'c' }}">{{ activity.activity_at|date:'d/m/Y' }}</time></a></li>
+      {% empty %}<li class="empty-state"><h3>Sin actividad reciente</h3><p>Los cambios de tu expediente aparecerán aquí.</p></li>{% endfor %}
+    </ol>
+  </article>
+</section>
+{% endblock %}

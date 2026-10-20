@@ -1,0 +1,28 @@
+{# ES: Renderiza la interfaz templates/dashboard/role_auditor; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/role_auditor interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Dashboard auditoría | Vinova Pro{% endblock %}
+{% block page_title %}Dashboard auditoría{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Vista de lectura para revisión, control y trazabilidad. No expone formularios de operación si el rol no los permite.</p>{% endblock %}
+{% block content %}
+<section class="role-dashboard-hero auditor-hero"><div><span>Auditoría / solo lectura</span><h2>Revisión controlada</h2><p>Resumen para evaluar consistencia operacional sin mezclar permisos de edición.</p></div></section>
+<div class="action-row wrap"><a class="btn btn-primary" href="{% url 'audit_internal:list' %}">Abrir auditoría avanzada</a><a class="btn btn-light" href="{% url 'audit_internal:alerts' %}">Alertas de seguridad</a>{% if request.user.can_view_analytics %}<a class="btn btn-light" href="{% url 'analytics_internal:home' %}">Analítica comercial</a>{% endif %}</div>
+<section class="metric-grid role-metric-grid">
+  <article class="metric-card"><span>Vehículos</span><strong>{{ metrics.vehicles }}</strong></article>
+  <article class="metric-card"><span>Clientes</span><strong>{{ metrics.customers }}</strong></article>
+  <article class="metric-card"><span>Ventas</span><strong>{{ metrics.sales }}</strong></article>
+  <article class="metric-card"><span>Documentos</span><strong>{{ metrics.documents }}</strong></article>
+  <article class="metric-card"><span>Eventos auditados</span><strong>{{ metrics.audit_events }}</strong></article>
+  <article class="metric-card"><span>Alertas abiertas</span><strong>{{ metrics.open_alerts }}</strong></article>
+  <article class="metric-card"><span>Leads</span><strong>{{ metrics.leads }}</strong></article>
+  <article class="metric-card"><span>Interacciones</span><strong>{{ metrics.interactions }}</strong></article>
+</section>
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Ventas recientes</h2>{% include 'dashboard/snippets/sales_rows.html' with sales=recent_sales empty_text='Sin ventas recientes.' %}</article>
+  <article class="panel-card"><h2>Documentos recientes</h2>{% include 'dashboard/snippets/document_rows.html' with documents=recent_documents empty_text='Sin documentos recientes.' %}</article>
+</section>
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Eventos recientes</h2><div class="table-scroll"><table class="data-table"><thead><tr><th>Fecha</th><th>Acción</th><th>Usuario</th></tr></thead><tbody>{% for log in recent_audit_logs %}<tr><td>{{ log.occurred_at|date:'d/m H:i' }}</td><td><a href="{% url 'audit_internal:detail' log.event_id %}"><code>{{ log.action }}</code></a></td><td>{{ log.user_display_snapshot|default:log.username_snapshot|default:'Sistema' }}</td></tr>{% empty %}<tr><td colspan="3">Sin eventos.</td></tr>{% endfor %}</tbody></table></div></article>
+  <article class="panel-card"><h2>Alertas recientes</h2><div class="table-scroll"><table class="data-table"><thead><tr><th>Fecha</th><th>Alerta</th><th>Estado</th></tr></thead><tbody>{% for alert in recent_security_alerts %}<tr><td>{{ alert.created_at|date:'d/m H:i' }}</td><td><a href="{% url 'audit_internal:alert_detail' alert.alert_id %}">{{ alert.title }}</a></td><td>{{ alert.get_status_display }}</td></tr>{% empty %}<tr><td colspan="3">Sin alertas.</td></tr>{% endfor %}</tbody></table></div></article>
+</section>
+{% endblock %}

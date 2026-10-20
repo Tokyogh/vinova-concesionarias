@@ -1,0 +1,20 @@
+{# ES: Renderiza la interfaz templates/dashboard/role_support; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/role_support interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Dashboard atención | Vinova Pro{% endblock %}
+{% block page_title %}Dashboard atención al cliente{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Panel para soporte, postventa y comunicación con clientes. Sencillo, operativo y sin administración innecesaria.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-primary" href="{% url 'notifications_internal:compose' %}">Enviar mensaje</a>{% endblock %}
+{% block content %}
+<section class="role-dashboard-hero support-hero"><div><span>Soporte y postventa</span><h2>Relación con clientes</h2><p>Clientes, notas importantes, intereses abiertos y mensajes por revisar.</p></div></section>
+<section class="metric-grid role-metric-grid">
+  <article class="metric-card"><span>Clientes</span><strong>{{ metrics.customers }}</strong></article>
+  <article class="metric-card"><span>Notas importantes</span><strong>{{ metrics.important_notes }}</strong></article>
+  <article class="metric-card"><span>Intereses abiertos</span><strong>{{ metrics.open_interests }}</strong></article>
+  <article class="metric-card"><span>No leídas</span><strong>{{ metrics.unread_notifications }}</strong></article>
+</section>
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Clientes recientes</h2>{% include 'dashboard/snippets/customer_rows.html' with customers=recent_customers empty_text='Sin clientes recientes.' %}</article>
+  <article class="panel-card"><h2>Mensajes sin leer</h2><div class="compact-row-list">{% for recipient in unread_notifications %}<a class="compact-row" href="{% url 'notifications_internal:detail' recipient.notification.pk %}"><strong>{{ recipient.notification.title }}</strong><span>{{ recipient.notification.get_priority_display }} · {{ recipient.notification.sent_at|date:'d/m/Y H:i' }}</span></a>{% empty %}<p class="muted">No tienes mensajes pendientes.</p>{% endfor %}</div></article>
+</section>
+{% endblock %}

@@ -1,0 +1,24 @@
+{# ES: Renderiza la interfaz templates/notifications/internal/message_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/notifications/internal/message_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ page_heading }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ page_heading }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Envía mensajes internos o avisos a clientes sin tocar código, rutas de archivos ni configuraciones técnicas.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'notifications_internal:inbox' %}">Volver</a>{% endblock %}
+{% block content %}
+<section class="panel-card form-panel-wide">
+  <form method="post" class="form-grid notifications-form-grid">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="message message-error span-2">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}
+      <label class="form-field {% if field.name == 'body' or field.name == 'recipient_users' or field.name == 'recipient_customers' %}span-2{% endif %}">
+        <span>{{ field.label }}</span>{{ field }}
+        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+      </label>
+    {% endfor %}
+    <div class="panel-card compact span-2 notifications-help-card"><strong>Consejo de uso</strong><p>Los campos de destinatarios y relaciones tienen búsqueda. Escribe parte del nombre, cédula/RUC, VIN, placa, número de venta o correo para encontrar registros sin recorrer listas enormes.</p></div>
+    <div class="form-actions"><button class="btn btn-primary">Enviar notificación</button><a class="btn btn-light" href="{% url 'notifications_internal:inbox' %}">Cancelar</a></div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,65 @@
+{# ES: Renderiza la interfaz templates/invoices/internal/invoice_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/invoices/internal/invoice_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% load filter_ui %}
+{% block title %}Facturación | Vinova Pro{% endblock %}
+{% block page_title %}Facturación y comprobantes{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Control interno de proformas, facturas, comprobantes, pagos aplicados y trazabilidad documental.</p>{% endblock %}
+{% block topbar_actions %}
+  {% if request.user.can_issue_invoices %}<a class="btn btn-primary" href="{% url 'invoices_internal:create_from_sale' %}">Crear desde venta</a>{% endif %}
+  <a class="btn btn-light" href="{% url 'dashboard:billing_home' %}">Dashboard facturación</a>
+{% endblock %}
+{% block content %}
+<section class="metric-grid invoices-status-grid">
+  <article class="metric-card"><span>Borradores</span><strong>{{ metrics.draft }}</strong></article>
+  <article class="metric-card"><span>Emitidas</span><strong>{{ metrics.issued }}</strong></article>
+  <article class="metric-card"><span>Pago parcial</span><strong>{{ metrics.partial }}</strong></article>
+  <article class="metric-card"><span>Total del mes</span><strong>${{ metrics.month_total }}</strong></article>
+</section>
+
+{% url 'invoices_internal:list' as filter_clear_url %}
+{% vinova_filter_panel search_form filter_clear_url 'invoices' common='q,status,sort' advanced='invoice_type,branch' %}
+
+{% if ready_sales %}
+<section class="panel-card invoices-ready-card">
+  <div class="panel-header"><div><h2>Operaciones listas para facturar</h2><p>Se muestran ventas/reservas aprobadas sin comprobante activo.</p></div><a class="btn btn-secondary" href="{% url 'invoices_internal:create_from_sale' %}">Crear comprobante</a></div>
+  <div class="timeline-list invoices-ready-list">
+    {% for sale in ready_sales %}
+      <a class="timeline-item" href="{% url 'invoices_internal:create_from_sale' %}?sale={{ sale.pk }}">
+        <strong>{{ sale.number }} · {{ sale.customer.display_name }}</strong>
+        <span class="table-subtext">{{ sale.get_status_display }} · {{ sale.branch.name }} · ${{ sale.total }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="panel-card table-panel">
+  <div class="panel-header"><div><h2>Comprobantes</h2><p>{{ page_obj.paginator.count }} resultado(s). Usa búsqueda en filtros para evitar listas enormes.</p></div></div>
+  <div class="responsive-table">
+    <table class="data-table mobile-card-table">
+      <thead><tr><th>Número</th><th>Cliente</th><th>Sucursal</th><th>Fecha</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        {% for invoice in invoices %}
+          <tr>
+            <td data-label="Número"><strong>{{ invoice.number }}</strong><span class="table-subtext">{{ invoice.get_invoice_type_display }}{% if invoice.sale %} · {{ invoice.sale.number }}{% endif %}</span></td>
+            <td data-label="Cliente">{{ invoice.customer_name }}<span class="table-subtext">{{ invoice.customer_document|default:'Sin documento' }}</span></td>
+            <td data-label="Sucursal">{{ invoice.branch.name }}<span class="table-subtext">{{ invoice.company.commercial_name }}</span></td>
+            <td data-label="Fecha">{{ invoice.issue_date|date:'d/m/Y' }}<span class="table-subtext">Vence: {{ invoice.due_date|date:'d/m/Y'|default:'N/D' }}</span></td>
+            <td data-label="Total"><strong>${{ invoice.total }}</strong><span class="table-subtext">Saldo: ${{ invoice.balance_due }}</span></td>
+            <td data-label="Estado"><span class="state state-invoice-{{ invoice.status }}">{{ invoice.get_status_display }}</span></td>
+            <td class="table-actions-cell" data-label="Acciones"><a class="btn btn-light btn-small" href="{% url 'invoices_internal:detail' invoice.pk %}">Gestionar</a></td>
+          </tr>
+        {% empty %}<tr class="empty-table-row"><td colspan="7">No hay comprobantes con estos filtros.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.previous_page_number %}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.next_page_number %}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

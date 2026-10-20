@@ -1,0 +1,29 @@
+{# ES: Borrador público del inventario de cookies y tecnologías similares. #}
+{# EN: Public draft inventory of cookies and similar technologies. #}
+
+{% extends 'privacy/public/legal_base.html' %}
+{% block title %}Política de cookies | Vinova Pro{% endblock %}
+{% block legal_heading %}Política de cookies y tecnologías similares{% endblock %}
+{% block legal_summary %}Categorías reales del navegador y forma de retirar una elección.{% endblock %}
+{% block legal_version %}{{ vinova_cookie_preferences.version|default:'PENDIENTE DE COMPLETAR' }}{% endblock %}
+{% block legal_body %}
+  <h2>1. Tecnologías necesarias</h2>
+  <p>La sesión Django, la protección CSRF y la cookie firmada de preferencias permiten autenticación, seguridad, formularios y evidencia mínima de la elección. No se usan para publicidad comportamental.</p>
+
+  <h2>2. Categorías opcionales</h2>
+  <ul>
+    <li><strong>Preferencias:</strong> tema, favoritos, vistas y navegación guardados en `localStorage`.</li>
+    <li><strong>Analítica:</strong> eventos propios del catálogo con identificadores hash.</li>
+    <li><strong>Contenido externo:</strong> MapLibre y MapTiler para el mapa interactivo de establecimientos.</li>
+  </ul>
+  <p>Estas categorías permanecen apagadas hasta una aceptación expresa. Rechazarlas no impide usar la lista de establecimientos ni los servicios esenciales.</p>
+
+  <h2>3. Duración y evidencia</h2>
+  <p>La preferencia firmada conserva versión, fecha y tres decisiones booleanas durante un máximo técnico configurado actualmente en 180 días. No incluye nombre, correo ni identificador publicitario. Un cambio de versión vuelve a solicitar la elección.</p>
+
+  <h2>4. Retirada</h2>
+  <p>Puedes cambiar o retirar tu elección desde “Preferencias de cookies”. Al retirar preferencias, la aplicación intenta eliminar los valores locales conocidos en la siguiente carga.</p>
+
+  <h2>5. Proveedores</h2>
+  <p>MapTiler y la distribución de MapLibre solo se contactan desde el navegador si aceptas contenido externo. Dominio, contrato, ubicación del tratamiento y restricciones de la clave deben verificarse antes de producción.</p>
+{% endblock %}

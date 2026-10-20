@@ -1,0 +1,48 @@
+{# ES: Borrador público del aviso de privacidad basado en tratamientos reales de VINOVA PRO. #}
+{# EN: Public privacy-notice draft based on VINOVA PRO's actual processing. #}
+
+{% extends 'privacy/public/legal_base.html' %}
+{% block title %}Política de privacidad | Vinova Pro{% endblock %}
+{% block legal_heading %}Política de privacidad{% endblock %}
+{% block legal_summary %}Información preliminar sobre el uso y protección de datos personales en VINOVA PRO.{% endblock %}
+{% block legal_version %}{{ vinova_privacy_notice_version }}{% endblock %}
+{% block legal_body %}
+  <h2>1. Responsable del tratamiento</h2>
+  {% if vinova_company %}
+    <dl class="legal-identity">
+      <div><dt>Razón social</dt><dd>{{ vinova_company.legal_name|default:'PENDIENTE DE COMPLETAR' }}</dd></div>
+      <div><dt>RUC</dt><dd>{{ vinova_company.ruc|default:'PENDIENTE DE COMPLETAR' }}</dd></div>
+      <div><dt>Domicilio</dt><dd>{{ vinova_company.address|default:'PENDIENTE DE COMPLETAR' }}</dd></div>
+      <div><dt>Contacto de privacidad</dt><dd>{{ vinova_company.email|default:'PENDIENTE DE COMPLETAR' }}</dd></div>
+    </dl>
+  {% else %}<p>PENDIENTE DE COMPLETAR: razón social, RUC, domicilio y contacto de privacidad del responsable.</p>{% endif %}
+  <p>Debe confirmarse si corresponde designar y publicar un delegado de protección de datos.</p>
+
+  <h2>2. Datos y titulares</h2>
+  <p>La plataforma puede tratar datos de clientes, prospectos, personal, usuarios autorizados y contactos de proveedores: identificación, contacto, cuenta, roles, sucursal, vehículos, intereses comerciales, ventas, pagos, comprobantes, postventa, documentos, comunicaciones, consentimiento y señales técnicas de seguridad.</p>
+
+  <h2>3. Finalidades y bases por validar</h2>
+  <ul>
+    <li>Atender consultas, cotizaciones, pruebas de manejo y gestiones precontractuales.</li>
+    <li>Administrar relaciones contractuales, vehículos, pagos, documentos y postventa.</li>
+    <li>Cumplir obligaciones legales, contables, laborales y de conservación que resulten aplicables.</li>
+    <li>Proteger cuentas, prevenir abuso, conservar trazabilidad y responder incidentes.</li>
+    <li>Enviar marketing o activar analítica opcional solo cuando exista una base válida y, cuando corresponda, consentimiento revocable.</li>
+  </ul>
+  <p>La base jurídica exacta de cada tratamiento debe validarse en el registro de actividades y por asesoría profesional; no todo tratamiento depende del consentimiento.</p>
+
+  {% if vinova_public_settings.data_processing_summary %}<h2>4. Resumen configurado por la empresa</h2><p>{{ vinova_public_settings.data_processing_summary|linebreaksbr }}</p>{% endif %}
+  {% if vinova_public_settings.privacy_policy %}<h2>5. Texto adicional configurado</h2><p>{{ vinova_public_settings.privacy_policy|linebreaksbr }}</p>{% endif %}
+
+  <h2>6. Destinatarios, encargados y transferencias</h2>
+  <p>Solo deben acceder personas autorizadas y proveedores necesarios bajo contrato e instrucciones documentadas. Según la configuración pueden intervenir alojamiento, almacenamiento, correo, monitoreo, mapas o integraciones. La lista real de proveedores, ubicaciones, subencargados y transferencias nacionales o internacionales está PENDIENTE DE COMPLETAR por cada despliegue.</p>
+
+  <h2>7. Conservación</h2>
+  <p>Los datos no deben conservarse indefinidamente. VINOVA PRO ofrece políticas operativas de revisión, archivo, anonimización o eliminación; sus plazos son bases configurables y requieren validación legal. Una obligación o retención activa puede impedir una eliminación inmediata.</p>
+
+  <h2>8. Derechos</h2>
+  <p>El titular puede presentar solicitudes de acceso, corrección, exportación, eliminación o anonimización, oposición y revocación. La identidad se verifica antes de entregar o modificar información. También puede acudir a la autoridad ecuatoriana competente conforme al procedimiento aplicable.</p>
+
+  <h2>9. Seguridad e incidentes</h2>
+  <p>La aplicación incorpora controles de acceso, 2FA, registros de auditoría, almacenamiento privado, cifrado de transporte previsto para producción y procedimientos de continuidad. Ningún control elimina todo riesgo; los incidentes deben evaluarse, contenerse, documentarse y notificarse cuando la normativa lo exija.</p>
+{% endblock %}

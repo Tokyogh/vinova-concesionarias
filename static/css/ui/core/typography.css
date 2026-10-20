@@ -1,0 +1,56 @@
+/* ES: Define estilos de static/css/ui/core/typography, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/core/typography styles, including states and responsive behavior. */
+/*
+   Escala tipográfica. Los headings usan rem-free px para coincidir con el
+   spec medido en la referencia (1440px). */
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-normal);
+  line-height: var(--lh-tight);
+  overflow-wrap: break-word;
+}
+
+/* --- Escala pública --- */
+h1 { font-size: var(--fs-42); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); }
+h2 { font-size: var(--fs-30); }
+h3 { font-size: var(--fs-20); }
+h4 { font-size: var(--fs-18); }
+h5 { font-size: var(--fs-16); }
+h6 { font-size: var(--fs-14); text-transform: uppercase; letter-spacing: var(--tracking-caps); }
+
+p {
+  color: var(--text-2);
+  margin: 0 0 var(--space-16);
+  max-width: 72ch;
+}
+
+p:last-child { margin-bottom: 0; }
+
+.eyebrow {
+  display: inline-block;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.muted { color: var(--text-muted); }
+.small-text { font-size: var(--fs-13); }
+
+.lead {
+  font-size: var(--fs-18);
+  line-height: var(--lh-relaxed);
+  color: var(--text-2);
+}
+
+.accent-word { color: var(--primary); }
+
+.text-link {
+  color: var(--primary);
+  font-weight: var(--fw-semibold);
+}
+
+.text-link:hover { text-decoration: underline; }

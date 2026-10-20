@@ -1,0 +1,180 @@
+{# ES: Renderiza la interfaz templates/dashboard/public_home; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/public_home interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% load ui_assets %}
+{% block title %}Vinova Pro | Concesionaria{% endblock %}
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="public-hero">
+  <div class="public-hero-content">
+    <span class="eyebrow">{{ public_settings.hero_eyebrow|default:'Concesionaria automotriz' }}</span>
+    <h1>Tu próximo<br>viaje comienza<br><span class="accent-word">aquí</span></h1>
+    <p>{{ public_settings.hero_subtitle|default:'Descubre vehículos listos para estrenar, financiamiento a tu medida y un equipo que acompaña cada decisión.' }}</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="{% url 'vehicles:catalog' %}">{{ public_settings.hero_primary_label|default:'Ver vehículos disponibles' }}</a>
+      <a class="btn btn-light" href="{% url 'leads:public_request' %}">{{ public_settings.hero_secondary_label|default:'Solicitar atención' }}</a>
+    </div>
+  </div>
+  <div class="hero-media">
+    {% with vehicle=featured_vehicles.0 %}
+      {% with hero=vehicle.hero_media %}
+        {% ui_final_asset "home-hero" as final_hero %}{% ui_final_srcset "home-hero" as final_hero_srcset %}
+        <div class="hero-image asset-slot{% if not final_hero and not hero or not final_hero and not hero.resource.file %} hero-image-fallback{% endif %}" data-asset-slot="hero-home" role="img" aria-label="{% if final_hero %}Vehículo premium frente a la concesionaria{% elif hero %}{{ hero.alt_text|default:vehicle }}{% else %}Fotografía del vehículo destacado{% endif %}">
+          {% if final_hero %}<img class="asset-slot-image" src="{{ final_hero }}" srcset="{{ final_hero_srcset }}" sizes="100vw" width="1672" height="941" alt="Vehículo premium frente a la concesionaria" loading="eager" fetchpriority="high" decoding="async">{% elif hero and hero.resource.file %}<img class="asset-slot-image" src="{{ hero.resource.file.url }}" alt="{{ hero.alt_text|default:vehicle }}" loading="eager" fetchpriority="high" decoding="async">{% endif %}
+        </div>
+      {% endwith %}
+    {% endwith %}
+    <div class="hero-indicators" role="presentation" aria-label="Vehículos destacados">
+      {% for v in featured_vehicles %}<span class="{% if forloop.first %}is-active{% endif %}"></span>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="hero-benefits" aria-label="Beneficios de Vinova Pro">
+    <div class="hero-benefit">
+      <span class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3l2-5h2.5L15 11h6"/><path d="M21 11l-1.5 6H6.5L5 11"/><path d="M5 17H3v3h2.2"/><path d="M18 20h3v-3h-1.5"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg></span>
+      <div><strong>Asesoría personalizada</strong><p>Acompañamiento humano antes, durante y después de tu compra.</p></div>
+    </div>
+    <div class="hero-benefit">
+      <span class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 17h.01"/><path d="M11 17h.01"/><path d="M7 13h.01"/><path d="M15 9h.01"/><path d="M7 9h.01"/><path d="M3 3l10 6 8-4"/></svg></span>
+      <div><strong>Opciones de financiamiento</strong><p>Planes flexibles para que tu vehículo entre en tu presupuesto.</p></div>
+    </div>
+    <div class="hero-benefit">
+      <span class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+      <div><strong>Servicio y postventa</strong><p>Mantenimiento y atención de taller para que tu vehículo rinda más.</p></div>
+    </div>
+    <div class="hero-benefit">
+      <span class="benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
+      <div><strong>Sucursales</strong><p>Puntos de atención cercanos, coordinados para atenderte.</p></div>
+    </div>
+</section>
+
+<section class="public-section" id="vehiculos">
+  <div class="section-heading">
+    <span class="eyebrow">Vehículos</span>
+    <h2>{{ public_settings.catalog_intro_title|default:'Modelos destacados' }}</h2>
+    <p>{{ public_settings.catalog_intro_text|default:'Explora la selección publicada por la concesionaria y solicita información del modelo que te interesa.' }}</p>
+  </div>
+  <div class="vehicle-grid public-grid">
+    {% for vehicle in display_vehicles %}
+      <article class="vehicle-card">
+        <div class="vehicle-image-wrap">
+          {% with hero=vehicle.hero_media %}
+            {% if hero and hero.resource.file %}<img class="asset-slot-image" src="{{ hero.resource.file.url }}" alt="{{ hero.alt_text|default:vehicle }}" loading="lazy" decoding="async">{% else %}<div class="vehicle-image-placeholder asset-slot" data-asset-slot="vehicle-photo" role="img" aria-label="Fotografía de {{ vehicle }}"></div>{% endif %}
+          {% endwith %}
+          <span class="status-badge status-{{ vehicle.status }}">Disponible</span>
+        </div>
+        <div class="vehicle-card-body">
+          <span class="vehicle-brand-label">{{ vehicle.brand.name }}</span>
+          <h3 class="vehicle-name">{{ vehicle.year }} {{ vehicle.model.name }} {{ vehicle.version }}</h3>
+          <p>{{ vehicle.short_description|default:'Vehículo disponible para información comercial.' }}</p>
+          <div class="vehicle-meta">
+            <span>{{ vehicle.color|default:'Color N/D' }}</span>
+            {% if vehicle.branch %}<span>{{ vehicle.branch.city|default:vehicle.branch.name }}</span>{% endif %}
+          </div>
+          <div class="vehicle-card-bottom">
+            {% if public_settings.show_vehicle_prices and vehicle.price %}<div class="vehicle-price-row"><span class="vehicle-price"><small>Desde</small>${{ vehicle.price }}</span><a class="vehicle-details-link" href="{% url 'vehicles:detail' vehicle.public_slug %}">Ver detalles →</a></div>{% endif %}
+            <div class="vehicle-actions-split"><button class="btn btn-secondary full" hx-get="{% url 'vehicles:detail_modal' vehicle.pk %}" hx-target="#modal-root" hx-swap="innerHTML">Ver ficha</button><a class="btn btn-light full" href="{% url 'leads:public_vehicle_request' vehicle.pk %}">Solicitar información</a></div>
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <article class="panel-card empty-public-card">Aún no hay vehículos publicados. El catálogo público se alimentará del módulo de vehículos.</article>
+    {% endfor %}
+  </div>
+</section>
+
+{% if public_settings.show_public_branches %}
+<section class="public-section public-about" id="nosotros">
+  <div class="about-grid">
+    <div class="about-content">
+      <span class="eyebrow">Sobre Vinova</span>
+      <h2>Más que vehículos,<br><span class="accent-word">impulsamos historias</span></h2>
+      <p>Somos una concesionaria que combina catálogo digital y atención cercana. Cada vehículo que publicamos viene con una ficha clara, un asesor real y el respaldo de una operación organizada.</p>
+      <a class="btn btn-primary" href="{% url 'leads:public_request' %}">Conversa con un asesor</a>
+    </div>
+    <div class="about-media">
+      {% ui_final_asset "showroom-about" as showroom_asset %}{% ui_final_srcset "showroom-about" as showroom_srcset %}
+      <div class="media-slot asset-slot" data-asset-slot="showroom-about" role="img" aria-label="Showroom de la concesionaria Vinova Pro">
+        {% if showroom_asset %}<img class="asset-slot-image" src="{{ showroom_asset }}" srcset="{{ showroom_srcset }}" sizes="(max-width: 900px) 100vw, 50vw" width="1670" height="942" alt="" aria-hidden="true" loading="lazy" decoding="async">{% else %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l4-3 4 3v14"/><path d="M13 21V10l7-4v15"/><path d="M9 10v.01"/><path d="M9 14v.01"/><path d="M9 18v.01"/></svg><small>Showroom de la concesionaria</small>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="about-stats">
+    <article><strong>{{ public_vehicle_count }}</strong><span>Vehículos publicados</span></article>
+    <article><strong>{{ public_branch_count }}</strong><span>Puntos de atención</span></article>
+    <article><strong>{{ public_brand_count }}</strong><span>Marcas disponibles</span></article>
+    <article><strong>{{ public_model_count }}</strong><span>Modelos disponibles</span></article>
+  </div>
+</section>
+
+<section class="service-hero" id="servicios">
+  {% ui_final_asset "workshop-services" as workshop_asset %}{% ui_final_srcset "workshop-services" as workshop_srcset %}
+  <div class="media-slot asset-slot" data-asset-slot="workshop-services" role="img" aria-label="Taller y servicio postventa de Vinova Pro">{% if workshop_asset %}<img class="asset-slot-image" src="{{ workshop_asset }}" srcset="{{ workshop_srcset }}" sizes="100vw" width="1670" height="942" alt="" aria-hidden="true" loading="lazy" decoding="async">{% endif %}</div>
+  <div class="service-hero-overlay" aria-hidden="true"></div>
+  <div class="service-hero-content">
+    <span class="eyebrow">Servicio y postventa</span>
+    <h2>Tu vehículo<br>siempre en las<br>mejores manos</h2>
+    <p>Taller propio, repuestos originales y asesoría dedicada para mantener tu vehículo en las mejores condiciones después de la entrega.</p>
+    <div class="service-hero-actions">
+      <a class="btn btn-primary" href="{% url 'leads:public_request' %}">Agendar servicio</a>
+      <a class="btn btn-light" href="{% url 'leads:public_request' %}">Consultar repuestos</a>
+    </div>
+  </div>
+</section>
+
+<section class="public-section services-body">
+    <div class="services-intro">
+      <h3>Servicios para cada etapa</h3>
+      <p>Atención directa en sucursal y seguimiento digital de tu vehículo.</p>
+    </div>
+
+  <div class="services-grid">
+    <article class="service-item">
+      <span class="service-icon service-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0 0 5.7l1.4 1.4a4 4 0 0 0 5.7 0l2.6-2.6"/><path d="m12.6 8.4-2.9-2.9-6 6a2.1 2.1 0 0 0 0 3l1.6 1.6a2.1 2.1 0 0 0 3 0l6-6z"/><path d="m9.6 8.4 2.9 2.9"/><path d="m7.4 10.6 2.9 2.9"/></svg></span>
+      <h3>Servicio técnico</h3>
+      <p>Mantenimiento preventivo y correctivo con revisão por etapas y reporte digital de cada intervención.</p>
+    </article>
+    <article class="service-item">
+      <span class="service-icon service-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 12 4l9 4.5-9 4.5z"/><path d="M3 12.5 12 17l9-4.5"/><path d="M3 16.5 12 21l9-4.5"/></svg></span>
+      <h3>Repuestos originales</h3>
+      <p>Despiece de marca con garantía y trazabilidad de cada componente instalado.</p>
+    </article>
+    <article class="service-item">
+      <span class="service-icon service-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M3 10h18"/><path d="m9 15 2 2 4-4"/></svg></span>
+      <h3>Agendamiento en línea</h3>
+      <p>Reserva tu hora por canales digitales y recibe confirmación y recordatorios automáticos.</p>
+    </article>
+    <article class="service-item">
+      <span class="service-icon service-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 13a8 8 0 0 1 16 0"/><rect x="3" y="13" width="4" height="6" rx="1.6"/><rect x="17" y="13" width="4" height="6" rx="1.6"/><path d="M19 19v1a2 2 0 0 1-2 2h-3"/></svg></span>
+      <h3>Asesoría postventa</h3>
+      <p>Un asesor asignado que conoce el historial de tu vehículo y resuelve cada consulta.</p>
+    </article>
+  </div>
+</section>
+
+<section class="public-section" id="concesionarias">
+  <div class="section-heading">
+    <span class="eyebrow">Concesionarias</span>
+    <h2>Encuentra tu punto de atención</h2>
+    <p>Visítanos o contáctanos. Una sola empresa, varias sucursales coordinadas para atenderte mejor.</p>
+  </div>
+  <div class="branch-public-grid">
+    {% for branch in public_branches %}
+      <article class="panel-card branch-public-card">
+        <span class="eyebrow">{{ branch.get_branch_type_display }}</span>
+        <h3>{{ branch.name }}</h3>
+        <p>{{ branch.city|default:'Ubicación no especificada' }}{% if branch.address %} · {{ branch.address }}{% endif %}</p>
+        <small>{{ branch.company.commercial_name }}</small>
+      </article>
+    {% empty %}
+      <article class="panel-card branch-public-card"><h3>Puntos de atención pendientes</h3><p>Cuando se creen sucursales activas, aparecerán en la portada pública.</p></article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

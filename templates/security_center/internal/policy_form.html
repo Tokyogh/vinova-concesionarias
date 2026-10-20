@@ -1,0 +1,13 @@
+{# ES: Renderiza la interfaz templates/security_center/internal/policy_form; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/security_center/internal/policy_form interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Política de seguridad | Vinova Pro{% endblock %}
+{% block page_title %}Política de seguridad{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Define controles empresariales sin modificar archivos de configuración.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'security_center:dashboard' %}">Volver</a>{% endblock %}
+{% block content %}
+<section class="panel-card form-panel-wide"><form method="post" class="form-grid" novalidate>{% csrf_token %}
+{% for field in form %}<label class="form-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}"><span>{{ field.label }}</span>{{ field }}{% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}
+{% for error in form.non_field_errors %}<p class="field-error span-2">{{ error }}</p>{% endfor %}
+<div class="form-actions"><button class="btn btn-primary">Guardar política</button></div></form></section>
+{% endblock %}

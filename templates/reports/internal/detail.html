@@ -1,0 +1,93 @@
+{# ES: Renderiza la interfaz templates/reports/internal/detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/reports/internal/detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}{{ report_title }} | Vinova Pro{% endblock %}
+{% block page_title %}{{ report_title }}{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Reporte interno con filtros, datos resumidos y exportación. Las listas se limitan visualmente para mantener rendimiento.</p>{% endblock %}
+{% block topbar_actions %}
+  {% if can_export_reports %}
+    <a class="btn btn-primary" href="{% url 'reports_internal:export' report_type 'csv' %}?{{ request.GET.urlencode }}">CSV</a>
+    <a class="btn btn-secondary" href="{% url 'reports_internal:export' report_type 'xlsx' %}?{{ request.GET.urlencode }}">Excel</a>
+  {% endif %}
+  <a class="btn btn-light" href="{% url 'reports_internal:print' report_type %}?{{ request.GET.urlencode }}" target="_blank">Imprimible/PDF</a>
+  <a class="btn btn-light" href="{% url 'reports_internal:home' %}">Reportes</a>
+{% endblock %}
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="toolbar panel-card compact reports-toolbar">
+  {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+  {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+  <form method="get" class="search-form internal-filter-form reports-filter-form">
+    {{ filter_form.start_date }} {{ filter_form.end_date }} {{ filter_form.branch }} {{ filter_form.seller }} {{ filter_form.sale_status }} {{ filter_form.vehicle }} {{ filter_form.category }} {{ filter_form.q }}
+    <button class="btn btn-primary">Filtrar</button>
+    <a class="btn btn-light" href="{% url 'reports_internal:detail' report_type %}">Limpiar</a>
+  </form>
+</section>
+
+{% if metrics %}
+<section class="metric-grid reports-status-grid">
+  {% for key,value in metrics.items %}
+    <article class="metric-card"><span>{{ key|title }}</span><strong>{{ value }}</strong></article>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if report_type == 'sales' %}
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Ventas por estado</h2>{% include 'reports/internal/partials/status_rows.html' with rows=status_rows value_label='Total' %}</article>
+  <article class="panel-card"><h2>Ventas por día</h2>{% include 'reports/internal/partials/date_rows.html' with rows=date_rows date_field='day' %}</article>
+</section>
+<section class="panel-card table-panel">
+  <h2>Rendimiento por vendedor</h2>
+  <div class="responsive-table compact-table">
+    <table class="data-table">
+      <thead><tr><th>Vendedor</th><th>Ventas</th><th>Total</th><th>Cobrado</th><th>Saldo</th></tr></thead>
+      <tbody>
+        {% for row in seller_rows %}
+          <tr><td>{{ row.advisor__first_name }} {{ row.advisor__last_name }}<span class="table-subtext">{{ row.advisor__username }}</span></td><td>{{ row.count }}</td><td>${{ row.total|default:'0.00' }}</td><td>${{ row.paid|default:'0.00' }}</td><td>${{ row.balance|default:'0.00' }}</td></tr>
+        {% empty %}<tr><td colspan="5">Sin ventas cerradas por vendedor.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="panel-card table-panel"><h2>Operaciones recientes</h2>{% include 'reports/internal/partials/sales_table.html' with sales=object_list %}</section>
+{% elif report_type == 'branches' %}
+<section class="reports-branch-grid">
+  {% for row in branch_cards %}
+    <article class="panel-card branch-report-card"><h2>{{ row.branch.name }}</h2><p>{{ row.branch.city }} · {{ row.branch.get_branch_type_display }}</p><div class="report-mini-metrics"><span>Ventas <strong>{{ row.sales_count }}</strong></span><span>Total <strong>${{ row.sales_total }}</strong></span><span>Facturas <strong>{{ row.invoices_count }}</strong></span><span>Stock bajo <strong>{{ row.low_stock }}</strong></span></div></article>
+  {% empty %}<article class="panel-card">No hay sucursales para este filtro.</article>{% endfor %}
+</section>
+{% elif report_type == 'vehicles' %}
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Por estado</h2>{% include 'reports/internal/partials/status_rows.html' with rows=status_rows value_label='Valor' %}</article>
+  <article class="panel-card"><h2>Por marca</h2>{% include 'reports/internal/partials/brand_rows.html' with rows=brand_rows %}</article>
+</section>
+<section class="panel-card table-panel"><h2>Vehículos</h2>{% include 'reports/internal/partials/vehicles_table.html' with vehicles=object_list %}</section>
+{% elif report_type == 'inventory' or report_type == 'stock_movements' %}
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Stock bajo</h2>{% include 'reports/internal/partials/stock_table.html' with rows=low_stock_rows %}</article>
+  <article class="panel-card"><h2>Movimientos recientes</h2>{% include 'reports/internal/partials/movement_table.html' with rows=recent_movements %}</article>
+</section>
+{% elif report_type == 'invoices' %}
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Por estado</h2>{% include 'reports/internal/partials/status_rows.html' with rows=status_rows value_label='Total' %}</article>
+  <article class="panel-card"><h2>Por tipo</h2>{% include 'reports/internal/partials/type_rows.html' with rows=type_rows %}</article>
+</section>
+<section class="panel-card table-panel"><h2>Comprobantes</h2>{% include 'reports/internal/partials/invoices_table.html' with invoices=object_list %}</section>
+{% elif report_type == 'customers' %}
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Por estado</h2>{% include 'reports/internal/partials/count_rows.html' with rows=status_rows label_key='status' %}</article>
+  <article class="panel-card"><h2>Por ciudad</h2>{% include 'reports/internal/partials/city_rows.html' with rows=city_rows %}</article>
+</section>
+<section class="panel-card table-panel"><h2>Clientes nuevos</h2>{% include 'reports/internal/partials/customers_table.html' with customers=object_list %}</section>
+{% elif report_type == 'activity' %}
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Acciones frecuentes</h2>{% include 'reports/internal/partials/action_rows.html' with rows=action_rows %}</article>
+  <article class="panel-card"><h2>Usuarios con actividad</h2>{% include 'reports/internal/partials/user_rows.html' with rows=user_rows %}</article>
+</section>
+<section class="panel-card table-panel"><h2>Eventos auditados</h2>{% include 'reports/internal/partials/activity_table.html' with logs=object_list %}</section>
+{% elif report_type == 'products' %}
+<section class="panel-card table-panel"><h2>Productos y servicios vendidos</h2>{% include 'reports/internal/partials/products_table.html' with rows=product_rows %}</section>
+{% endif %}
+{% endblock %}

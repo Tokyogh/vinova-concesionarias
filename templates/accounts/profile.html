@@ -1,0 +1,90 @@
+{# ES: Renderiza la interfaz templates/accounts/profile; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/accounts/profile interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}Mi perfil | Vinova Pro{% endblock %}
+{% block content %}
+{# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+{# EN: The following section groups content, empty states, and actions for the current flow. #}
+<section class="profile-public-hero">
+  <div>
+    <span class="eyebrow">Cuenta Vinova Pro</span>
+    <h1>Mi perfil</h1>
+    <p>Este espacio muestra únicamente la información de tu cuenta. La gestión de usuarios, roles, empresas, sucursales y operación interna solo aparece para personal autorizado.</p>
+  </div>
+  {% if request.user.can_access_internal_panel %}
+    <a class="btn btn-primary" href="{% url 'dashboard:staff_home' %}">Ir al panel interno</a>
+  {% endif %}
+</section>
+
+<section class="detail-grid two-columns public-profile-grid">
+  <article class="panel-card profile-card">
+    {% include 'components/avatar.html' with avatar_user=request.user avatar_size='avatar-profile' avatar_alt='Fotografía de perfil' %}
+    <h2>{{ request.user.get_full_name|default:request.user.username }}</h2>
+    <p>{{ request.user.email }}</p>
+    <div class="profile-meta">
+      {% if request.user.is_active %}<span class="state state-ok">Cuenta activa</span>{% else %}<span class="state state-danger">Cuenta inactiva</span>{% endif %}
+      {% if request.user.branch %}<span>{{ request.user.branch }}</span>{% else %}<span>Sin sucursal principal</span>{% endif %}
+    </div>
+    {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+    {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+    <form method="post" action="{% url 'accounts:avatar_update' %}" enctype="multipart/form-data" class="avatar-form">
+      {% csrf_token %}
+      <div class="form-field">
+        {{ avatar_form.avatar.label_tag }}
+        {{ avatar_form.avatar }}
+        {% if avatar_form.avatar.help_text %}<small>{{ avatar_form.avatar.help_text }}</small>{% endif %}
+      </div>
+      <div class="module-actions">
+        <button class="btn btn-primary" type="submit">Guardar fotografía</button>
+        {% if request.user.avatar %}
+          <button class="btn btn-light" type="submit" formaction="{% url 'accounts:avatar_delete' %}" formnovalidate>Eliminar fotografía</button>
+        {% endif %}
+      </div>
+    </form>
+  </article>
+  <article class="panel-card">
+    <h2>Alcance de cuenta</h2>
+    {% if active_roles %}
+      <p class="muted">Estos son los accesos asociados a tu cuenta. Las opciones internas se habilitan solo si tienes permisos de operación.</p>
+      <div class="role-list">
+        {% for user_role in active_roles %}
+          <div class="role-row">
+            <div>
+              <strong>{{ user_role.role.name }}</strong>
+              <span>{% if user_role.branch %}{{ user_role.branch }}{% else %}Alcance global{% endif %}</span>
+            </div>
+            <span class="state state-ok">Activo</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">Tu cuenta todavía no tiene permisos internos asignados. Puedes navegar la página pública y el catálogo de vehículos.</p>
+      <a class="btn btn-secondary" href="{% url 'vehicles:catalog' %}">Ver catálogo</a>
+    {% endif %}
+  </article>
+</section>
+
+<section class="detail-grid two-columns public-profile-grid">
+  <article class="panel-card">
+    <h2>Seguridad de la cuenta</h2>
+    <p class="muted">Protege tu acceso con una contraseña actualizada, autenticación en dos pasos y control de sesiones.</p>
+    <div class="module-actions">
+      <a class="btn btn-primary" href="{% url 'security_center:password_change' %}">Cambiar contraseña</a>
+      {% if request.user.security_profile.two_factor_enabled %}
+        <a class="btn btn-light" href="{% url 'security_center:two_factor_disable' %}">Administrar 2FA</a>
+      {% else %}
+        <a class="btn btn-secondary" href="{% url 'security_center:two_factor_setup' %}">Activar 2FA</a>
+      {% endif %}
+      <a class="btn btn-light" href="{% url 'security_center:my_sessions' %}">Ver sesiones</a>
+    </div>
+  </article>
+  <article class="panel-card">
+    <h2>Estado de protección</h2>
+    <dl class="detail-list">
+      <div><span>Segundo factor</span><strong>{% if request.user.security_profile.two_factor_enabled %}Activo{% else %}No configurado{% endif %}</strong></div>
+      <div><span>Último cambio de contraseña</span><strong>{{ request.user.last_password_change_at|date:'d/m/Y H:i'|default:'No registrado' }}</strong></div>
+      <div><span>Último acceso</span><strong>{{ request.user.last_login|date:'d/m/Y H:i'|default:'No registrado' }}</strong></div>
+    </dl>
+  </article>
+</section>
+{% endblock %}

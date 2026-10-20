@@ -1,0 +1,20 @@
+{# ES: Renderiza la interfaz templates/sri_integration/internal/sequence_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/sri_integration/internal/sequence_list interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Secuenciales SRI | Vinova Pro{% endblock %}
+{% block page_title %}Secuenciales de comprobantes{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Define numeración base por establecimiento, punto de emisión y tipo de comprobante.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-primary" href="{% url 'sri_integration:sequence_create' %}">Nueva secuencia</a>{% endblock %}
+{% block content %}
+{% include 'enterprise/internal/_nav.html' %}
+<section class="panel-card table-panel">
+  <div class="responsive-table"><table class="data-table">
+    <thead><tr><th>Documento</th><th>Punto</th><th>Actual</th><th>Siguiente</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+    {% for sequence in sequences %}
+      <tr><td><strong>{{ sequence.get_document_type_display }}</strong></td><td>{{ sequence.establishment.establishment_code }}-{{ sequence.establishment.emission_point_code }}</td><td>{{ sequence.current_number }}</td><td>{{ sequence.next_number_preview }}</td><td>{% if sequence.is_active %}Activa{% else %}Inactiva{% endif %}</td><td><a class="btn btn-light" href="{% url 'sri_integration:sequence_update' sequence.pk %}">Editar</a></td></tr>
+    {% empty %}<tr><td colspan="6">No hay secuenciales configurados.</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}

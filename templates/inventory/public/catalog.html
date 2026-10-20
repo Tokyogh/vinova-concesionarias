@@ -1,0 +1,90 @@
+{# ES: Catálogo público de artículos publicados; nunca renderiza datos internos de stock o costo. #}
+{# EN: Public catalog of published items; it never renders internal stock or cost data. #}
+
+{% extends 'base/public.html' %}
+{% load static filter_ui %}
+{% block title %}Repuestos y accesorios | Vinova Pro{% endblock %}
+{% block main_class %}parts-catalog-page{% endblock %}
+{% block content %}
+{# ES: Presentación equivalente a LITE con la paleta PRO. EN: LITE-equivalent presentation with the PRO palette. #}
+<section class="parts-catalog-hero">
+  <div>
+    <span class="eyebrow">CATÁLOGO VINOVA</span>
+    <h1>Repuestos y accesorios</h1>
+    <p>Explora artículos publicados por la red Vinova. La disponibilidad se informa sin revelar existencias ni datos operativos internos.</p>
+  </div>
+  <div class="parts-catalog-hero-mark" aria-hidden="true">
+    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 20 32 10l18 10v24L32 54 14 44Z"/><path d="m14 20 18 10 18-10M32 30v24"/><path d="m23 15 18 10"/></svg>
+  </div>
+</section>
+
+{# ES: Filtros GET validados en backend. EN: GET filters validated on the server. #}
+<form method="get" class="parts-filter-panel" aria-label="Filtros del catálogo">
+  <label><span>{{ filter_form.q.label }}</span>{{ filter_form.q }}</label>
+  <label><span>{{ filter_form.category.label }}</span>{{ filter_form.category }}</label>
+  <label><span>{{ filter_form.item_type.label }}</span>{{ filter_form.item_type }}</label>
+  <label><span>{{ filter_form.sort.label }}</span>{{ filter_form.sort }}</label>
+  <div class="parts-filter-actions">
+    <button class="btn btn-primary" type="submit">Aplicar filtros</button>
+    {% if has_active_filters %}<a class="btn btn-light" href="{% url 'parts:catalog' %}">Limpiar filtros</a>{% endif %}
+  </div>
+  {% for field in filter_form %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}{% endfor %}
+</form>
+
+{# ES: Tarjetas y diálogos muestran únicamente la proyección pública. EN: Cards and dialogs show only the public projection. #}
+<section class="parts-results" aria-labelledby="parts-results-title">
+  <header><div><span class="eyebrow">RESULTADOS</span><h2 id="parts-results-title">Artículos disponibles para consulta</h2></div><strong>{{ page_obj.paginator.count }} resultado{{ page_obj.paginator.count|pluralize }}</strong></header>
+  <div class="parts-public-grid">
+    {% for item in items %}
+      <article class="part-public-card">
+        <div class="part-public-image">
+          {% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.name }}" loading="lazy" decoding="async">{% else %}<span aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 16 16-9 16 9v21L24 46 8 37Z"/><path d="m8 16 16 9 16-9M24 25v21"/></svg></span>{% endif %}
+          <em>{{ item.get_item_type_display }}</em>
+        </div>
+        <div class="part-public-body">
+          <small>{{ item.category.name|default:'Artículo Vinova' }}</small>
+          <h3>{{ item.name }}</h3>
+          <p>{{ item.description|default:'Consulta características y disponibilidad en la red Vinova.'|truncatechars:135 }}</p>
+          <div class="part-public-code">Código {{ item.sku }}</div>
+          <div class="part-public-availability {% if item.public_stock_records %}is-available{% else %}is-unavailable{% endif %}">
+            <span aria-hidden="true"></span>{% if item.public_stock_records %}Disponible en sedes seleccionadas{% else %}Disponibilidad por consultar{% endif %}
+          </div>
+          <footer>
+            <strong>{% if item.price %}${{ item.price|floatformat:2 }}{% else %}Precio a consultar{% endif %}</strong>
+            <button class="btn btn-light btn-small" type="button" data-open-part-dialog="part-dialog-{{ item.pk }}">Ver disponibilidad</button>
+          </footer>
+        </div>
+      </article>
+
+      <dialog class="part-public-dialog" id="part-dialog-{{ item.pk }}" aria-labelledby="part-dialog-title-{{ item.pk }}">
+        <button class="part-dialog-close" type="button" data-close-part-dialog aria-label="Cerrar detalle">×</button>
+        <div class="part-dialog-layout">
+          <div class="part-dialog-media">{% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.name }}">{% else %}<span aria-hidden="true">VINOVA</span>{% endif %}</div>
+          <div>
+            <span class="eyebrow">{{ item.category.name|default:item.get_item_type_display }}</span>
+            <h2 id="part-dialog-title-{{ item.pk }}">{{ item.name }}</h2>
+            <p>{{ item.description|default:'Consulta este artículo con nuestro equipo.'|linebreaksbr }}</p>
+            <strong class="part-dialog-price">{% if item.price %}${{ item.price|floatformat:2 }}{% else %}Precio a consultar{% endif %}</strong>
+            <h3>Disponibilidad pública</h3>
+            {% if item.public_stock_records %}
+              <ul>{% for stock in item.public_stock_records %}<li><strong>{{ stock.branch.name }}</strong>{% if stock.branch.city %}<span>{{ stock.branch.city }}</span>{% endif %}</li>{% endfor %}</ul>
+            {% else %}<p class="muted">Consulta con una sede para confirmar disponibilidad.</p>{% endif %}
+            <div class="part-dialog-actions"><a class="btn btn-primary" href="{% url 'institutions:list' %}">Ver sedes</a><button class="btn btn-light" type="button" data-close-part-dialog>Cerrar</button></div>
+          </div>
+        </div>
+      </dialog>
+    {% empty %}
+      <article class="parts-empty"><h2>No encontramos artículos publicados</h2><p>Prueba otros filtros o vuelve más tarde.</p>{% if has_active_filters %}<a class="btn btn-light" href="{% url 'parts:catalog' %}">Quitar filtros</a>{% endif %}</article>
+    {% endfor %}
+  </div>
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="public-pagination" aria-label="Paginación del catálogo">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.previous_page_number %}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="{% filter_querystring page=page_obj.next_page_number %}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}
+{% block extra_scripts %}<script defer src="{% static 'js/parts_catalog.js' %}?v={{ vinova_product_version }}"></script>{% endblock %}

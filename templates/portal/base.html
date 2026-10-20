@@ -1,0 +1,122 @@
+{# ES: Renderiza la interfaz templates/portal/base; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/portal/base interface; permissions and data are resolved server-side. #}
+{% load static ui_assets %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f2f4d'/%3E%3Ctext x='16' y='23' font-family='Arial' font-size='20' font-weight='700' text-anchor='middle' fill='white'%3EV%3C/text%3E%3C/svg%3E">
+  <title>{% block portal_title %}Mi cuenta{% endblock %} | Vinova Pro</title>
+  {% include 'components/head_assets.html' %}
+  {% if vinova_company %}<style nonce="{{ request.csp_nonce }}">:root{--brand-primary:{{ vinova_brand_primary }};--brand-secondary:{{ vinova_brand_secondary }};}</style>{% endif %}
+  <script defer src="{% static 'js/portal.js' %}?v={{ vinova_product_version }}"></script>
+  <script defer src="{% static 'js/model_viewer.js' %}?v={{ vinova_product_version }}"></script>
+</head>
+<body class="portal-body">
+  <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+  <div class="portal-app-shell">
+    <aside class="portal-sidebar" id="portal-sidebar" aria-label="Navegación de mi cuenta">
+      <div class="portal-sidebar-brand">
+        <a href="{% url 'dashboard:home' %}" aria-label="Ir al inicio público de Vinova Pro">
+          {% ui_final_asset "brand-logo" as brand_logo %}
+          <span class="portal-brand-mark">{% if brand_logo %}<img src="{{ brand_logo }}" alt="" aria-hidden="true">{% else %}V{% endif %}</span>
+          <span><strong>Mi Vinova</strong><small>Portal del cliente</small></span>
+        </a>
+        <button class="portal-sidebar-close" type="button" data-portal-sidebar-close aria-label="Cerrar menú">×</button>
+      </div>
+
+      {# ES: La navegación siguiente muestra destinos ya autorizados por el contexto de backend. #}
+      {# EN: The following navigation shows destinations already authorized by backend context. #}
+      <nav class="portal-sidebar-nav">
+        <span class="portal-nav-label">Principal</span>
+        <a href="{% url 'portal:dashboard' %}"{% if request.resolver_match.url_name == 'dashboard' %} aria-current="page"{% endif %}><span aria-hidden="true">⌂</span>Inicio</a>
+        <a href="{% url 'portal:vehicle_list' %}"{% if request.resolver_match.url_name == 'vehicle_list' or request.resolver_match.url_name == 'vehicle_detail' %} aria-current="page"{% endif %}><span aria-hidden="true">▰</span>Mis vehículos</a>
+        <a href="{% url 'portal:vehicle_redeem' %}"{% if request.resolver_match.url_name == 'vehicle_redeem' %} aria-current="page"{% endif %}><span aria-hidden="true">＋</span>Agregar vehículo</a>
+
+        {% if portal_modules.post_sales %}
+          <span class="portal-nav-label">Servicios</span>
+          <a href="{% url 'portal:service_list' %}?view=history"{% if request.resolver_match.url_name == 'service_list' and request.GET.view != 'upcoming' or request.resolver_match.url_name == 'service_detail' %} aria-current="page"{% endif %}><span aria-hidden="true">↺</span>Historial</a>
+          <a href="{% url 'portal:service_list' %}?view=upcoming"{% if request.resolver_match.url_name == 'service_list' and request.GET.view == 'upcoming' %} aria-current="page"{% endif %}><span aria-hidden="true">⌁</span>Próximos servicios</a>
+        {% endif %}
+
+        <span class="portal-nav-label">Documentos</span>
+        <a href="{% url 'portal:document_list' %}#manuales"{% if request.resolver_match.url_name == 'document_list' or request.resolver_match.url_name == 'document_detail' or request.resolver_match.url_name == 'manual_download' %} aria-current="page"{% endif %}><span aria-hidden="true">▤</span>Manuales</a>
+        <a href="{% url 'portal:invoice_list' %}"{% if request.resolver_match.url_name == 'invoice_list' or request.resolver_match.url_name == 'invoice_detail' %} aria-current="page"{% endif %}><span aria-hidden="true">▧</span>Facturas</a>
+
+        <span class="portal-nav-label">Cuenta</span>
+        <a href="{% url 'portal:profile' %}"{% if request.resolver_match.url_name == 'profile' %} aria-current="page"{% endif %}><span aria-hidden="true">♙</span>Perfil</a>
+        <a href="{% url 'portal:notification_list' %}" class="portal-notification-link{% if portal_unread_notifications %} is-unread{% endif %}"{% if 'notification' in request.resolver_match.url_name %} aria-current="page"{% endif %}><span class="portal-notification-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span>Notificaciones{% if portal_unread_notifications %}<b class="portal-sidebar-count">{{ portal_unread_notifications }}</b>{% endif %}</a>
+        <a href="{% url 'portal:settings' %}"{% if request.resolver_match.url_name == 'settings' %} aria-current="page"{% endif %}><span aria-hidden="true">⚙</span>Configuración</a>
+      </nav>
+
+      <div class="portal-sidebar-footer">
+        <a href="{% url 'vehicles:catalog' %}">Explorar catálogo</a>
+        <a href="{% url 'privacy_public:cookie_settings' %}">Preferencias de cookies</a>
+        {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+        {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+        <form action="{% url 'accounts:logout' %}" method="post">{% csrf_token %}<button type="submit">Cerrar sesión</button></form>
+      </div>
+    </aside>
+
+    <button class="portal-sidebar-overlay" type="button" data-portal-sidebar-close aria-label="Cerrar menú" tabindex="-1"></button>
+
+    <div class="portal-workspace">
+      <header class="portal-topbar">
+        <button class="portal-menu-button" type="button" data-portal-sidebar-open aria-controls="portal-sidebar" aria-expanded="false"><span aria-hidden="true">☰</span><span class="sr-only">Abrir menú</span></button>
+        <div class="portal-welcome">
+          <span>Hola,</span>
+          <strong>{{ portal_customer.first_name|default:portal_customer.display_name }} <span aria-hidden="true">👋</span></strong>
+        </div>
+        <form class="portal-global-search" action="{% url 'portal:vehicle_list' %}" method="get" role="search">
+          <label class="sr-only" for="portal-search">Buscar en mis vehículos</label>
+          <span aria-hidden="true">⌕</span>
+          <input id="portal-search" type="search" name="q" placeholder="Buscar vehículo..." value="{% if request.resolver_match.url_name == 'vehicle_list' %}{{ request.GET.q }}{% endif %}">
+        </form>
+        <div class="portal-topbar-actions">
+          <button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema">◐</button>
+          <a class="portal-bell{% if portal_unread_notifications %} is-unread{% endif %}" href="{% url 'portal:notification_list' %}" aria-label="Notificaciones{% if portal_unread_notifications %}: {{ portal_unread_notifications }} sin leer{% endif %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>{% if portal_unread_notifications %}<span>{{ portal_unread_notifications }}</span>{% endif %}</a>
+          <a class="portal-avatar-link" href="{% url 'portal:profile' %}" aria-label="Abrir mi perfil">{% include 'components/avatar.html' with avatar_user=request.user avatar_size='avatar-sm' avatar_alt='Fotografía de perfil' %}</a>
+        </div>
+      </header>
+
+      {% if messages %}
+        <section class="portal-message-wrap" aria-label="Mensajes del sistema" aria-live="polite">
+          {% for message in messages %}<div class="message message-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}
+        </section>
+      {% endif %}
+
+      <main class="portal-main" id="main-content" tabindex="-1">
+        {% if request.resolver_match.url_name != 'dashboard' %}
+          <nav class="portal-breadcrumb" aria-label="Migas de pan">
+            <a href="{% url 'portal:dashboard' %}">Mi cuenta</a><span aria-hidden="true">/</span>
+            <span aria-current="page">
+              {% if request.resolver_match.url_name == 'profile' %}Perfil
+              {% elif request.resolver_match.url_name == 'settings' %}Configuración
+              {% elif 'vehicle' in request.resolver_match.url_name %}Vehículos
+              {% elif 'document' in request.resolver_match.url_name or 'manual' in request.resolver_match.url_name %}Documentos
+              {% elif 'invoice' in request.resolver_match.url_name %}Facturas
+              {% elif 'notification' in request.resolver_match.url_name %}Notificaciones
+              {% elif 'service' in request.resolver_match.url_name %}Servicios
+              {% else %}Sección privada{% endif %}
+            </span>
+          </nav>
+        {% endif %}
+        <header class="portal-heading">
+          <div>
+            <span class="eyebrow">Portal privado</span>
+            <h1>{% block portal_heading %}Mi cuenta{% endblock %}</h1>
+            <p>{% block portal_lead %}Información personal vinculada a tu expediente de cliente.{% endblock %}</p>
+          </div>
+        </header>
+        <div class="portal-content">{% block portal_content %}{% endblock %}</div>
+      </main>
+    </div>
+  </div>
+  <dialog class="portal-detail-dialog" id="portal-detail-dialog" aria-labelledby="portal-dialog-title">
+    <button class="portal-dialog-close" type="button" data-portal-dialog-close aria-label="Cerrar detalle">×</button>
+    <div class="portal-dialog-body" data-portal-dialog-body></div>
+  </dialog>
+  {% include 'components/cookie_consent.html' %}
+</body>
+</html>

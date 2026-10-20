@@ -1,0 +1,60 @@
+{# ES: Renderiza la interfaz templates/components/head_assets; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/components/head_assets interface; permissions and data are resolved server-side. #}
+{% load static %}
+<meta name="vinova-cookie-consent" data-decided="{% if vinova_cookie_preferences.decided %}1{% else %}0{% endif %}" data-preferences="{% if vinova_cookie_preferences.preferences %}1{% else %}0{% endif %}" data-analytics="{% if vinova_cookie_preferences.analytics %}1{% else %}0{% endif %}" data-external-media="{% if vinova_cookie_preferences.external_media %}1{% else %}0{% endif %}" data-version="{{ vinova_cookie_preferences.version }}">
+<script src="{% static 'js/consent.js' %}?v={{ vinova_product_version }}"></script>
+<script src="{% static 'js/theme.js' %}?v={{ vinova_product_version }}"></script>
+<link rel="stylesheet" href="{% static 'css/ui/core/tokens.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/core/reset.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/core/base.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/core/typography.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/buttons.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/forms.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/filters.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/cards.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/badges.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/alerts.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/tables.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/pagination.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/modal.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/theme-toggle.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/cookie-consent.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/legal.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/brand.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/header.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/navigation.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/command-palette.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/sidebar.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/drawer.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/layouts/containers.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/layouts/public.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/layouts/staff.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/layouts/auth.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/layouts/grids.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/components/vehicle-card.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/home.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/catalog.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/vehicle-detail.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/contact.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/institutions.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/parts-catalog.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/login.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/client-auth.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/portal/base.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/portal/dashboard.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/portal/profile.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/portal/vehicles.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/portal/services.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/portal/documents.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/portal/invoices.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/portal/notifications.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/dashboard.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages/staff-modules.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/pages.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/themes/light.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/responsive/breakpoints.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/responsive/tablet.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/responsive/mobile.css' %}?v={{ vinova_product_version }}">
+<link rel="stylesheet" href="{% static 'css/ui/accessibility.css' %}?v={{ vinova_product_version }}">
+<script defer src="{% static 'js/vinova.js' %}?v={{ vinova_product_version }}"></script>
+<meta name="htmx-config" content='{"allowEval":false,"allowScriptTags":false,"historyCacheSize":0,"inlineStyleNonce":"{{ request.csp_nonce }}"}'>

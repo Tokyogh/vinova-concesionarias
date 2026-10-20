@@ -1,0 +1,13 @@
+/* ES: Define estilos de static/css/ui/pages/portal/profile, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/pages/portal/profile styles, including states and responsive behavior. */
+.portal-profile-form .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.portal-profile-form .form-actions { grid-column: 1 / -1; }
+
+@media (max-width: 680px) {
+  .portal-profile-form .form-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,59 @@
+/* ES: Define estilos de static/css/ui/layouts/public, incluidos estados y adaptación responsive. */
+/* EN: Defines static/css/ui/layouts/public styles, including states and responsive behavior. */
+/*
+   Shell público: header, main, footer. */
+
+.public-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.public-body > main { flex: 1 0 auto; }
+
+.public-footer {
+  margin-top: var(--space-80);
+  padding: var(--space-48) var(--container-gutter);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-32);
+  background: var(--navy);
+  color: #b9c8d6;
+}
+
+.public-footer strong {
+  color: #fff;
+  font-size: var(--fs-16);
+  font-weight: var(--fw-bold);
+}
+
+.public-footer p {
+  color: #8fa8bc;
+  max-width: 460px;
+  margin-top: var(--space-12);
+  line-height: var(--lh-relaxed);
+}
+
+.public-footer span { display: block; color: #8fa8bc; }
+.public-footer small { color: #6d8499; }
+.public-footer a { color: #c8d6e2; }
+.public-footer a:hover { color: #fff; text-decoration: underline; }
+
+[data-theme="dark"] .public-footer { background: var(--navy-2); }
+
+.user-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-width: 0;
+  max-width: 220px;
+  padding: var(--space-8) var(--space-12);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+}
+
+.user-pill > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

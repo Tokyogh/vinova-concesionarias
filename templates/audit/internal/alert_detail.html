@@ -1,0 +1,32 @@
+{# ES: Renderiza la interfaz templates/audit/internal/alert_detail; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/audit/internal/alert_detail interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Alerta {{ alert.alert_id }} | Vinova Pro{% endblock %}
+{% block page_title %}Revisión de alerta{% endblock %}
+{% block page_subtitle %}<p class="page-lead">{{ alert.title }}</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'audit_internal:alerts' %}">Volver</a>{% if alert.audit_log %}<a class="btn btn-secondary" href="{% url 'audit_internal:detail' alert.audit_log.event_id %}">Ver evento original</a>{% endif %}{% endblock %}
+{% block content %}
+<section class="detail-grid two-columns">
+  <article class="panel-card">
+    <div class="panel-header"><div><h2>{{ alert.title }}</h2><p><code>{{ alert.code }}</code></p></div><span class="audit-badge audit-severity-{{ alert.severity }}">{{ alert.get_severity_display }}</span></div>
+    <p>{{ alert.description|linebreaksbr }}</p>
+    <dl class="data-list">
+      <div><dt>ID de alerta</dt><dd><code>{{ alert.alert_id }}</code></dd></div>
+      <div><dt>Estado</dt><dd>{{ alert.get_status_display }}</dd></div>
+      <div><dt>Usuario</dt><dd>{{ alert.user|default:'No identificado' }}</dd></div>
+      <div><dt>Sucursal</dt><dd>{{ alert.branch.name|default:'Global / N/D' }}</dd></div>
+      <div><dt>Creada</dt><dd>{{ alert.created_at|date:'d/m/Y H:i:s' }}</dd></div>
+      <div><dt>Resuelta</dt><dd>{{ alert.resolved_at|date:'d/m/Y H:i:s'|default:'Pendiente' }}</dd></div>
+      <div><dt>Responsable de cierre</dt><dd>{{ alert.resolved_by|default:'Pendiente' }}</dd></div>
+    </dl>
+  </article>
+  <article class="panel-card">
+    <h2>Revisión y cierre</h2>
+    {% if request.user.can_manage_audit_alerts %}
+      <form method="post" action="{% url 'audit_internal:alert_update' alert.alert_id %}" class="stacked-form">{% csrf_token %}{% for field in resolution_form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}<button class="btn btn-primary">Guardar revisión</button></form>
+    {% else %}<p>Tienes acceso de lectura. Solo administración autorizada puede cambiar el estado de la alerta.</p>{% endif %}
+    {% if alert.resolution_notes %}<div class="audit-resolution-note"><strong>Notas actuales</strong><p>{{ alert.resolution_notes|linebreaksbr }}</p></div>{% endif %}
+  </article>
+</section>
+<section class="panel-card"><h2>Metadatos técnicos</h2><pre>{{ alert.metadata|pprint }}</pre></section>
+{% endblock %}

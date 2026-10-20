@@ -1,0 +1,107 @@
+{# ES: Renderiza la interfaz templates/quality/internal/run_list; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/quality/internal/run_list interface; permissions and data are resolved server-side. #}
+{% extends "base/base.html" %}
+{% block title %}QA Bot | Vinova Pro{% endblock %}
+{% block page_title %}QA Bot empresarial{% endblock %}
+{% block page_subtitle %}
+  <p class="page-lead">Validación automática, trazable y aislada antes de actualizar o publicar una versión.</p>
+{% endblock %}
+{% block content %}
+  {# ES: La sección siguiente agrupa contenido, estados vacíos y acciones del flujo actual. #}
+  {# EN: The following section groups content, empty states, and actions for the current flow. #}
+  <section class="metric-grid">
+    <article class="metric-card">
+      <span>Ejecutor</span><strong>{% if qa_execution_enabled %}Disponible{% else %}Desactivado{% endif %}</strong><small>Entorno: {{ qa_environment }}</small>
+    </article>
+    <article class="metric-card">
+      <span>Programación</span><strong>{% if qa_automated_enabled %}Activa{% else %}Manual{% endif %}</strong><small>La ejecución automática es opt-in.</small>
+    </article>
+    <article class="metric-card">
+      <span>Seguridad</span><strong>Perfiles cerrados</strong><small>No acepta comandos arbitrarios.</small>
+    </article>
+  </section>
+  {% if can_run_quality %}
+    <section class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Iniciar validación</h2>
+          <p>La validación release usa PostgreSQL temporal y genera evidencia JSON/HTML privada.</p>
+        </div>
+      </div>
+      {% if not qa_execution_enabled %}
+        <div class="alert alert-warning">El panel conserva el historial, pero el worker QA no está activo. Inícialo con el Compose QA antes de ejecutar.</div>
+      {% endif %}
+      <div class="qa-action-grid">
+        {# ES: El formulario siguiente presenta errores del servidor; el navegador no sustituye su validación. #}
+        {# EN: The following form renders server errors; browser checks do not replace server validation. #}
+        <form method="post" action="{% url 'quality:run_create' %}">
+          {% csrf_token %}<input type="hidden" name="profile" value="quick"><button type="submit" class="btn btn-light" {% if not qa_execution_enabled %}disabled{% endif %}>Prueba rápida</button><small>Check, Ruff, migraciones, rutas y smoke tests.</small>
+        </form>
+        <form method="post" action="{% url 'quality:run_create' %}">
+          {% csrf_token %}<input type="hidden" name="profile" value="full"><button type="submit" class="btn btn-secondary" {% if not qa_execution_enabled %}disabled{% endif %}>Prueba completa</button><small>Incluye OpenAPI, dependencias y Pytest completo.</small>
+        </form>
+        <form method="post" action="{% url 'quality:run_create' %}" data-confirm="La validación release puede tardar y usa recursos QA aislados. ¿Deseas continuar?">
+          {% csrf_token %}<input type="hidden" name="profile" value="release"><button type="submit" class="btn btn-primary" {% if not qa_execution_enabled %}disabled{% endif %}>Validar release</button><small>PostgreSQL aislado, seeds, Nginx, JavaScript y ZIP limpio.</small>
+        </form>
+      </div>
+    </section>
+  {% endif %}
+  <section class="panel-card table-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Historial de validaciones</h2>
+        <p>Resultados por versión, perfil, usuario y entorno.</p>
+      </div>
+      <form method="get" class="qa-inline-filters">
+        <select name="profile" aria-label="Filtrar por perfil QA">
+          <option value="">Todos los perfiles</option>{% for value,label in profiles %}<option value="{{ value }}" {% if selected_profile == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        <select name="status" aria-label="Filtrar por estado QA">
+          <option value="">Todos los estados</option>{% for value,label in statuses %}<option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="btn btn-light btn-small">Filtrar</button>
+      </form>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Fecha</th>
+            <th scope="col">Perfil</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Resultado</th>
+            <th scope="col">Versión</th>
+            <th scope="col">Solicitó</th>
+            <th scope="col">
+              <span class="sr-only">Acciones</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for run in runs %}
+            <tr>
+              <td>{{ run.created_at|date:"d/m/Y H:i" }}</td>
+              <td>{{ run.get_profile_display }}</td>
+              <td>{{ run.get_status_display }}</td>
+              <td>{{ run.passed_count }} OK · {{ run.warning_count }} avisos · {{ run.failed_count }} fallos</td>
+              <td>{{ run.source_version|default:"—" }}</td>
+              <td>{{ run.requested_by|default:"Sistema/CLI" }}</td>
+              <td>
+                <a class="btn btn-light btn-small" href="{% url 'quality:run_detail' run.public_id %}">Abrir</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7">Aún no existen validaciones registradas.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="pagination-bar" aria-label="Paginación del historial QA">
+        {% if page_obj.has_previous %}<a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}{% if selected_profile %}&profile={{ selected_profile }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Anterior</a>{% endif %}<span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a class="btn btn-light" href="?page={{ page_obj.next_page_number }}{% if selected_profile %}&profile={{ selected_profile }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Siguiente</a>{% endif %}
+      </nav>
+    {% endif %}
+  </section>
+{% endblock %}

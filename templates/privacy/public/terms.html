@@ -1,0 +1,29 @@
+{# ES: Borrador público de términos del portal, separado del consentimiento. #}
+{# EN: Public portal-terms draft kept separate from consent. #}
+
+{% extends 'privacy/public/legal_base.html' %}
+{% block title %}Términos y condiciones | Vinova Pro{% endblock %}
+{% block legal_heading %}Términos y condiciones{% endblock %}
+{% block legal_summary %}Condiciones preliminares de uso del sitio, catálogos y cuentas.{% endblock %}
+{% block legal_version %}{{ vinova_terms_version }}{% endblock %}
+{% block legal_body %}
+  <h2>1. Operador y alcance</h2>
+  <p>El operador es {% if vinova_company %}{{ vinova_company.legal_name|default:'PENDIENTE DE COMPLETAR' }}{% else %}PENDIENTE DE COMPLETAR{% endif %}. Estos términos cubren el sitio público, los catálogos y las cuentas habilitadas. La fecha efectiva y aprobación jurídica están PENDIENTES DE COMPLETAR.</p>
+
+  <h2>2. Información comercial</h2>
+  <p>Disponibilidad, precio, fotografías, características y condiciones comerciales deben confirmarse con la empresa antes de contratar. La política vinculante sobre reservas, pagos, garantías, devoluciones y entrega está PENDIENTE DE COMPLETAR.</p>
+
+  <h2>3. Cuenta y uso aceptable</h2>
+  <p>La persona usuaria debe proporcionar datos correctos, proteger sus credenciales y avisar sobre accesos no autorizados. No puede intentar acceder a expedientes ajenos, eludir permisos, alterar el servicio, cargar contenido malicioso ni usar automatizaciones abusivas.</p>
+
+  <h2>4. Disponibilidad y propiedad intelectual</h2>
+  <p>El servicio puede requerir mantenimiento y depender de infraestructura externa. Titularidad de marcas, contenidos, licencias, niveles de servicio y límites de responsabilidad están PENDIENTES DE COMPLETAR y revisar profesionalmente.</p>
+
+  <h2>5. Privacidad y comunicaciones</h2>
+  <p>Aceptar estos términos es distinto de autorizar marketing, analítica o cookies opcionales. El tratamiento de datos se describe en la política de privacidad y cada finalidad opcional debe contar con su mecanismo propio.</p>
+
+  {% if vinova_public_settings.terms_and_conditions %}<h2>6. Texto adicional configurado por la empresa</h2><p>{{ vinova_public_settings.terms_and_conditions|linebreaksbr }}</p>{% endif %}
+
+  <h2>7. Ley aplicable y contacto</h2>
+  <p>Jurisdicción, mecanismos de reclamo y contacto contractual: PENDIENTE DE COMPLETAR tras revisión profesional.</p>
+{% endblock %}

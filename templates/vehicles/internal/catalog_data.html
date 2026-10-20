@@ -1,0 +1,46 @@
+{# ES: Renderiza la interfaz templates/vehicles/internal/catalog_data; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/vehicles/internal/catalog_data interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Marcas y modelos | Vinova Pro{% endblock %}
+{% block page_title %}Marcas y modelos{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Catálogo maestro usado por el inventario vehicular. Mantenerlo ordenado evita duplicados y errores comerciales.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'vehicles_internal:list' %}">Volver a vehículos</a>{% endblock %}
+{% block content %}
+<section class="detail-grid two-columns">
+  <article class="panel-card">
+    <h2>Nueva marca</h2>
+    <form method="post" enctype="multipart/form-data" action="{% url 'vehicles_internal:brand_create' %}" class="stacked-form">
+      {% csrf_token %}
+      {% for field in brand_form %}
+        <label class="form-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>
+      {% endfor %}
+      <button class="btn btn-primary">Crear marca</button>
+    </form>
+  </article>
+  <article class="panel-card">
+    <h2>Nuevo modelo</h2>
+    <form method="post" action="{% url 'vehicles_internal:model_create' %}" class="stacked-form">
+      {% csrf_token %}
+      {% for field in model_form %}
+        <label class="form-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>
+      {% endfor %}
+      <button class="btn btn-primary">Crear modelo</button>
+    </form>
+  </article>
+</section>
+
+<section class="detail-grid two-columns">
+  <article class="panel-card table-panel">
+    <div class="panel-header"><div><h2>Marcas</h2><p>{{ brands.count }} registro(s)</p></div></div>
+    <div class="responsive-table"><table class="data-table"><thead><tr><th>Marca</th><th>Estado</th></tr></thead><tbody>
+      {% for brand in brands %}<tr><td><strong>{{ brand.name }}</strong></td><td>{% if brand.is_active %}<span class="state state-ok">Activa</span>{% else %}<span class="state state-danger">Inactiva</span>{% endif %}</td></tr>{% empty %}<tr><td colspan="2">Sin marcas.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </article>
+  <article class="panel-card table-panel">
+    <div class="panel-header"><div><h2>Modelos</h2><p>{{ models.count }} registro(s)</p></div></div>
+    <div class="responsive-table"><table class="data-table"><thead><tr><th>Modelo</th><th>Marca</th><th>Segmento</th></tr></thead><tbody>
+      {% for model in models %}<tr><td><strong>{{ model.name }}</strong></td><td>{{ model.brand.name }}</td><td>{{ model.segment|default:'N/D' }}</td></tr>{% empty %}<tr><td colspan="3">Sin modelos.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </article>
+</section>
+{% endblock %}

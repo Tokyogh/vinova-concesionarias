@@ -1,0 +1,3 @@
+{# ES: Renderiza la interfaz templates/reports/internal/partials/user_rows; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/reports/internal/partials/user_rows interface; permissions and data are resolved server-side. #}
+<div class="responsive-table compact-table"><table class="data-table"><thead><tr><th>Usuario</th><th>Email</th><th>Eventos</th></tr></thead><tbody>{% for row in rows %}<tr><td>{{ row.user__username|default:'Sistema' }}</td><td>{{ row.user__email }}</td><td>{{ row.count }}</td></tr>{% empty %}<tr><td colspan="3">Sin datos.</td></tr>{% endfor %}</tbody></table></div>

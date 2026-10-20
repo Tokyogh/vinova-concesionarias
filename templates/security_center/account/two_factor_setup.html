@@ -1,0 +1,16 @@
+{# ES: Renderiza la interfaz templates/security_center/account/two_factor_setup; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/security_center/account/two_factor_setup interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}Configurar 2FA | Vinova Pro{% endblock %}
+{% block content %}
+<section class="security-account-card panel-card">
+  <span class="eyebrow">Seguridad de cuenta</span><h1>Configurar autenticación en dos pasos</h1>
+  <p>Agrega una cuenta TOTP en Google Authenticator, Microsoft Authenticator, 1Password, Bitwarden u otra aplicación compatible.</p>
+  <div class="secret-box"><span>Clave manual</span><code>{{ secret }}</code></div>
+  <details><summary>Mostrar URI técnica</summary><code class="uri-code">{{ provisioning_uri }}</code></details>
+  <form method="post" class="form-grid compact-grid" novalidate>{% csrf_token %}
+    {% for field in form %}<label class="form-field"><span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</label>{% endfor %}
+    <button class="btn btn-primary">Confirmar y activar</button>
+  </form>
+</section>
+{% endblock %}

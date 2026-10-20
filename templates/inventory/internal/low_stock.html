@@ -1,0 +1,37 @@
+{# ES: Renderiza la interfaz templates/inventory/internal/low_stock; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/inventory/internal/low_stock interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Stock bajo | Vinova Pro{% endblock %}
+{% block page_title %}Alertas de stock bajo{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Artículos cuyo stock físico está en o por debajo del mínimo definido por sucursal.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'inventory_internal:list' %}">Inventario</a>{% endblock %}
+{% block content %}
+<section class="panel-card table-panel">
+  <div class="panel-header"><div><h2>Reposición recomendada</h2><p>{{ page_obj.paginator.count }} alerta(s) detectada(s).</p></div></div>
+  <div class="responsive-table">
+    <table class="data-table mobile-card-table">
+      <thead><tr><th>Artículo</th><th>Sucursal</th><th>Stock actual</th><th>Stock mínimo</th><th>Disponible</th><th>Ubicación</th><th></th></tr></thead>
+      <tbody>
+        {% for stock in stock_records %}
+          <tr>
+            <td data-label="Artículo"><strong>{{ stock.item.sku }}</strong><span class="table-subtext">{{ stock.item.name }}</span></td>
+            <td data-label="Sucursal">{{ stock.branch.name }}<span class="table-subtext">{{ stock.branch.city|default:stock.branch.company.commercial_name }}</span></td>
+            <td data-label="Stock actual"><span class="state state-warning">{{ stock.quantity }}</span></td>
+            <td data-label="Stock mínimo">{{ stock.minimum_stock }}</td>
+            <td data-label="Disponible">{{ stock.available_quantity }}</td>
+            <td data-label="Ubicación">{{ stock.location_code|default:'N/D' }}</td>
+            <td class="table-actions-cell" data-label="Acciones"><a class="btn btn-light btn-small" href="{% url 'inventory_internal:detail' stock.item.pk %}">Gestionar</a></td>
+          </tr>
+        {% empty %}<tr class="empty-table-row"><td colspan="7">No hay alertas de stock bajo.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-bar">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-light" href="?page={{ page_obj.next_page_number }}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

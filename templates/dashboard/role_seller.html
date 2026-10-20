@@ -1,0 +1,23 @@
+{# ES: Renderiza la interfaz templates/dashboard/role_seller; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/dashboard/role_seller interface; permissions and data are resolved server-side. #}
+{% extends 'base/base.html' %}
+{% block title %}Dashboard vendedor | Vinova Pro{% endblock %}
+{% block page_title %}Dashboard vendedor{% endblock %}
+{% block page_subtitle %}<p class="page-lead">Panel práctico para vendedores: clientes, cotizaciones y reservas sin opciones administrativas globales.</p>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-light" href="{% url 'leads_internal:list' %}">Mis leads</a><a class="btn btn-primary" href="{% url 'sales_internal:create' %}">Nueva cotización</a>{% endblock %}
+{% block content %}
+<section class="role-dashboard-hero seller-hero"><div><span>Ventas y atención</span><h2>Tu trabajo comercial del día</h2><p>Accesos rápidos y seguimiento de oportunidades asignadas.</p></div></section>
+<section class="metric-grid role-metric-grid">
+  <article class="metric-card"><span>Mis cotizaciones</span><strong>{{ metrics.quotes }}</strong></article>
+  <article class="metric-card"><span>Mis reservas</span><strong>{{ metrics.reservations }}</strong></article>
+  <article class="metric-card"><span>Mis ventas</span><strong>{{ metrics.sold }}</strong></article>
+  <article class="metric-card"><span>Clientes asignados</span><strong>{{ metrics.customers }}</strong></article>
+  <article class="metric-card"><span>Leads abiertos</span><strong>{{ metrics.leads_open }}</strong></article>
+  <article class="metric-card"><span>Seguimientos vencidos</span><strong>{{ metrics.followups_overdue }}</strong></article>
+</section>
+<section class="detail-grid two-columns">
+  <article class="panel-card"><h2>Mis operaciones</h2>{% include 'dashboard/snippets/sales_rows.html' with sales=my_sales empty_text='Aún no tienes operaciones registradas.' %}</article>
+  <article class="panel-card"><h2>Clientes recientes</h2>{% include 'dashboard/snippets/customer_rows.html' with customers=recent_customers empty_text='Sin clientes recientes.' %}</article>
+</section>
+<section class="panel-card"><h2>Mis leads recientes</h2><div class="compact-row-list">{% for lead in my_leads %}<a class="compact-row" href="{% url 'leads_internal:detail' lead.pk %}"><strong>{{ lead.full_name }} · {{ lead.get_status_display }}</strong><span>{{ lead.code }} · {{ lead.vehicle_interest_label }}</span></a>{% empty %}<p class="muted">Aún no tienes leads asignados.</p>{% endfor %}</div></section>
+{% endblock %}

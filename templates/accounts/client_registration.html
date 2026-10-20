@@ -1,0 +1,29 @@
+{# ES: Renderiza la interfaz templates/accounts/client_registration; permisos y datos se resuelven en backend. #}
+{# EN: Renders the templates/accounts/client_registration interface; permissions and data are resolved server-side. #}
+{% extends 'base/public.html' %}
+{% block title %}Crear cuenta | Vinova Pro{% endblock %}
+{% block main_class %}auth-public-page{% endblock %}
+{% block content %}
+<section class="auth-public-card">
+  <span class="eyebrow">Portal de clientes</span>
+  <h1>Crear una cuenta</h1>
+  <p>Este registro crea un expediente nuevo. Si ya eres cliente de la concesionaria, solicita una invitación para evitar duplicados.</p>
+  <form method="post" class="form-stack" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <label class="form-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}">
+        <span>
+          {% if field.name == 'accept_terms' %}Acepto los <a href="{% url 'privacy_public:terms' %}" target="_blank" rel="noopener">términos y condiciones</a> del portal
+          {% elif field.name == 'privacy_acknowledgement' %}Confirmo que leí la <a href="{% url 'privacy_public:privacy_policy' %}" target="_blank" rel="noopener">política de privacidad</a>
+          {% else %}{{ field.label }}{% endif %}
+        </span>{{ field }}
+        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+      </label>
+    {% endfor %}
+    <button class="btn btn-primary full">Crear cuenta y enviar activación</button>
+  </form>
+  <p><a href="{% url 'accounts:login' %}">Ya tengo una cuenta</a></p>
+</section>
+{% endblock %}
