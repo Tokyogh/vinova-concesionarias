@@ -396,7 +396,3 @@ El índice canónico está en [`docs/README.md`](docs/README.md). Puntos de entr
 - Ejecute checks, pruebas proporcionales, revisión del índice y escaneo de
   secretos antes de cada push.
 - No use force push ni reescriba historial para ocultar hallazgos.
-
-Este repositorio no contiene un archivo `LICENSE`; no debe asumirse una licencia
-de software libre ni autorización de redistribución fuera de los permisos del
-titular.
