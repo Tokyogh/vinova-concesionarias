@@ -1,14 +1,96 @@
+LICENCIA PROPIETARIA PRELIMINAR
+VINOVA PRO / VINOVA CONCESIONARIAS
+
 Copyright (c) 2026 Elias Leonardo Villacis Leon
+Todos los derechos reservados.
 
-TODOS LOS DERECHOS RESERVADOS. / ALL RIGHTS RESERVED.
+ESTADO DEL DOCUMENTO
 
-Queda estrictamente prohibida la reproducción, distribución, modificación,
-comercialización, sublicenciamiento o uso total o parcial de este software,
-código fuente, documentación o archivos asociados, por cualquier medio o
-para cualquier propósito, sin el consentimiento previo y por escrito del 
-titular del copyright.
+Este texto establece una política propietaria preliminar y requiere revisión
+jurídica antes de utilizarse como contrato comercial definitivo. No sustituye
+un acuerdo de licencia, compraventa, soporte o servicios firmado por el titular
+y el cliente.
 
-Este software se proporciona únicamente con fines de exhibición del código 
-fuente ("read-only display"). No se otorga ninguna licencia implícita o explícita 
-sobre ninguna patente, marca registrada, derecho de autor o cualquier otro derecho 
-de propiedad intelectual.
+1. TITULARIDAD Y RESERVA DE DERECHOS
+
+El software, su código fuente, documentación, diseños y demás materiales
+propios están protegidos por los derechos de propiedad intelectual que
+correspondan. Salvo los derechos concedidos expresamente por escrito, el
+titular se reserva todos los derechos.
+
+2. AUSENCIA DE LICENCIA POR PUBLICACIÓN
+
+El acceso a este repositorio o a una copia del código no concede por sí mismo
+derecho de uso, instalación, ejecución, modificación, comercialización,
+sublicenciamiento o redistribución. No se otorgan licencias implícitas.
+
+3. LICENCIA COMERCIAL DE USO
+
+Los derechos de uso solo nacen de un acuerdo escrito con el titular. Ese
+acuerdo debe definir, como mínimo, el producto y versión autorizados, cliente,
+entornos, instalaciones, usuarios o sucursales, finalidad, duración y copias
+permitidas. La licencia será no exclusiva, no transferible y limitada al
+alcance expresamente acordado, salvo que el acuerdo disponga otra cosa.
+
+4. RESTRICCIONES
+
+Sin autorización escrita del titular queda prohibido:
+
+a) copiar, publicar, vender, alquilar, sublicenciar, ceder o redistribuir el
+   software o permitir su explotación por terceros;
+b) retirar avisos de autoría, titularidad o licencias;
+c) usar el software fuera del alcance pactado;
+d) proporcionar el código fuente o credenciales de acceso a terceros; y
+e) utilizar marcas, nombres comerciales o identidad visual del producto fuera
+   de la autorización correspondiente.
+
+Las restricciones se aplican sin perjuicio de los derechos irrenunciables que
+pueda reconocer la legislación aplicable.
+
+5. COPIAS, MODIFICACIONES Y DERIVADOS
+
+Solo se permiten las copias de instalación, respaldo o recuperación definidas
+en el acuerdo escrito. Las modificaciones, adaptaciones o trabajos derivados
+requieren autorización expresa y no transfieren la titularidad del software
+original. El acuerdo debe determinar la titularidad y el mantenimiento de las
+modificaciones autorizadas.
+
+6. DURACIÓN Y TERMINACIÓN
+
+La duración, renovación y causales de terminación se establecerán en el acuerdo
+comercial. Al terminar la autorización, el cliente deberá cesar el uso y tratar
+las copias conforme al acuerdo, sin afectar retenciones exigidas por ley ni las
+obligaciones que deban sobrevivir a la terminación.
+
+7. COMPONENTES DE TERCEROS
+
+Los componentes de terceros conservan sus derechos, avisos y licencias
+propios. Esta licencia no amplía, restringe ni sustituye esas condiciones.
+Consulte `THIRD_PARTY_NOTICES.md` y los archivos de licencia distribuidos junto
+a cada componente.
+
+8. ACTUALIZACIONES, SOPORTE Y SERVICIOS
+
+La entrega de actualizaciones, mantenimiento, soporte, instalación,
+capacitación, niveles de servicio o garantías solo existe cuando conste en un
+acuerdo escrito. La posesión de una versión no concede automáticamente derecho
+a versiones futuras.
+
+9. GARANTÍAS Y RESPONSABILIDAD
+
+Las garantías, exclusiones, límites de responsabilidad, indemnizaciones y
+remedios aplicables deben definirse en el acuerdo comercial y revisarse
+jurídicamente. Este texto preliminar no fija límites económicos ni sustituye
+los derechos obligatorios del cliente bajo la legislación aplicable.
+
+10. LEGISLACIÓN Y JURISDICCIÓN
+
+La ley aplicable, el mecanismo de solución de controversias y la jurisdicción
+quedan pendientes de definición expresa y revisión jurídica en el acuerdo
+comercial. No se presume una jurisdicción por la ubicación del repositorio.
+
+11. PRELACIÓN
+
+Cuando exista un acuerdo escrito firmado por el titular y el cliente, sus
+términos prevalecerán en caso de conflicto con este aviso preliminar. Las
+licencias de terceros prevalecen respecto de sus propios componentes.

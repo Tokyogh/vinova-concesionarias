@@ -6,8 +6,8 @@ público, portal cliente, CRM, vehículos, inventario, ventas, facturación
 interna, documentos, analítica, privacidad, auditoría e integraciones sobre una
 arquitectura Django modular.
 
-> **Estado:** candidato apto para beta controlada según la evidencia local F16
-> y F17. No está declarado `PRODUCTION READY`; staging, TLS, proveedores,
+> **Estado:** candidato apto para beta controlada según las pruebas históricas
+> registradas en el proyecto. No está declarado `PRODUCTION READY`; staging, TLS, proveedores,
 > restauración real, revisión jurídica y beta humana siguen siendo gates
 > externos.
 
@@ -20,7 +20,7 @@ arquitectura Django modular.
 | Repositorio | Distribución comercial independiente |
 | Rama principal | `main` |
 | Remoto | [`Tokyogh/vinova-concesionarias`](https://github.com/Tokyogh/vinova-concesionarias) |
-| Historial | Nuevo e independiente del repositorio de desarrollo |
+| Historial | Distribución comercial independiente |
 | Estado funcional | Implementado y probado localmente; beta humana pendiente |
 
 Esta distribución contiene el código y la documentación de VINOVA PRO, pero no
@@ -201,8 +201,9 @@ La referencia de control es OWASP ASVS 5.0 con objetivo L2, complementada por
 CIA/STRIDE, OWASP Top 10/API Security, NIST SSDF y OWASP SAMM. Esto expresa el
 modelo de trabajo, no una certificación ni una garantía de seguridad absoluta.
 
-Consulte el [estado de seguridad avanzada](docs/seguridad-avanzada/ESTADO_ACTIVO.md)
-y el [informe F16](docs/seguridad-avanzada/16-informe-final.md).
+Consulte la [guía de seguridad](docs/SECURITY.md), el
+[modelo de amenazas](docs/seguridad-avanzada/03-modelo-amenazas.md) y la
+[matriz ASVS](docs/seguridad-avanzada/04-matriz-asvs.md).
 
 ## Tecnologías verificadas
 
@@ -313,15 +314,14 @@ Perfiles empresariales:
 
 | Evidencia | Resultado documentado | Alcance |
 |---|---|---|
-| F16, 17-oct-2026 | 2.602 pruebas Python aprobadas; 33 E2E Chromium aprobadas | Seguridad y consolidación local |
-| F17, 19-oct-2026 | 2.669 pruebas PostgreSQL aprobadas; 34 E2E Chromium aprobadas | Correcciones funcionales e integridad |
-| F17 focal | 2.079 pruebas de seguridad/RBAC/ownership aprobadas | Una omisión negativa intencional |
+| 17-oct-2026 | 2.602 pruebas Python aprobadas; 33 E2E Chromium aprobadas | Seguridad y consolidación local |
+| 19-oct-2026 | 2.669 pruebas PostgreSQL aprobadas; 34 E2E Chromium aprobadas | Correcciones funcionales e integridad |
+| Focal histórica | 2.079 pruebas de seguridad/RBAC/ownership aprobadas | Una omisión negativa intencional |
 | Beta manual | 248 casos preparados | Pendientes de ejecución humana |
 
 Estos resultados son históricos y están vinculados a los candidatos descritos
 en cada informe; no sustituyen una nueva ejecución sobre otro commit.
 
-- [Informe F17](docs/correcciones-f17/INFORME_FINAL.md)
 - [Testing](docs/TESTING.md)
 - [Mapas funcionales](docs/mapas-funcionales/README.md)
 - [Guías beta](docs/testeo-beta/testeo-indice-maestro.md)
@@ -385,8 +385,21 @@ El índice canónico está en [`docs/README.md`](docs/README.md). Puntos de entr
 - [seguridad](docs/SECURITY.md);
 - [manuales](docs/manuals/README.md);
 - [paridad LITE → PRO](docs/PARIDAD_LITE_PRO.md);
-- [informe F16](docs/seguridad-avanzada/16-informe-final.md);
-- [informe F17](docs/correcciones-f17/INFORME_FINAL.md).
+- [modelo de amenazas](docs/seguridad-avanzada/03-modelo-amenazas.md);
+- [matriz OWASP ASVS](docs/seguridad-avanzada/04-matriz-asvs.md).
+
+## Licenciamiento
+
+El código propio está sujeto al [`LICENSE`](LICENSE) propietario preliminar.
+La presencia del código fuente en este repositorio no concede por sí sola
+derechos de uso, instalación, modificación, comercialización o redistribución.
+El alcance comercial, la duración, las copias autorizadas, el soporte y las
+actualizaciones deben constar en un acuerdo escrito con el titular.
+
+Los componentes de terceros conservan sus propias licencias. Consulte
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) y los avisos incluidos junto
+a cada componente. El texto de licenciamiento requiere revisión jurídica antes
+de utilizarse como contrato comercial definitivo.
 
 ## Publicación y uso
 
