@@ -64,7 +64,8 @@ Inventario LITE comprobado: 74 archivos, 68 decoradores Flask y 66 endpoints efe
 
 ## Cobertura de las 68 reglas Flask
 
-La enumeración individual histórica permanece en `docs/integracion-lite-pro/09-paridad-funcional.md`; el código LITE no cambió y se reconfirmaron sus 68 decoradores. Esta auditoría corrige las conclusiones que quedaron obsoletas:
+El código LITE no cambió y se reconfirmaron sus 68 decoradores. Esta auditoría
+corrige las conclusiones históricas que quedaron obsoletas:
 
 | Reglas LITE | Cobertura actual PRO | Resultado B2 |
 |---|---|---|

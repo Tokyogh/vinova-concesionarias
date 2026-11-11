@@ -1,7 +1,7 @@
 /* ES: Define estilos de static/css/ui/core/tokens, incluidos estados y adaptación responsive. */
 /* EN: Defines static/css/ui/core/tokens styles, including states and responsive behavior. */
 /*
-   ÚNICA fuente de verdad de tokens. Paleta canónica (AGENTS.md §5) y escalas
+   ÚNICA fuente de verdad de tokens. Paleta canónica (docs/UI_UX_V200.md) y escalas
    de spacing / radius / shadow / typography / layout / motion / z-index.
    Cargar antes que reset, base, typography y cualquier componente. */
 

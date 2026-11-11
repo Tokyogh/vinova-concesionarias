@@ -21,5 +21,6 @@ de multimedia, MapTiler restringido por dominio y la aprobación visual humana
 siguen siendo gates externos, no brechas funcionales del código.
 
 Matriz ruta por ruta: [B2](auditoria-integral/02-paridad-lite-pro.md). Las
-decisiones visuales y capturas históricas permanecen en `ui/`,
-`integracion-lite-pro/` y `vinova-redesign/`.
+decisiones visuales y capturas históricas necesarias permanecen en `ui/`; los
+mapas de datos y compatibilidad útiles para mantenimiento están en
+`vinova-redesign/`.

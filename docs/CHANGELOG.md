@@ -2,6 +2,15 @@
 
 Este registro comienza con la línea estable 2.x. Los cambios futuros deben documentarse aquí sin incorporar resultados temporales de QA, manifests ni notas internas de desarrollo.
 
+## Organización de la distribución comercial — 2026-11-11
+
+- Documentación comercial consolidada y enlaces canónicos actualizados.
+- Retiro de instrucciones de agentes, estados temporales e informes internos ya
+  sustituidos por documentación técnica vigente.
+- Política propietaria preliminar ampliada sin definir condiciones comerciales,
+  duración ni jurisdicción pendientes de acuerdo y revisión jurídica.
+- Aviso de componentes de terceros añadido sin alterar sus licencias originales.
+
 ## Consolidación de seguridad y beta — 2026-10-16
 
 - Sedes públicas enriquecidas y catálogo público de repuestos reutilizando modelos PRO.

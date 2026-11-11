@@ -1,7 +1,8 @@
 ﻿# Data model map — web_carros/ ↔ VINOVA PRO (Django)
 
 > R01. Equivalencias de entidades entre el proyecto original (SQLite crudo) y el modelo Django actual.
-> Referencia: `docs/vinova-redesign/reference-inventory.md` §3.
+> Referencia histórica: inventario de modelos y rutas utilizado durante la
+> integración. La fuente LITE no forma parte de esta distribución comercial.
 
 ## Tabla de equivalencias
 

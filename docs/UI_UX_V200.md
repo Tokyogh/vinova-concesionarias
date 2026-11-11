@@ -1,7 +1,7 @@
 # VINOVA PRO — ROADMAP UI/UX (fuente de verdad visual)
 
-> Fuente de verdad de la iniciativa UI/UX. NO condición de STOP: docs/ROADMAP.md.
-> El ROADMAP funcional v2.0 permanece cerrado; este documento manda mientras haya fases UI TODO/IN_PROGRESS.
+> Fuente de verdad técnica de la interfaz consolidada. El roadmap funcional
+> anterior está cerrado; este documento conserva las decisiones vigentes de UI.
 
 ## Lenguaje visual — VINOVA CORPORATE AUTOMOTIVE
 

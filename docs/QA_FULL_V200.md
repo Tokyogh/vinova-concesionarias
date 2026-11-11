@@ -86,7 +86,7 @@ No se detectó otro bottleneck claro ni N+1 severo fuera del caso de ventas corr
 ## 5. Alcance y garantías
 - Sin nuevas funcionalidades; solo corrección de defectos y endurecimiento de cobertura/rendimiento.
 - Sin acceso a datos/entornos de producción, `.env*`, `nd.txt`, credenciales ni volúmenes reales.
-- Sin modificación del `ROADMAP.md`.
+- Sin modificación de los criterios funcionales del producto.
 - Cambios de arquitectura: ninguno; solo `select_related` adicional y un bypass de autorización coherente con el alcance global de superusuarios.
 - Commits locales en `feature/v0-2-auth-roles` (sin push, sin force, sin `--hard`, sin `clean`).
 

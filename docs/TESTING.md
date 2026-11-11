@@ -59,4 +59,6 @@ ejecutarse en sus perfiles reales; no se cuentan como aprobadas por pasar SQLite
 Un gate solo se aprueba si se ejecutó sobre el commit candidato. Los skips se
 clasifican; staging, TLS, proveedores y revisión humana son gates separados.
 
-Resultados actuales: [checkpoint de auditoría](auditoria-integral/ESTADO_ACTIVO.md).
+Los resultados históricos se resumen en el `README.md` y el changelog. Para
+aprobar un candidato deben repetirse los perfiles aplicables y conservarse la
+evidencia fuera de Git, sin secretos ni datos personales.

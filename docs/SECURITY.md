@@ -80,8 +80,10 @@ Se cerraron localmente los riesgos antes registrados de DNS rebinding entre
 validación y envío, ausencia de lock con hashes y `style-src 'unsafe-inline'`.
 Permanece una excepción acotada en `style-src-attr`, y siguen pendientes
 antivirus/CDR, egreso de red, vault/HSM, firma/attestation del artefacto,
-proveedores, DNS/TLS y restauración real. El índice de evidencia vigente está en
-[`seguridad-avanzada/ESTADO_ACTIVO.md`](seguridad-avanzada/ESTADO_ACTIVO.md).
+proveedores, DNS/TLS y restauración real. La documentación técnica asociada se
+encuentra en el [modelo de amenazas](seguridad-avanzada/03-modelo-amenazas.md),
+la [matriz ASVS](seguridad-avanzada/04-matriz-asvs.md) y los procedimientos
+especializados del directorio `seguridad-avanzada/`.
 
 Estos controles no demuestran seguridad absoluta ni cumplimiento legal
 definitivo.
